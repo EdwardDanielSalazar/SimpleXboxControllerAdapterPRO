@@ -48,7 +48,11 @@ What you'll need:
 * An Arduino USB Host Shield, connected to the Arduino (...you guessed it...details to follow)
 
 Assuming you have Ubuntu up and running:
-* From a command prompt run 'sudo apt-get install avrdude gcc-avr gdb-avr binutils-avr avr-libc git build-essential cmake'. If you're using a fresh install of Ubuntu or one with which you previously haven't done any development you'll probably see a lot of dependencies installed, but these should be handled automatically.
+* From a command prompt run: 
+```
+sudo apt-get install avrdude gcc-avr gdb-avr binutils-avr avr-libc git build-essential cmake xinput
+``` 
+If you're using a fresh install of Ubuntu or one with which you previously haven't done any development you'll probably see a lot of dependencies installed, but these should be handled automatically.
 * Download and install Visual Studio Code here: https://code.visualstudio.com/download
 * Open VS Code, click on the 'extensions' icon on the left hand side and install the 'C/C++' and 'CMake Tools' extensions.
 * Close VS Code.
@@ -60,11 +64,22 @@ Assuming you have Ubuntu up and running:
 
 To build:
 * Enter the 'build' directory created by CMake Tools.
-* Type 'make' to build the project. It will create .elf file, containing the firmware to be burned onto an Arduino Leonardo or Pro Micro but not yet in the correct format. As things stand this is called 'ogx360_32u4_master.elf'.
-* Enter 'avr-objcopy -O binary ogx360_32u4_master.elf ./ogx360_32u4_master.bin' to create file we can burn to the Arduino
+* Type `make` to build the project. It will create .elf file, containing the firmware to be burned onto an Arduino Leonardo or Pro Micro but not yet in the correct format. As things stand this is called 'ogx360_32u4_master.elf'.
+* Enter 
+```
+avr-objcopy -O binary ogx360_32u4_master.elf ./ogx360_32u4_master.bin
+```
+to create file we can burn to the Arduino
 * Open another terminal window and enter 'dmesg -wH' to provide dmesg output on a rolling basis.
-* In the original terminal window (which you just used to run avr-objcopy) enter the following command, but don't hit 'Enter': 'avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:ogx360_32u4_master.bin -C /etc/avrdude.conf'
+* In the original terminal window (which you just used to run avr-objcopy) enter the following command, but don't hit 'Enter': 
+```
+avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:ogx360_32u4_master.bin -C /etc/avrdude.conf'
+```
 * Plug in the Arduino as you would normally. You'll see some dmesg output about it being connected. 
 * Press the reset button on the Arduino or if using a Pro Micro, short the RST and GND pins twice in immediate sucession. When the dmesg output shows the Arduino as disconnected, then immediately reconnected, hit 'Enter' in the other window. If you get this wrong you'll need another Arduino or hardware programmer to fix it (search for burning Ardunio bootloaders using an Arduino as an ISP).
+
+## Additional Bits
+
+This section contains notes to self for future updating of the readme...
 
 
