@@ -2,7 +2,11 @@
 
 ## Purpose
 
-This is a 'work in progress' adaptation of Ryzee119's excellent four-way wired/wireless controller adapter (https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers on an original Xbox console. The purpose is to allow for a simpler build, using only off-the-shelf parts, ideally an Arduino Leonardo/Pro Micro paired with a generic USB Host Shield. Soldering will be limited to connecting pads on the USB Host Shield, which may not be necessary at all depending on the manufacturer/model used. It will be wired-only, not offer Steel Batallion support and eventually (I hope) allow for use of a wider range of controllers. 
+This is a 'work in progress' adaptation of Ryzee119's excellent four-way wired/wireless controller adapter (https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers on an original Xbox console. 
+
+The purpose is to allow for a simpler build, using only off-the-shelf parts, ideally an Arduino Leonardo/Pro Micro paired with a generic USB Host Shield. Soldering will be limited to connecting pads on the USB Host Shield, which may not be necessary at all depending on the manufacturer/model used. 
+
+It will be wired-only, not offer Steel Batallion support and eventually (I hope) allow for use of a wider range of controllers. 
 
 It also has full instructions for building/burning which aren't dependent on Windows, Atmel Studio or other things which are closed source/specialist subjects in their own right. A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput was that it was possible (for me) to get everything up and running in VS Code/Linux. As I update this doc, a proper explantion will follow as to why none of this is as simple as loading a project into the Arduino IDE (on any OS) and uploading it in the normal way. In short, any project uploaded via the IDE will always make the Arduino act like a serial device and we need it to act like a HID device. 
 
@@ -44,7 +48,7 @@ What you'll need:
 * An Arduino USB Host Shield, connected to the Arduino (...you guessed it...details to follow)
 
 Assuming you have Ubuntu up and running:
-* From a command prompt run 'sudo apt-get install avrdude gcc-avr gdb-avr binutils-avr avr-libc git build-essential'. If you're using a fresh install of Ubuntu or one with which you previously haven't done any development you'll probably see a lot of dependencies installed, but these should be handled automatically.
+* From a command prompt run 'sudo apt-get install avrdude gcc-avr gdb-avr binutils-avr avr-libc git build-essential cmake'. If you're using a fresh install of Ubuntu or one with which you previously haven't done any development you'll probably see a lot of dependencies installed, but these should be handled automatically.
 * Download and install Visual Studio Code here: https://code.visualstudio.com/download
 * Open VS Code, click on the 'extensions' icon on the left hand side and install the 'C/C++' and 'CMake Tools' extensions.
 * Close VS Code.
