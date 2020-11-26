@@ -59,7 +59,7 @@ If you're using a fresh install of Ubuntu or one with which you previously haven
 * Clone this project to an appropriate location with 'git clone https://github.com/jimnarey/SimpleXboxControllerAdapter'
 * Open VS Code again and select 'File -> Open Folder'. Point it to the cloned repo.
 * The CMake Tools extension should now create a 'build' directory within the 'Firmware' directory. Click 'yes' if it asks for permission to do this.
-* Open main.cpp. If there are red squiggles under any of the header file/other names (meaning VS Code doesn't know where the files are located), open the VS Code command palette with Ctrl-Shift-P and type 'edit'. An option entitled 'C/C++ Edit Configurations UI' should appear. Select it. Scroll down to the 'Include Path' section and in the box below add the path to the AVR libraries. On Ubuntu 20 this is '/usr/lib/avr/include' but running 'dpkg -L avr-libc | grep include' will give you the right path on any Debian-based system.
+* Open main.cpp. If there are red squiggles under any of the header file/other names (meaning VS Code doesn't know where the files are located), open the VS Code command palette with Ctrl-Shift-P and type 'edit'. An option entitled 'C/C++ Edit Configurations UI' should appear. Select it. Scroll down to the 'Include Path' section and in the box below add the path to the AVR libraries. On Ubuntu 20 this is '/usr/lib/avr/include' but running ```dpkg -L avr-libc | grep include``` will give you the right path on any Debian-based system.
 * You should now have everything up and running to play around with the code and build it.
 
 To build:
