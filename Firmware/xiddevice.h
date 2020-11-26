@@ -42,11 +42,8 @@ this software.
 #include <LUFAConfig.h>
 #include <LUFA/Drivers/USB/USB.h>
 #include "dukecontroller.h"
-// #include "steelbattalion.h"
-
 
 #define DUKE_CONTROLLER 0
-// #define STEELBATTALION 1
 
 /* Function Prototypes: */
 #ifdef __cplusplus
@@ -74,16 +71,9 @@ extern "C" {
 	const void* ReportData,
 	const uint16_t ReportSize);
 
-	
-
 	/* Data Types: */
 	extern USB_ClassInfo_HID_Device_t DukeController_HID_Interface;
-	// extern USB_ClassInfo_HID_Device_t SteelBattalion_HID_Interface;
 	extern USB_XboxGamepad_Data_t XboxOGDuke[4];
-	// #ifdef SUPPORTBATTALION
-	// extern USB_XboxSteelBattalion_Data_t XboxOGSteelBattalion;
-	// extern USB_XboxSteelBattalion_Feedback_t XboxOGSteelBattalionFeedback;
-	// #endif
 	extern bool enumerationComplete;
 	extern uint8_t playerID;
 	#ifdef __cplusplus
