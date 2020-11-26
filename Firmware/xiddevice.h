@@ -42,11 +42,11 @@ this software.
 #include <LUFAConfig.h>
 #include <LUFA/Drivers/USB/USB.h>
 #include "dukecontroller.h"
-#include "steelbattalion.h"
+// #include "steelbattalion.h"
 
 
 #define DUKE_CONTROLLER 0
-#define STEELBATTALION 1
+// #define STEELBATTALION 1
 
 /* Function Prototypes: */
 #ifdef __cplusplus
