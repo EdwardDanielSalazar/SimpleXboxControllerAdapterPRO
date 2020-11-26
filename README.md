@@ -38,32 +38,48 @@ There are variations on this (a Pro Micro can stand in for a Leonardo, you can u
 
 There isn't a release yet though using the instructions below to build commit 9d2a5b2 works (tested in Unreal 2, on an original Xbox, with an Xbox One controller).
 
-These instructions are for Ubuntu. Others will follow but I've started here because it's what I use and it's easy (and free) to setup an Ubuntu virtual machine on Windows/Mac if that's what you're working with.
+These instructions are for Ubuntu (or other Debian-based distro) and MacOS (tested on Catalina). Windows instructions to follow.
 
 Further explanation as to why you have to do all this rather than just use the Arduino IDE/PlatformIO will also follow. 
 
-What you'll need:
-* An Ubuntu installation
+What you'll need in add:
 * An Arduino Leonardo/Pro Micro (explanation to follow on why not an Uno/Mini/other) and USB cable to connect it
 * An Arduino USB Host Shield, connected to the Arduino (...you guessed it...details to follow)
 
-Assuming you have Ubuntu up and running:
+## Install Tools
+
+### Ubuntu etc
 * From a command prompt run: 
 ```
-sudo apt-get install avrdude gcc-avr gdb-avr binutils-avr avr-libc git build-essential cmake xinput
-``` 
-If you're using a fresh install of Ubuntu or one with which you previously haven't done any development you'll probably see a lot of dependencies installed, but these should be handled automatically.
+sudo apt-get install avrdude gcc-avr gdb-avr binutils-avr avr-libc git build-essential cmake
+```
+
+### MacOS
+* From a command prompt run:
+```
+xcode-select —-install
+brew tap osx-cross/avr
+brew install avr-gcc avrdude cmake
+```
+
 * Download and install Visual Studio Code here: https://code.visualstudio.com/download
 * Open VS Code, click on the 'extensions' icon on the left hand side and install the 'C/C++' and 'CMake Tools' extensions.
 * Close VS Code.
 * Clone this project to an appropriate location with 'git clone https://github.com/jimnarey/SimpleXboxControllerAdapter'
 * Open VS Code again and select 'File -> Open Folder'. Point it to the cloned repo.
-* The CMake Tools extension should now create a 'build' directory within the 'Firmware' directory. Click 'yes' if it asks for permission to do this.
-* Open main.cpp. If there are red squiggles under any of the header file/other names (meaning VS Code doesn't know where the files are located), open the VS Code command palette with Ctrl-Shift-P and type 'edit'. An option entitled 'C/C++ Edit Configurations UI' should appear. Select it. Scroll down to the 'Include Path' section and in the box below add the path to the AVR libraries. On Ubuntu 20 this is '/usr/lib/avr/include' but running ```dpkg -L avr-libc | grep include``` will give you the right path on any Debian-based system.
+* If asked about which compiler to use, via a drop-down box, select gcc-avr
+* The CMake Tools extension should now create a 'build' directory within the 'Firmware' directory. Click 'yes' if it asks for permission to do this and click 'yes' if it asks about running Cmake each time a project/folder is opened.
+* Open main.cpp. If there are red squiggles under any of the header file/other names (meaning VS Code doesn't know where the files are located):
+    * Open the VS Code command palette with Ctrl-Shift-P and type 'edit'. 
+    * An option entitled 'C/C++ Edit Configurations UI' should appear. Select it. 
+    * Scroll down to the 'Include Path' section and in the box below add the path to the AVR libraries. 
+        * On Ubuntu 20 this is '/usr/lib/avr/include' but running ```dpkg -L avr-libc | grep include``` will give you the right path on any Debian-based system.
+        * On MacOS, this will depend on the version of the AVR compiler installed by brew. On Catalina and avr-gcc 9.3.0, the correct path is '/usr/local/Cellar/avr-gcc/9.3.0/avr/include/'.
 * You should now have everything up and running to play around with the code and build it.
 
-To build:
-* Enter the 'build' directory created by CMake Tools.
+## Build
+
+* Enter the 'build' directory created by VS Code/CMake Tools.
 * Type `make` to build the project. It will create .elf file, containing the firmware to be burned onto an Arduino Leonardo or Pro Micro but not yet in the correct format. As things stand this is called 'ogx360_32u4_master.elf'.
 * Enter 
 ```
@@ -71,15 +87,30 @@ avr-objcopy -O binary ogx360_32u4_master.elf ./ogx360_32u4_master.bin
 ```
 to create file we can burn to the Arduino
 * Open another terminal window and enter 'dmesg -wH' to provide dmesg output on a rolling basis.
-* In the original terminal window (which you just used to run avr-objcopy) enter the following command, but don't hit 'Enter': 
+* In the original terminal window (which you just used to run avr-objcopy) enter the following command, but don't hit 'Enter'.
+
+Linux:
 ```
 avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:ogx360_32u4_master.bin -C /etc/avrdude.conf'
 ```
+MacOS [to do - test this]
+```
+avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:ogx360_32u4_master.bin -C /usr/local/Cellar/avrdude/6.3_1/etc/avrdude.conf'
+```
+## Burn
+
+We need to use avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. Whatever code you flash to an Arduino with the IDE, it always appears to a connected host (i.e a PC) as a serial device, as this is a feature of the pre-flashed bootloader.
+
+No special hardware (e.g. a progammer is needed).
+
+Performing this process successfully *ought* not prevent flashing the standard Arduino bootloader back onto the device using USB (no special hardware is needed), however I haven't tested this yet. 
+
+If something goes wrong, you may need to reflash the Arduino using a hardware programmer, which can be as simple as another properly configured Arduino. I have tested this, after running an incorrect avrdude command.
+
+For the time being, these instructions are for Linux...
+
 * Plug in the Arduino as you would normally. You'll see some dmesg output about it being connected. 
 * Press the reset button on the Arduino or if using a Pro Micro, short the RST and GND pins twice in immediate sucession. When the dmesg output shows the Arduino as disconnected, then immediately reconnected, hit 'Enter' in the other window. If you get this wrong you'll need another Arduino or hardware programmer to fix it (search for burning Ardunio bootloaders using an Arduino as an ISP).
 
-## Additional Bits
-
-This section contains notes to self for future updating of the readme...
 
 
