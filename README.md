@@ -2,35 +2,35 @@
 
 ## Purpose
 
-This is a 'work in progress' adaptation of Ryzee119's excellent four-way wired/wireless controller adapter (https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers on an original Xbox console. 
+This is a 'work in progress' adaptation of Ryzee119's excellent ]four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers on an original Xbox console. 
 
-The purpose is to allow for a simpler build, using only off-the-shelf parts, ideally an Arduino Leonardo/Pro Micro paired with a generic USB Host Shield. Soldering will be limited to connecting pads on the USB Host Shield, which may not be necessary at all depending on the manufacturer/model used. 
+The objectives of this project are:
+* The simplest possible harware build, using only off-the-shelf parts (ideally an Arduino Leonardo/Pro Micro paired with a generic USB Host Shield). 
+* Little or no soldering (depending on which shield is used, none may be needed). 
+* Reduced, simpler code to make playing around with it as straightforward as possible.
+* Reduced functionality, reflecting the simpler code - it will be wired-only and not offer Steel Batallion support. 
+* Eventually (I hope) allow for use of a wider range of controllers.
+* To provide full, foolproof instructions to enable anyone who's broadly comfortable with an Arduino to put together an adapter and anyone who is broadly comfortable with the command line and IDEs to edit and build the code. So this document is a key part of the project.
 
-It will be wired-only, not offer Steel Batallion support and eventually (I hope) allow for use of a wider range of controllers. 
+This started when I dusted off my old Xbox and wanted to make something to use newer (and I'll just say it - better) controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do this. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable free or open-source tools.
 
-It also has full instructions for building/burning which aren't dependent on Windows, Atmel Studio or other things which are closed source/specialist subjects in their own right. A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput was that it was possible (for me) to get everything up and running in VS Code/Linux. As I update this doc, a proper explantion will follow as to why none of this is as simple as loading a project into the Arduino IDE (on any OS) and uploading it in the normal way. In short, any project uploaded via the IDE will always make the Arduino act like a serial device and we need it to act like a HID device. 
+A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible (for me) to clone, edit, extend and build without too much fighting with build tools/IDEs etc. That being said, the ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but kept causing my mouse pointer to stall every 60 seconds (I really coulndn't) because it apparently [fears USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives (2min 15s)](https://www.youtube.com/watch?v=PjxPaCnIVdM). This project uses VS Code.
 
 ## Alternatives / Comparisons
 
-As above, this is based on Ryzee119's ogx360 project. This uses up to four Arduino Pro Micros to provide up to four emulated original Xbox controllers, connected via a custom PCB to a MAX3421 USB Host Controller IC (the same IC used in Arduino USB Host Shields). A big motivation for this project is that the MAX3421 is not (to the very best of my knowledge) available in a through-hole package making it tough work for a hobby project. Some people laugh in the face of surface mount soldering; I am not amongst them. 
+* [Ryzee119's ogx360 project](https://github.com/Ryzee119/ogx360/), as above. This uses up to four Arduino Pro Micros to provide up to four emulated original Xbox controllers, connected via a custom PCB to a MAX3421 USB Host Controller IC (the same IC used in Arduino USB Host Shields). A big motivation for this project is that the MAX3421 is not (to the very best of my knowledge) available in a through-hole package making it tough work for a hobby project. Some people laugh in the face of surface mount soldering; I am not amongst them. 
+* [Another Ryzee199 project](https://github.com/Ryzee119/ogx360_t4) pretty much meets the aims of this one (simple, no soldering, other controller support) but relies on the [Teensy 4.1](https://www.pjrc.com/store/teensy41.html). This works with the Arduino IDE, PlatformIO etc but is a more expensive option, reflecting the fact the board has an integral USB host, SD card, ethernet support etc and a 32bit processor. But very straightforward.
+* [The XBOXPadMicro project](https://github.com/bootsector/XBOXPadMicro) allows for a customised controller to be built to work with a classic Xbox Console, using an Arduino's digital input pins but doesn't include any USB host functionality (so you can't plug another controller into it). It's written in C and needs some work to adapt it for use with the broader Arduino ecosystem (which provides the easiest way to code USB host support via a shield/MAX3421).
+* [The Arduino XInput library](https://github.com/dmadison/ArduinoXInput) has everything needed to build a project to make an Arduino appear as an Xinput controller (the protocol used by the Xbox, successor consoles and Windows) except the vendor-specific HID challenge/response code needed to work with an actual Xbox console. So it will work with Windows/Linux/Mac but not the console itself.
+* This project and both of Ryzee119's use the [Arduino USB Host Shield Library](https://github.com/felis/USB_Host_Shield_2.0) to handle communication between the device and the Xbox One/360 controller. The speed with which you can pick up an Arduino, a shield and have a PS4 (or other) controller talking to Linux/Windows/Mac via serial is very impressive. It's well supported and very comprehensive.
 
-Two asides: 
-* I'd emotionally committed to this before I realised the MAX3421 is used in all Arduino USB Host Shields and therefore the original ogc360 code could be made to work without the custom PCB (see below). So there's a huge shortcut available if you just want the quickest and easiest way to use a more modern controller on an original Xbox.
-* Ultimately, I'd like something which doesn't need an Arduino shield and have purchased several PIC24FJ64GB002 ICs, which have integrated USB, to play around with. I'll update this if I get anywhere.
+## Quickest and easiest way to get an Xbox One/360 pad working with an original Xbox right now!
 
-There are several other projects it's worth taking a look at:
-* While helping me with a question on the source, Ryzee119 pointed me to this, https://github.com/Ryzee119/ogx360_t4, which pretty much meets the aims of this project (simpler, no soldering, other controller support) but relies on the Teensy 4.1 (https://www.pjrc.com/store/teensy41.html). This works with the Arduino IDE, PlatformIO etc but is a more expensive option, reflecting the fact the board has an integral USB host, SD card, ethernet support etc and a 32bit processor. But very straightforward.
-* The XBOXPadMicro project https://github.com/bootsector/XBOXPadMicro allows for a customised controller to be built to work with a classic Xbox Console, using an Arduino's digital input pins but doesn't include any USB host functionality (so you can't plug another controller into it). It's written in C and needs some work to adapt it for use with the broader Arduino ecosystem (which provides the easiest way to code USB host support via a shield/MAX3421).
-* The Arduino XInput library (https://github.com/dmadison/ArduinoXInput) has everything needed to build a project to make an Arduino appear as an Xinput controller (the protocol used by the Xbox, successor consoles and Windows) except the vendor-specific HID challenge/response code needed to work with an actual Xbox console. So it will work with Windows/Linux/Mac but not the console itself.
-* This project and both of Ryzee119's use the Arduino USB Host Shield library to handle communication between the device and the Xbox One/360 controller. This can be found here: https://github.com/felis/USB_Host_Shield_2.0. The speed with which you can pick up an Arduino, a shield and have a PS4 (or other) controller talking to Linux/Windows/Mac via serial is very impressive. It's well supported and very comprehensive.
+As I started to understand the ogx360 project it became clear that the custom PCB isn't needed - it will work with a Leonardo, paired with a USB Host Shield, with no modifications to the code. An aim of this project is to make building an adapter with just these two things foolproof but for now...
 
-## Quickest and easiest way to get an Xbox One/360 pad working with an original Xbox right now
-
-The aim of this project is to make this foolproof including full instructions but, for now...
-
-* Buy an Arduino Leonardo and USB Host Shield. Make sure the Shield is set up for 5V on the bus (it may be already) and plug them together.
+* Buy an Arduino Leonardo and USB Host Shield. Make sure the Shield is set up for 5V on the USB bus (it may be already) and plug them together.
 * Download 'ogx360_32u4_master.hex' from https://github.com/Ryzee119/ogx360/releases
-* Burn the hex to the Leonardo using the method under 'Programming' here: https://github.com/Ryzee119/ogx360/releases (this is for Windows, Linux/Mac instructions will be added to this document in due course, when I make my first release). You can't just use the normal Arduino IDE method but don't be put off. It's easy and no special hardware is needed.
+* Burn the hex to the Leonardo using the method under 'Programming' [here](https://github.com/Ryzee119/ogx360/releases) (Windows) or the Linux instructions towards the end of this document. You can't just use the normal Arduino IDE method but don't be put off. It's easy and no special hardware is needed.
 
 There are variations on this (a Pro Micro can stand in for a Leonardo, you can use a shield designed for the Pro Mini etc) but this is the simplest.
 
@@ -40,13 +40,11 @@ There isn't a release yet though using the instructions below to build commit 9d
 
 These instructions are for Ubuntu (or other Debian-based distro) and MacOS (tested on Catalina). Windows instructions to follow.
 
-Further explanation as to why you have to do all this rather than just use the Arduino IDE/PlatformIO will also follow. 
-
 What you'll need in add:
 * An Arduino Leonardo/Pro Micro (explanation to follow on why not an Uno/Mini/other) and USB cable to connect it
 * An Arduino USB Host Shield, connected to the Arduino (...you guessed it...details to follow)
 
-## Install Tools
+## Install Command Line Tools
 
 ### Ubuntu etc
 * From a command prompt run: 
@@ -61,6 +59,9 @@ xcode-select —-install
 brew tap osx-cross/avr
 brew install avr-gcc avrdude cmake
 ```
+## Install VS Code
+
+The project uses CMake to build itself from the three libraries (Arduino, LUFA, USB Host Shield) and project code. VS Code's CMake extension can run the right CMake tasks automatically every time the project is opened.
 
 * Download and install Visual Studio Code here: https://code.visualstudio.com/download
 * Open VS Code, click on the 'extensions' icon on the left hand side and install the 'C/C++' and 'CMake Tools' extensions.
