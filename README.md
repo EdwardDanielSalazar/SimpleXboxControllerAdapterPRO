@@ -82,6 +82,7 @@ The project uses CMake to build itself from the three libraries (Arduino, LUFA, 
 
 * Enter the 'build' directory created by VS Code/CMake Tools.
 * Type `make` to build the project. It will create .elf file, containing the firmware to be burned onto an Arduino Leonardo or Pro Micro but not yet in the correct format. As things stand this is called 'ogx360_32u4_master.elf'.
+* MacOS/Brew, which uses a newer version of gcc-avr than Ubuntu, will likely throw some warnings when compiling the LUFA library. These can be ignored.
 * Enter 
 ```
 avr-objcopy -O binary ogx360_32u4_master.elf ./ogx360_32u4_master.bin
