@@ -24,7 +24,7 @@ In settings.h you can configure the following options:
 
 #include "settings.h"
 #include "xiddevice.h"
-#include "Wire.h"
+// #include "Wire.h"
 #include "EEPROM.h"
 
 #include <XBOXRECV.h>
@@ -34,6 +34,9 @@ In settings.h you can configure the following options:
 
 
 uint8_t playerID; //playerID is set in the main program based on the slot the Arduino is installed.
+
+//*********************
+// TO DO - reduce size of this array before turning into var
 USB_XboxGamepad_Data_t XboxOGDuke[4]; //Xbox gamepad data structure to store all button and actuator states for all four controllers.
 uint8_t ConnectedXID = DUKE_CONTROLLER; //Default XID device to emulate
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
@@ -49,16 +52,18 @@ void setLedOn(LEDEnum led, uint8_t controller);
 bool controllerConnected(uint8_t controller);
 
 XBOXONE XboxOneWired1(&UsbHost);
-XBOXONE XboxOneWired2(&UsbHost);
-XBOXONE XboxOneWired3(&UsbHost);
-XBOXONE XboxOneWired4(&UsbHost);
-XBOXONE *XboxOneWired[4] = {&XboxOneWired1, &XboxOneWired2, &XboxOneWired3, &XboxOneWired4};
+// XBOXONE XboxOneWired2(&UsbHost);
+// XBOXONE XboxOneWired3(&UsbHost);
+// XBOXONE XboxOneWired4(&UsbHost);
+// XBOXONE *XboxOneWired[4] = {&XboxOneWired1, &XboxOneWired2, &XboxOneWired3, &XboxOneWired4};
+XBOXONE *XboxOneWired[1] = {&XboxOneWired1};
 
 XBOXUSB Xbox360Wired1(&UsbHost);
-XBOXUSB Xbox360Wired2(&UsbHost);
-XBOXUSB Xbox360Wired3(&UsbHost);
-XBOXUSB Xbox360Wired4(&UsbHost);
-XBOXUSB *Xbox360Wired[4] = {&Xbox360Wired1, &Xbox360Wired2, &Xbox360Wired3, &Xbox360Wired4};
+// XBOXUSB Xbox360Wired2(&UsbHost);
+// XBOXUSB Xbox360Wired3(&UsbHost);
+// XBOXUSB Xbox360Wired4(&UsbHost);
+// XBOXUSB *Xbox360Wired[4] = {&Xbox360Wired1, &Xbox360Wired2, &Xbox360Wired3, &Xbox360Wired4};
+XBOXUSB *Xbox360Wired[1] = {&Xbox360Wired1};
 
 int main(void)
 {
@@ -79,6 +84,9 @@ int main(void)
 
 	playerID = 0;
 
+
+	//*********************
+	// TO DO - CHANGE THIS ONCE XboxOGDuke is no longer array
 	//Init the XboxOG data arrays to zero.
 	memset(&XboxOGDuke,0x00,sizeof(USB_XboxGamepad_Data_t)*4);
 
@@ -99,7 +107,7 @@ int main(void)
 		/*** MASTER TASKS ***/
 		UsbHost.busprobe();
 
-		int i = 0;
+		uint8_t i = 0;
 		UsbHost.Task();
 		if (controllerConnected(i)) {
 			//Button Mapping for Duke Controller
@@ -158,11 +166,12 @@ int main(void)
 				} else if (getButtonPress(START, i) && getButtonPress(BACK, i) && 
 							getButtonPress(L2, i)>0x00 && getButtonPress(R2, i)>0x00) {
 					//Turn off rumble on all controllers
-					for(uint8_t j=0; j<4; j++){
+					// for(uint8_t j=0; j<4; j++){
+						uint8_t j = 0;
 						XboxOGDuke[j].left_actuator=0;
 						XboxOGDuke[j].right_actuator=0;
 						XboxOGDuke[j].rumbleUpdate=1;
-					}
+					// }
 				//If Xbox button isnt held down, send the rumble commands
 				} else {
 					xboxHoldTimer[i]=0; //Reset the XBOX button hold time counter.
@@ -177,16 +186,16 @@ int main(void)
 			/*Check/send the Player 1 HID report every loop to minimise lag even more on the master*/
 			sendControllerHIDReport();
 
-		} else {
+		} // else {
 			//If the respective controller isn't synced, we instead send a disablePacket over the i2c bus
 			//so that the slave device knows to disable its USB. I've arbitrarily made this 0xF0.
-			if(i>0){
-				static uint8_t disablePacket[1] = {0xF0};
-				Wire.beginTransmission(i);
-				Wire.write((char*)disablePacket,1);
-				Wire.endTransmission(true);
-			}
-		}
+			// if(i>0){
+			// 	static uint8_t disablePacket[1] = {0xF0};
+			// 	Wire.beginTransmission(i);
+			// 	Wire.write((char*)disablePacket,1);
+			// 	Wire.endTransmission(true);
+			// }
+		// }
 
 		//Handle Player 1 controller connect/disconnect events.
 		if (controllerConnected(0) && disconnectTimer==0){
