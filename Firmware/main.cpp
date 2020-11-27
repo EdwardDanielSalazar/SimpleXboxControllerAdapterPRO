@@ -28,8 +28,8 @@ In settings.h you can configure the following options:
 #include "EEPROM.h"
 
 #include <XBOXRECV.h>
-#include <usbhub.h>
-#include <XBOXONE.h>
+#include <usbhub.h> // TO DO Take this out?
+#include <XBOXONE.h> // TO DO Look again at rumble settings in XBOXONE.cpp
 #include <XBOXUSB.h>
 
 
@@ -43,7 +43,7 @@ bool enumerationComplete=false; //Flag is set when the device has been successfu
 uint32_t disconnectTimer=0; //Timer used to time disconnection between SB and Duke controller swapover
 
 USB UsbHost;
-USBHub Hub(&UsbHost);
+USBHub Hub(&UsbHost); // TO DO Take this out if header successfully removed
 XBOXRECV Xbox360Wireless(&UsbHost);
 uint8_t getButtonPress(ButtonEnum b, uint8_t controller);
 int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller);
@@ -111,7 +111,7 @@ int main(void)
 		UsbHost.Task();
 		if (controllerConnected(i)) {
 			//Button Mapping for Duke Controller
-			if(ConnectedXID == DUKE_CONTROLLER || i != 0){
+			if(ConnectedXID == DUKE_CONTROLLER || i != 0){ // TO DO Remove this
 
 				//Read Digital Buttons
 				XboxOGDuke[i].dButtons=0x0000;

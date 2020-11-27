@@ -423,7 +423,7 @@ uint8_t XBOXONE::XboxCommand(uint8_t* data, uint16_t nbytes) {
 // The Xbox One packets are described at: https://github.com/quantus/xbox-one-controller-protocol
 void XBOXONE::onInit() {
 
-        // Deactivate Rumble to avoid too much power draw
+        // Mirror code in Ryzee implementation - why set like this?
 
         // // A short buzz to show the controller is active
         // uint8_t writeBuf[13];
