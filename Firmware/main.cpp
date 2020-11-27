@@ -27,7 +27,7 @@ In settings.h you can configure the following options:
 // #include "Wire.h"
 #include "EEPROM.h"
 
-#include <XBOXRECV.h>
+// #include <XBOXRECV.h>
 #include <usbhub.h> // TO DO Take this out?
 #include <XBOXONE.h> // TO DO Look again at rumble settings in XBOXONE.cpp
 #include <XBOXUSB.h>
@@ -44,7 +44,7 @@ uint32_t disconnectTimer=0; //Timer used to time disconnection between SB and Du
 
 USB UsbHost;
 USBHub Hub(&UsbHost); // TO DO Take this out if header successfully removed
-XBOXRECV Xbox360Wireless(&UsbHost);
+// XBOXRECV Xbox360Wireless(&UsbHost);
 uint8_t getButtonPress(ButtonEnum b, uint8_t controller);
 int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller);
 void setRumbleOn(uint8_t lValue, uint8_t rValue, uint8_t controller);
@@ -157,7 +157,7 @@ int main(void)
 						XboxOGDuke[i].dButtons = 0x00;
 						setRumbleOn(0, 0, i);
 						delay(10);
-						Xbox360Wireless.disconnect(i);
+						// Xbox360Wireless.disconnect(i);
 						xboxHoldTimer[i]=0;
 					}
 				//START+BACK TRIGGERS is a standard soft reset command. 
@@ -206,7 +206,7 @@ int main(void)
 		} else if(millis()>7000){
 			digitalWrite(ARDUINO_LED_PIN, HIGH);
 			USB_Detach(); //Disconnect from the OG Xbox port.
-			Xbox360Wireless.chatPadInitNeeded[0]=1;
+			// Xbox360Wireless.chatPadInitNeeded[0]=1; // Why is this not within its own if block?
 		} else {
 			USB_Attach();
 			sendControllerHIDReport();
@@ -251,8 +251,8 @@ void sendControllerHIDReport(){
 // #ifdef MASTER
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b, uint8_t controller){
-	if(Xbox360Wireless.Xbox360Connected[controller])
-	return Xbox360Wireless.getButtonPress(b, controller);
+	// if(Xbox360Wireless.Xbox360Connected[controller])
+	// return Xbox360Wireless.getButtonPress(b, controller);
 
 	#ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected)
@@ -275,8 +275,8 @@ uint8_t getButtonPress(ButtonEnum b, uint8_t controller){
 //Parse analog stick requests for each type of controller.
 int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller){
 	int32_t val=0;
-	if(Xbox360Wireless.Xbox360Connected[controller])
-		return Xbox360Wireless.getAnalogHat(a, controller);
+	// if(Xbox360Wireless.Xbox360Connected[controller])
+	// 	return Xbox360Wireless.getAnalogHat(a, controller);
 
 	#ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected){
@@ -298,8 +298,8 @@ int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller){
 
 //Parse rumble activation requests for each type of controller.
 void setRumbleOn(uint8_t lValue, uint8_t rValue, uint8_t controller){
-	if(Xbox360Wireless.Xbox360Connected[controller])
-	Xbox360Wireless.setRumbleOn(lValue, rValue, controller);
+	// if(Xbox360Wireless.Xbox360Connected[controller])
+	// Xbox360Wireless.setRumbleOn(lValue, rValue, controller);
 
 	#ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected){
@@ -316,8 +316,8 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue, uint8_t controller){
 
 //Parse LED activation requests for each type of controller.
 void setLedOn(LEDEnum led, uint8_t controller){
-	if(Xbox360Wireless.Xbox360Connected[controller])
-	Xbox360Wireless.setLedOn(led,controller);
+	// if(Xbox360Wireless.Xbox360Connected[controller])
+	// Xbox360Wireless.setLedOn(led,controller);
 
 	#ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected)
@@ -332,8 +332,8 @@ void setLedOn(LEDEnum led, uint8_t controller){
 }
 
 bool controllerConnected(uint8_t controller){
-	if (Xbox360Wireless.Xbox360Connected[controller])
-		return 1;
+	// if (Xbox360Wireless.Xbox360Connected[controller])
+	// 	return 1;
 
 	#ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected)
