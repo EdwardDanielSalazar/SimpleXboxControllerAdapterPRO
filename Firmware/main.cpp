@@ -254,12 +254,12 @@ uint8_t getButtonPress(ButtonEnum b, uint8_t controller){
 	// if(Xbox360Wireless.Xbox360Connected[controller])
 	// return Xbox360Wireless.getButtonPress(b, controller);
 
-	#ifdef SUPPORTWIREDXBOX360
+	// #ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected)
 	return Xbox360Wired[controller]->getButtonPress(b);
-	#endif
+	// #endif
 
-	#ifdef SUPPORTWIREDXBOXONE
+	// #ifdef SUPPORTWIREDXBOXONE
 	if (XboxOneWired[controller]->XboxOneConnected){
 		if(b==L2 || b==R2){
 			return (uint8_t)(XboxOneWired[controller]->getButtonPress(b)>>2); //Xbone one triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
@@ -267,7 +267,7 @@ uint8_t getButtonPress(ButtonEnum b, uint8_t controller){
 			return (uint8_t)XboxOneWired[controller]->getButtonPress(b);
 		}
 	}
-	#endif
+	// #endif
 
 	return 0;
 }
@@ -278,7 +278,7 @@ int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller){
 	// if(Xbox360Wireless.Xbox360Connected[controller])
 	// 	return Xbox360Wireless.getAnalogHat(a, controller);
 
-	#ifdef SUPPORTWIREDXBOX360
+	// #ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected){
 		val = Xbox360Wired[controller]->getAnalogHat(a);
 		if(val==-32512) //8bitdo range fix
@@ -286,12 +286,12 @@ int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller){
 		return val;
 	}
 
-	#endif
+	// #endif
 
-	#ifdef SUPPORTWIREDXBOXONE
+	// #ifdef SUPPORTWIREDXBOXONE
 	if (XboxOneWired[controller]->XboxOneConnected)
 		return XboxOneWired[controller]->getAnalogHat(a);
-	#endif
+	// #endif
 
 	return 0;
 }
@@ -301,17 +301,17 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue, uint8_t controller){
 	// if(Xbox360Wireless.Xbox360Connected[controller])
 	// Xbox360Wireless.setRumbleOn(lValue, rValue, controller);
 
-	#ifdef SUPPORTWIREDXBOX360
+	// #ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected){
 		Xbox360Wired[controller]->setRumbleOn(lValue, rValue); //If you have an externally power USB 2.0 hub you can uncomment this to enable rumble
 	}
-	#endif
+	// #endif
 
-	#ifdef SUPPORTWIREDXBOXONE
+	// #ifdef SUPPORTWIREDXBOXONE
 	if (XboxOneWired[controller]->XboxOneConnected){
 		XboxOneWired[controller]->setRumbleOn(lValue/8, rValue/8, lValue/2, rValue/2);
 	}
-	#endif
+	// #endif
 }
 
 //Parse LED activation requests for each type of controller.
@@ -319,30 +319,30 @@ void setLedOn(LEDEnum led, uint8_t controller){
 	// if(Xbox360Wireless.Xbox360Connected[controller])
 	// Xbox360Wireless.setLedOn(led,controller);
 
-	#ifdef SUPPORTWIREDXBOX360
+	// #ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected)
 	Xbox360Wired[controller]->setLedOn(led);
-	#endif
+	// #endif
 
-	#ifdef SUPPORTWIREDXBOXONE
+	// #ifdef SUPPORTWIREDXBOXONE
 	if (XboxOneWired[controller]->XboxOneConnected){
 		//no LEDs on Xbox One Controller. I think it is possible to adjust brightness but this is not implemented.
 	}
-	#endif
+	// #endif
 }
 
 bool controllerConnected(uint8_t controller){
 	// if (Xbox360Wireless.Xbox360Connected[controller])
 	// 	return 1;
 
-	#ifdef SUPPORTWIREDXBOX360
+	// #ifdef SUPPORTWIREDXBOX360
 	if (Xbox360Wired[controller]->Xbox360Connected)
 		return 1;
-	#endif
+	// #endif
 
-	#ifdef SUPPORTWIREDXBOXONE
+	// #ifdef SUPPORTWIREDXBOXONE
 	if (XboxOneWired[controller]->XboxOneConnected)
 		return 1;
-	#endif
+	// #endif
 	return 0;
 }
