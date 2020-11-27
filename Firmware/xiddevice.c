@@ -129,21 +129,21 @@ void EVENT_USB_Device_ControlRequest(void){
 	}
 
 	//If the request is a standard HID control request, jump into the LUFA library to handle it for us.
-	switch (ConnectedXID){
-		case DUKE_CONTROLLER:
+	// switch (ConnectedXID){
+	// 	case DUKE_CONTROLLER:
 		HID_Device_ProcessControlRequest(&DukeController_HID_Interface);
-		break;
-	}
+	// 	break;
+	// }
 
 }
 
 /** Event handler for the USB device Start Of Frame event. */
 void EVENT_USB_Device_StartOfFrame(void){
-	switch (ConnectedXID){
-		case DUKE_CONTROLLER:
+	// switch (ConnectedXID){
+	// 	case DUKE_CONTROLLER:
 		HID_Device_MillisecondElapsed(&DukeController_HID_Interface);
-		break;
-	}
+	// 	break;
+	// }
 
 
 }
@@ -155,8 +155,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 	USB_XboxGamepad_Data_t* DukeReport = (USB_XboxGamepad_Data_t*)ReportData;
 
-	switch (ConnectedXID){
-		case DUKE_CONTROLLER:
+	// switch (ConnectedXID){
+	// 	case DUKE_CONTROLLER:
 		DukeReport->startByte = 0x00;
 		DukeReport->bLength = 20;
 		DukeReport->dButtons = XboxOGDuke[0].dButtons;
@@ -174,8 +174,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		DukeReport->rightStickX = XboxOGDuke[0].rightStickX;
 		DukeReport->rightStickY = XboxOGDuke[0].rightStickY;
 		*ReportSize = DukeReport->bLength;
-		break;
-	}
+	// 	break;
+	// }
 
 	return false;
 }
@@ -213,21 +213,21 @@ uint16_t CALLBACK_USB_GetDescriptor(
 	switch (DescriptorType)
 	{
 		case DTYPE_Device:
-		switch (ConnectedXID){
-			case DUKE_CONTROLLER:
+		// switch (ConnectedXID){
+		// 	case DUKE_CONTROLLER:
 			Address = &DUKE_USB_DESCRIPTOR_DEVICE;
 			Size    = 18;
-			break;
-		}
+		// 	break;
+		// }
 		break;
 		case DTYPE_Configuration:
 
-		switch (ConnectedXID){
-			case DUKE_CONTROLLER:
+		// switch (ConnectedXID){
+		// 	case DUKE_CONTROLLER:
 			Address = &DUKE_USB_DESCRIPTOR_CONFIGURATION;
 			Size    = 32;
-			break;
-		}
+		// 	break;
+		// }
 		break;
 		case DTYPE_String:
 		Address = &nullString; //OG Xbox controller doesn't use these.
