@@ -136,20 +136,20 @@ int main(void)
 
 			//Anything that sends a command to the Xbox 360 controllers happens here.
 			//(i.e rumble, LED changes, controller off command)
-			static uint32_t commandTimer[4] ={0,0,0,0};
-			static uint32_t xboxHoldTimer[4] ={0,0,0,0};
-			if(millis()-commandTimer[i]>16){
+			static uint32_t commandTimer = 0;
+			static uint32_t xboxHoldTimer = 0;
+			if(millis()-commandTimer>16){
 				//If you hold the XBOX button for more than ~1second, turn off controller
 				if (getButtonPress(XBOX)) {
-					if(xboxHoldTimer[i]==0){
-						xboxHoldTimer[i]=millis();
+					if(xboxHoldTimer==0){
+						xboxHoldTimer=millis();
 					}
-					if((millis()-xboxHoldTimer[i])>1000 && (millis()-xboxHoldTimer[i])<1100){
+					if((millis()-xboxHoldTimer)>1000 && (millis()-xboxHoldTimer)<1100){
 						XboxOGDuke.dButtons = 0x00;
 						setRumbleOn(0, 0);
 						delay(10);
 						// Xbox360Wireless.disconnect(i);
-						xboxHoldTimer[i]=0;
+						xboxHoldTimer=0;
 					}
 				//START+BACK TRIGGERS is a standard soft reset command. 
 				//We turn off the rumble motors here to prevent them getting locked on
@@ -165,13 +165,13 @@ int main(void)
 					// }
 				//If Xbox button isnt held down, send the rumble commands
 				} else {
-					xboxHoldTimer[i]=0; //Reset the XBOX button hold time counter.
+					xboxHoldTimer=0; //Reset the XBOX button hold time counter.
 					if (XboxOGDuke.rumbleUpdate==1){
 						setRumbleOn(XboxOGDuke.left_actuator, XboxOGDuke.right_actuator);
 						XboxOGDuke.rumbleUpdate=0;
 					}
 				}
-				commandTimer[i]=millis();
+				commandTimer=millis();
 			}
 
 			/*Check/send the Player 1 HID report every loop to minimise lag even more on the master*/
