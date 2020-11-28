@@ -73,7 +73,7 @@ extern "C" {
 
 	/* Data Types: */
 	extern USB_ClassInfo_HID_Device_t DukeController_HID_Interface;
-	extern USB_XboxGamepad_Data_t XboxOGDuke[4];
+	extern USB_XboxGamepad_Data_t XboxOGDuke;
 	extern bool enumerationComplete;
 	extern uint8_t playerID;
 	#ifdef __cplusplus

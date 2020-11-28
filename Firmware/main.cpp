@@ -34,7 +34,7 @@ uint8_t playerID; //playerID is set in the main program based on the slot the Ar
 
 //*********************
 // TO DO - reduce size of this array before turning into var
-USB_XboxGamepad_Data_t XboxOGDuke[4]; //Xbox gamepad data structure to store all button and actuator states for all four controllers.
+USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for all four controllers.
 uint8_t ConnectedXID = DUKE_CONTROLLER; //Default XID device to emulate
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
 uint32_t disconnectTimer=0; //Timer used to time disconnection between SB and Duke controller swapover
@@ -79,7 +79,7 @@ int main(void)
 	//*********************
 	// TO DO - CHANGE THIS ONCE XboxOGDuke is no longer array
 	//Init the XboxOG data arrays to zero.
-	memset(&XboxOGDuke,0x00,sizeof(USB_XboxGamepad_Data_t)*4);
+	memset(&XboxOGDuke,0x00,sizeof(USB_XboxGamepad_Data_t));
 
 	/* MASTER DEVICE USB HOST CONTROLLER INIT */
 
@@ -105,33 +105,33 @@ int main(void)
 			// if(ConnectedXID == DUKE_CONTROLLER || i != 0){ // TO DO Remove this
 
 			//Read Digital Buttons
-			XboxOGDuke[i].dButtons=0x0000;
-			if (getButtonPress(UP))      XboxOGDuke[i].dButtons |= DUP;
-			if (getButtonPress(DOWN))    XboxOGDuke[i].dButtons |= DDOWN;
-			if (getButtonPress(LEFT))    XboxOGDuke[i].dButtons |= DLEFT;
-			if (getButtonPress(RIGHT))   XboxOGDuke[i].dButtons |= DRIGHT;;
-			if (getButtonPress(START))   XboxOGDuke[i].dButtons |= START_BTN;
-			if (getButtonPress(BACK))    XboxOGDuke[i].dButtons |= BACK_BTN;
-			if (getButtonPress(L3))      XboxOGDuke[i].dButtons |= LS_BTN;
-			if (getButtonPress(R3))      XboxOGDuke[i].dButtons |= RS_BTN;
+			XboxOGDuke.dButtons=0x0000;
+			if (getButtonPress(UP))      XboxOGDuke.dButtons |= DUP;
+			if (getButtonPress(DOWN))    XboxOGDuke.dButtons |= DDOWN;
+			if (getButtonPress(LEFT))    XboxOGDuke.dButtons |= DLEFT;
+			if (getButtonPress(RIGHT))   XboxOGDuke.dButtons |= DRIGHT;;
+			if (getButtonPress(START))   XboxOGDuke.dButtons |= START_BTN;
+			if (getButtonPress(BACK))    XboxOGDuke.dButtons |= BACK_BTN;
+			if (getButtonPress(L3))      XboxOGDuke.dButtons |= LS_BTN;
+			if (getButtonPress(R3))      XboxOGDuke.dButtons |= RS_BTN;
 
 			//Read Analog Buttons - have to be converted to digital because x360 controllers don't have analog buttons
-			getButtonPress(A)    ? XboxOGDuke[i].A = 0xFF      : XboxOGDuke[i].A = 0x00;
-			getButtonPress(B)    ? XboxOGDuke[i].B = 0xFF      : XboxOGDuke[i].B = 0x00;
-			getButtonPress(X)    ? XboxOGDuke[i].X = 0xFF      : XboxOGDuke[i].X = 0x00;
-			getButtonPress(Y)    ? XboxOGDuke[i].Y = 0xFF      : XboxOGDuke[i].Y = 0x00;
-			getButtonPress(L1)   ? XboxOGDuke[i].WHITE = 0xFF  : XboxOGDuke[i].WHITE = 0x00;
-			getButtonPress(R1)   ? XboxOGDuke[i].BLACK = 0xFF  : XboxOGDuke[i].BLACK = 0x00;
+			getButtonPress(A)    ? XboxOGDuke.A = 0xFF      : XboxOGDuke.A = 0x00;
+			getButtonPress(B)    ? XboxOGDuke.B = 0xFF      : XboxOGDuke.B = 0x00;
+			getButtonPress(X)    ? XboxOGDuke.X = 0xFF      : XboxOGDuke.X = 0x00;
+			getButtonPress(Y)    ? XboxOGDuke.Y = 0xFF      : XboxOGDuke.Y = 0x00;
+			getButtonPress(L1)   ? XboxOGDuke.WHITE = 0xFF  : XboxOGDuke.WHITE = 0x00;
+			getButtonPress(R1)   ? XboxOGDuke.BLACK = 0xFF  : XboxOGDuke.BLACK = 0x00;
 
 			//Read Analog triggers
-			XboxOGDuke[i].L = getButtonPress(L2); //0x00 to 0xFF
-			XboxOGDuke[i].R = getButtonPress(R2); //0x00 to 0xFF
+			XboxOGDuke.L = getButtonPress(L2); //0x00 to 0xFF
+			XboxOGDuke.R = getButtonPress(R2); //0x00 to 0xFF
 
 			//Read Control Sticks (16bit signed short)
-			XboxOGDuke[i].leftStickX = getAnalogHat(LeftHatX);
-			XboxOGDuke[i].leftStickY = getAnalogHat(LeftHatY);
-			XboxOGDuke[i].rightStickX = getAnalogHat(RightHatX);
-			XboxOGDuke[i].rightStickY = getAnalogHat(RightHatY);
+			XboxOGDuke.leftStickX = getAnalogHat(LeftHatX);
+			XboxOGDuke.leftStickY = getAnalogHat(LeftHatY);
+			XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
+			XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
 			// }
 
 			//Anything that sends a command to the Xbox 360 controllers happens here.
@@ -145,7 +145,7 @@ int main(void)
 						xboxHoldTimer[i]=millis();
 					}
 					if((millis()-xboxHoldTimer[i])>1000 && (millis()-xboxHoldTimer[i])<1100){
-						XboxOGDuke[i].dButtons = 0x00;
+						XboxOGDuke.dButtons = 0x00;
 						setRumbleOn(0, 0);
 						delay(10);
 						// Xbox360Wireless.disconnect(i);
@@ -158,17 +158,17 @@ int main(void)
 							getButtonPress(L2)>0x00 && getButtonPress(R2)>0x00) {
 					//Turn off rumble on all controllers
 					// for(uint8_t j=0; j<4; j++){
-						uint8_t j = 0;
-						XboxOGDuke[j].left_actuator=0;
-						XboxOGDuke[j].right_actuator=0;
-						XboxOGDuke[j].rumbleUpdate=1;
+						// uint8_t j = 0;
+						XboxOGDuke.left_actuator=0;
+						XboxOGDuke.right_actuator=0;
+						XboxOGDuke.rumbleUpdate=1;
 					// }
 				//If Xbox button isnt held down, send the rumble commands
 				} else {
 					xboxHoldTimer[i]=0; //Reset the XBOX button hold time counter.
-					if (XboxOGDuke[i].rumbleUpdate==1){
-						setRumbleOn(XboxOGDuke[i].left_actuator, XboxOGDuke[i].right_actuator);
-						XboxOGDuke[i].rumbleUpdate=0;
+					if (XboxOGDuke.rumbleUpdate==1){
+						setRumbleOn(XboxOGDuke.left_actuator, XboxOGDuke.right_actuator);
+						XboxOGDuke.rumbleUpdate=0;
 					}
 				}
 				commandTimer[i]=millis();
@@ -206,9 +206,9 @@ int main(void)
 			Endpoint_Read_Stream_LE(report, 6, NULL);
 			Endpoint_ClearOUT();
 			if(report[1]==0x06){
-				XboxOGDuke[0].left_actuator =  report[3];
-				XboxOGDuke[0].right_actuator = report[5];
-				XboxOGDuke[0].rumbleUpdate = 1;
+				XboxOGDuke.left_actuator =  report[3];
+				XboxOGDuke.right_actuator = report[5];
+				XboxOGDuke.rumbleUpdate = 1;
 			}
 			report[1]=0x00;
 		}
