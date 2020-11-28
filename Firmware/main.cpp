@@ -98,7 +98,7 @@ int main(void)
 		/*** MASTER TASKS ***/
 		UsbHost.busprobe();
 
-		uint8_t i = 0;
+		// uint8_t i = 0;
 		UsbHost.Task();
 		if (controllerConnected()) {
 			//Button Mapping for Duke Controller
