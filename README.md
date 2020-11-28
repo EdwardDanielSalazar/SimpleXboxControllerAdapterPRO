@@ -40,7 +40,8 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 ### Hardware build
 
 * Check whether the pads need soldering on your USB Host Shield. These three (and no others) need to be soldered:
-![Arduino USB host shield with power supply pads highlighted](https://github.com/jimnarey/SimpleXboxControllerAdapter/blob/media/re_usb_host_shield_pads_highlighted.jpeg)
+
+![Arduino USB host shield with power supply pads highlighted](../media/re_usb_host_shield_pads_highlighted.jpeg?raw=true)
 * Plug the USB Host Shield into the Leonardo.
 
 ### Flashing the firmware
