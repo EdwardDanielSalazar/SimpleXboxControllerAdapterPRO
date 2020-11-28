@@ -1,0 +1,6 @@
+/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware/build/CMakeFiles/rebuild_cache.dir
+/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware/build/CMakeFiles/edit_cache.dir
+/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware/build/CMakeFiles/sxbca.elf.dir
+/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware/build/CMakeFiles/USB_Host_Shield.dir
+/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware/build/CMakeFiles/LUFA.dir
+/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware/build/CMakeFiles/Arduino.dir

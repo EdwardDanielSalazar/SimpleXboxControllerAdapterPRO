@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/BTD.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/BTHID.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/PS3BT.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/PS3USB.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/PS4Parser.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/PSBuzz.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/SPP.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/UHS2_gpio.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/Usb.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/Wii.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/XBOXOLD.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/XBOXONE.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/XBOXONESParser.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/XBOXRECV.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/XBOXUSB.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/adk.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/cdc_XR21B1411.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/cdcacm.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/cdcftdi.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/cdcprolific.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/hidboot.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/hidcomposite.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/hidescriptorparser.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/hiduniversal.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/hidusagetitlearrays.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/masstorage.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/max_LCD.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/message.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/parsetools.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/usbh_midi.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/usbhid.cpp.obj"
+  "CMakeFiles/USB_Host_Shield.dir/lib/USB_Host_Shield/usbhub.cpp.obj"
+  "libUSB_Host_Shield.a"
+  "libUSB_Host_Shield.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/USB_Host_Shield.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

@@ -1,0 +1,86 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5.1"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "sxbca",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Arduino::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Arduino-Release-504bf3366f9263c32335.json",
+					"name" : "Arduino",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "LUFA::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-LUFA-Release-b41510b15e59ebee6609.json",
+					"name" : "LUFA",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "USB_Host_Shield::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-USB_Host_Shield-Release-eec2d7d3cfd7446f72ab.json",
+					"name" : "USB_Host_Shield",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sxbca.elf::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sxbca.elf-Release-9151659ea244dbaad5cd.json",
+					"name" : "sxbca.elf",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware/build",
+		"source" : "/home/jimnarey/projects/SimpleXboxControllerAdapter/Firmware"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 0
+	}
+}
