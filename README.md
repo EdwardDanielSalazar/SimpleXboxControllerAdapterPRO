@@ -39,7 +39,7 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 ### Hardware build
 
-* Check whether the pads need soldering on your USB Host Shield (I'll update this doc shortly with details).
+* Check whether the pads need soldering on your USB Host Shield.
 * Plug the USB Host Shield into the Leonardo.
 
 ### Flashing the firmware
