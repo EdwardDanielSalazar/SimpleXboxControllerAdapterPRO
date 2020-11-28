@@ -30,7 +30,7 @@ In settings.h you can configure the following options:
 #include <XBOXUSB.h>
 
 
-uint8_t playerID; //playerID is set in the main program based on the slot the Arduino is installed.
+// uint8_t playerID; //playerID is set in the main program based on the slot the Arduino is installed.
 
 //*********************
 // TO DO - reduce size of this array before turning into var
@@ -73,7 +73,7 @@ int main(void)
 	SetupHardware();
 	GlobalInterruptEnable();
 
-	playerID = 0;
+	// playerID = 0;
 
 
 	//*********************
