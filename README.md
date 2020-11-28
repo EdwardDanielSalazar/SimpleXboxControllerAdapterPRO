@@ -57,7 +57,9 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 Note: this section covers the process for Ubuntu/Debian and will be expanded with a bit more detail very soon...
 
-We need to use Avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. Whatever code you flash to an Arduino with the IDE, it always appears to a connected host (e.g. a PC) as a serial device, as this is a feature of the pre-flashed bootloader.
+We need to use Avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. 
+
+Generally when you flash code onto an Arduino with the IDE always appears to a connected host (e.g. a PC) as a serial device, as this is a feature of the pre-flashed bootloader. Some Leonardos come with a version of the bootloader which makes it appear as a keyboard/mouse device and there are plenty of Leonardo-based projects which make use of this. In any case, neither of these is what we need and the Arduino IDE can't help us.
 
 No special hardware (e.g. a programmer) is needed.
 
