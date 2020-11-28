@@ -43,7 +43,7 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 ![Arduino USB host shield with power supply pads highlighted](../media/re_usb_host_shield_pads_highlighted.jpeg?raw=true)
 
-* A USB-A female to Xbox Controller male/plug adapter. These are a few £/$ on eBay.
+* A USB-A female to Xbox Controller male/plug adapter. These are a few £/$ on eBay and [a better choice than hacking apart an Xbox peripheral](https://xboxdevwiki.net/Xbox_Input_Devices#USB_Adapters)
 * A total of two micro USB cables. Most Leonardos come with one.
 * (Optional) Another Arduino (Uno/Leonardo/Micro/Pro Micro) and some male to female jumper wires to re-flash the bootloader onto the Leonardo if something goes wrong when using Avrdude. If you follow the instructions and - in particular - are very careful to reproduce the Avrdude command correctly, it won't. You could of course use a dedicated AVR hardware programmer for this, if you have one.
 
