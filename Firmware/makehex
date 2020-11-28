@@ -1,0 +1,4 @@
+cd ./build
+make
+avr-objcopy -O binary sxbca.elf ./sxbca.bin
+cd ..
