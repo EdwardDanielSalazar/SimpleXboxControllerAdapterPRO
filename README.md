@@ -45,7 +45,7 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 * A USB-A female to Xbox Controller male/plug adapter. These are a few £/$ on eBay.
 * A total of two micro USB cables. Most Leonardos come with one.
-* (Optional) Another Arduino (Uno/Leonardo/Micro/Pro Micro) and some male to female jumper wires to re-flash the bootloader onto the Leonardo if something goes wrong when using Avrdude. If you follow the instructions it won't. You could also use a dedicated AVR hardware programmer, of course.
+* (Optional) Another Arduino (Uno/Leonardo/Micro/Pro Micro) and some male to female jumper wires to re-flash the bootloader onto the Leonardo if something goes wrong when using Avrdude. If you follow the instructions and - in particular - are very careful to reproduce the Avrdude command correctly, it won't. You could of course use a dedicated AVR hardware programmer for this, if you have one.
 
 ### Hardware build
 
@@ -59,7 +59,7 @@ Note: this section covers the process for Ubuntu/Debian and will be expanded wit
 
 We need to use Avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. 
 
-Generally when you flash code onto an Arduino with the IDE always appears to a connected host (e.g. a PC) as a serial device, as this is a feature of the pre-flashed bootloader. Some Leonardos come with a version of the bootloader which makes it appear as a keyboard/mouse device and there are plenty of Leonardo-based projects which make use of this. In any case, neither of these is what we need and the Arduino IDE can't help us.
+Generally when you flash code onto an Arduino with the IDE it appears to a connected host (e.g. a PC) as a serial device, as this is a feature of the pre-flashed bootloader. Some Leonardos come with a version of the bootloader which makes it appear as a keyboard/mouse device and there are plenty of Leonardo-based projects which make use of this. In any case, neither of these is what we need and the Arduino IDE can't help us.
 
 No special hardware (e.g. a programmer) is needed.
 
@@ -116,7 +116,7 @@ The main takeaway from this tutorial is that when using a Pro Micro rather than 
 * [Ryzee119's ogx360 project](https://github.com/Ryzee119/ogx360/), on which this is based.
     * Uses up to four Arduino Pro Micros to provide up to four emulated original Xbox controllers, connected via a custom PCB to a MAX3421 USB Host Controller IC (the same IC used in Arduino USB Host Shields).
     * Unfortunately, the MAX3421 is not (to the very best of my knowledge) available in a through-hole package making it tough work for a hobby project. Some people laugh in the face of surface mount soldering; I am not amongst them.
-    * You can flash the [ogx360 master binary](https://github.com/Ryzee119/ogx360/releases) to a Leonardo/Pro Micro in the same way as this project's and it will work with a wired controller. This doesn't seem to be documented in the otherwise comprehensive readmes. Be careful with the rumble though.
+    * *Note:* You can actually flash the [ogx360 master binary](https://github.com/Ryzee119/ogx360/releases) to a Leonardo/Pro Micro following the instructions above and it just works with a wired controller. This doesn't seem to be documented in the otherwise comprehensive readmes. As this firmware has rumble enabled you may well find it hangs the device when rumble is activated for any length of time if you apply it to this hardware build rather than Ryzee119's.
 * [Another Ryzee199 project](https://github.com/Ryzee119/ogx360_t4) pretty much meets the aims of this one (simple, no soldering, other controller support) but relies on the [Teensy 4.1](https://www.pjrc.com/store/teensy41.html). This works with the Arduino IDE, PlatformIO etc but is a more expensive option, reflecting the fact the board has an integral USB host, SD card, ethernet support etc. and a 32bit processor. But very straightforward.
 * [The XBOXPadMicro project](https://github.com/bootsector/XBOXPadMicro) allows for a customised controller to be built to work with a classic Xbox Console, using an Arduino's digital input pins. 
     * Doesn't include any USB host functionality, so you can't plug another controller into it. It has everything you need to build/adapt a custom controller, however. I plan to use this to get a [TAC-2](https://en.wikipedia.org/wiki/TAC-2) working with PC/Xbox. Nobody needs more than one button, as the Amiga port of Street Fighter 2 demonstrated...
