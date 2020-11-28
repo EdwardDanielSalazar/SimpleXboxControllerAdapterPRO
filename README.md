@@ -87,19 +87,7 @@ For the time being, these instructions are for Linux...
 * [The Arduino XInput library](https://github.com/dmadison/ArduinoXInput) has everything needed to build a project to make an Arduino appear as an Xinput controller (the protocol used by the Xbox, successor consoles and Windows) except the vendor-specific HID challenge/response code needed to work with an actual Xbox console. So it will work with Windows/Linux/Mac but not the console itself.
 * This project and both of Ryzee119's use the [Arduino USB Host Shield Library](https://github.com/felis/USB_Host_Shield_2.0) to handle communication between the device and the Xbox One/360 controller. The speed with which you can pick up an Arduino, a shield and have a PS4/Xbox One/360/etc controller talking to Linux/Windows/Mac via serial is really impressive. It's well supported and has support for a wide range of USB controllers, including great example sketches.
 
-## Quickest and easiest way to get an Xbox One/360 pad working with an original Xbox right now!
-
-As I started to understand the ogx360 project it became clear that the custom PCB isn't needed - it will work with a Leonardo, paired with a USB Host Shield, with no modifications to the code. An aim of this project is to make building an adapter with just these two things foolproof but for now...
-
-* Buy an Arduino Leonardo and USB Host Shield. Make sure the Shield is set up for 5V on the USB bus (it may be already) and plug them together.
-* Download 'ogx360_32u4_master.hex' from https://github.com/Ryzee119/ogx360/releases
-* Burn the hex to the Leonardo using the method under 'Programming' [here](https://github.com/Ryzee119/ogx360/releases) (Windows) or the Linux instructions towards the end of this document. You can't just use the normal Arduino IDE method but don't be put off. It's easy and no special hardware is needed.
-
-There are variations on this (a Pro Micro can stand in for a Leonardo, you can use a shield designed for the Pro Mini etc) but this is the simplest.
-
-# Getting Started
-
-There isn't a release yet though using the instructions below to build commit 9d2a5b2 works (tested in Unreal 2, on an original Xbox, with an Xbox One controller).
+# Development/Building the Binary
 
 These instructions are for Ubuntu (or other Debian-based distro) and MacOS (tested on Catalina). Windows instructions to follow.
 
