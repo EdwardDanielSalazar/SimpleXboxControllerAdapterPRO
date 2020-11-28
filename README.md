@@ -5,16 +5,16 @@
 This is a 'work in progress' adaptation of Ryzee119's excellent [four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers on an original Xbox console. 
 
 The objectives of this project are:
-* The simplest possible harware build, using only off-the-shelf parts (ideally an Arduino Leonardo/Pro Micro paired with a generic USB Host Shield). 
+* The simplest possible hardware build, using only off-the-shelf parts (ideally an Arduino Leonardo/Pro Micro paired with a generic USB Host Shield). 
 * Initially, simple (through-hole/jumper pad only) soldering. It later became clear a no solder version is possible if using the right brand of USB Host Shield. 
 * Reduced, simpler code to make playing around with it as straightforward as possible.
-* Reduced functionality, reflecting the simpler code - it will be wired-only and not offer Steel Batallion support. 
+* Reduced functionality, reflecting the simpler code - it will be wired-only and not offer Steel Battalion support. 
 * Eventually (I hope) allow for use of a wider range of controllers.
 * To provide full, foolproof instructions to enable anyone who's broadly comfortable with an Arduino to put together an adapter and anyone who is broadly comfortable with the command line and IDEs to edit and build the code. So this document is a key part of the project.
 
 This started when I dusted off my old Xbox and wanted to make something to use newer (and I'll just say it - better) controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do this. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable, free/open-source tools.
 
-A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible (for me) to clone, edit, extend and build without too much fighting with build tools/IDEs etc. That being said, the ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but kept causing my mouse pointer to stall every 60 seconds (I really coulndn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
+A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible (for me) to clone, edit, extend and build without too much fighting with build tools/IDEs etc. That being said, the ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
 
 
 ## Current State
@@ -22,8 +22,8 @@ A significant factor in basing this project on ogx360 rather than XBOXPadMicro/X
 Release 1.0 is basically a pared back version of ogx360. The differences are as follows:
 * Support for Xbox One and Xbox 360 *wireless* controllers has been removed.
 * Support for multiple controllers has been removed. It supports a single Xbox One/360 controller connected via USB.
-* Steel Batallion support has been removed, resulting in a smaller binary and space for additional (more common!) controllers to have support added later.
-* Rumble has been disabled via settings.h. Signficant rumble caused the device to hang. Future versions will address this though it can probably handle rumble if an => 6v power supply is connected to the Leonardo's power connector.
+* Steel Battalion support has been removed, resulting in a smaller binary and space for additional (more common!) controllers to have support added later.
+* Rumble has been disabled via settings.h. Significant rumble caused the device to hang. Future versions will address this though it can probably handle rumble if an => 6v power supply is connected to the Leonardo's power connector.
 
 ## Making One
 
@@ -31,7 +31,7 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 ### You will need
 
-* An Ardunio Leonardo/clone. Make sure it has the ICSP pin header (the separate, 6 pin header in the rear/centre). All those I could see on a quick skim of Amazon and eBay seemed to have one but I've seen references online to clones which do not.
+* An Arduino Leonardo/clone. Make sure it has the ICSP pin header (the separate, 6 pin header in the rear/centre). All those I could see on a quick skim of Amazon and eBay seemed to have one but I've seen references online to clones which do not.
 
 ![Arduino Leonardo with ICSP header highlighted](../media/re_leonardo_corner_icsp_highlighted.jpeg?raw=true)
 
@@ -57,13 +57,13 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 Note: this section covers the process for Ubuntu/Debian and will be expanded with a bit more detail very soon...
 
-We need to use avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. Whatever code you flash to an Arduino with the IDE, it always appears to a connected host (i.e a PC) as a serial device, as this is a feature of the pre-flashed bootloader.
+We need to use Avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. Whatever code you flash to an Arduino with the IDE, it always appears to a connected host (e.g. a PC) as a serial device, as this is a feature of the pre-flashed bootloader.
 
-No special hardware (e.g. a progammer) is needed.
+No special hardware (e.g. a programmer) is needed.
 
 * Open two terminal windows/panes
 * In one command prompt type ```sudo apt-get update && sudo apt-get install avrdude```
-* Get the [latest version of the binary (sxbca.bin)](https://github.com/jimnarey/SimpleXboxControllerAdapter/releases)
+* Get the [latest version of the binary](https://github.com/jimnarey/SimpleXboxControllerAdapter/releases) (sxbca.bin)
 * In one terminal type in ```dmesg -wH```
 * Plug in the Leonardo via USB and you should see some dmesg output about it. If the Leonardo has the standard bootloader installed it will appear as a composite keyboard and mouse. If it has the alternative Caterina bootloader installed it will appear as an Arduino device. It doesn't matter which.
 * In the second terminal window, navigate to where the sxbca.bin file is stored and - *without pressing Enter* - type in 
@@ -73,14 +73,14 @@ avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:sxbca.bin -C /etc/avr
 * Press the reset button on the Leonardo and *when you see the dmesg output register a new USB device* hit 'Enter'. Avrdude will then flash the firmware. You should have eight seconds from pressing the reset button before the Arduino reverts to its normal state. When this happens, you'll see it again in dmesg. You can just press the reset button again if this happens.
 * All done. Plug an Xbox One/360 controller into the USB Host Shield and the Leonardo into the Xbox console and everything should work.
 
-Note - the correct cmd for MacOS is probably the following but this will be tested/confirmed soon.
+Note - the correct command for MacOS is probably the following but this will be tested/confirmed soon.
 ```
 avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:sxbca.bin -C /usr/local/Cellar/avrdude/6.3_1/etc/avrdude.conf'
 ```
 
 ### Reflashing the standard Arduino bootloader
 
-If you want to get the Leonardo back to its stock state for whataver reason, just follow the same process as above but point Avrdude to the bootloader file which comes with the Arduino IDE. Where this is will depend on where the Arduino IDE is installed. Within the Arduino IDE folder on my (Ubuntu) system it was here:
+If you want to get the Leonardo back to its stock state for whatever reason, just follow the same process as above but point Avrdude to the bootloader file which comes with the Arduino IDE. Where this is will depend on where the Arduino IDE is installed. Within the Arduino IDE folder on my (Ubuntu) system it was here:
 
 ```
 XXXXX/arduino-1.8.12/hardware/arduino/avr/bootloaders/caterina/Leonardo-prod-firmware-2012-12-10.hex
@@ -115,12 +115,12 @@ The main takeaway from this tutorial is that when using a Pro Micro rather than 
     * Uses up to four Arduino Pro Micros to provide up to four emulated original Xbox controllers, connected via a custom PCB to a MAX3421 USB Host Controller IC (the same IC used in Arduino USB Host Shields).
     * Unfortunately, the MAX3421 is not (to the very best of my knowledge) available in a through-hole package making it tough work for a hobby project. Some people laugh in the face of surface mount soldering; I am not amongst them.
     * You can flash the [ogx360 master binary](https://github.com/Ryzee119/ogx360/releases) to a Leonardo/Pro Micro in the same way as this project's and it will work with a wired controller. This doesn't seem to be documented in the otherwise comprehensive readmes. Be careful with the rumble though.
-* [Another Ryzee199 project](https://github.com/Ryzee119/ogx360_t4) pretty much meets the aims of this one (simple, no soldering, other controller support) but relies on the [Teensy 4.1](https://www.pjrc.com/store/teensy41.html). This works with the Arduino IDE, PlatformIO etc but is a more expensive option, reflecting the fact the board has an integral USB host, SD card, ethernet support etc and a 32bit processor. But very straightforward.
+* [Another Ryzee199 project](https://github.com/Ryzee119/ogx360_t4) pretty much meets the aims of this one (simple, no soldering, other controller support) but relies on the [Teensy 4.1](https://www.pjrc.com/store/teensy41.html). This works with the Arduino IDE, PlatformIO etc but is a more expensive option, reflecting the fact the board has an integral USB host, SD card, ethernet support etc. and a 32bit processor. But very straightforward.
 * [The XBOXPadMicro project](https://github.com/bootsector/XBOXPadMicro) allows for a customised controller to be built to work with a classic Xbox Console, using an Arduino's digital input pins. 
     * Doesn't include any USB host functionality, so you can't plug another controller into it. It has everything you need to build/adapt a custom controller, however. I plan to use this to get a [TAC-2](https://en.wikipedia.org/wiki/TAC-2) working with PC/Xbox. Nobody needs more than one button, as the Amiga port of Street Fighter 2 demonstrated...
     * It's written in C and would need some work to adapt it for use with the broader Arduino ecosystem, allowing it to be adapted for use with USB controllers.
 * [The Arduino XInput library](https://github.com/dmadison/ArduinoXInput) has everything needed to build a project to make an Arduino appear as an Xinput controller (the protocol used by the Xbox, successor consoles and Windows) except the vendor-specific HID challenge/response code needed to work with an actual Xbox console. So it will work with Windows/Linux/Mac but not the console itself.
-* This project and both of Ryzee119's use the [Arduino USB Host Shield Library](https://github.com/felis/USB_Host_Shield_2.0) to handle communication between the device and the Xbox One/360 controller. The speed with which you can pick up an Arduino, a shield and have a PS4/Xbox One/360/etc controller talking to Linux/Windows/Mac via serial is really impressive. It's well supported and has support for a wide range of USB controllers, including great example sketches.
+* This project and both of Ryzee119's use the [Arduino USB Host Shield Library](https://github.com/felis/USB_Host_Shield_2.0) to handle communication between the device and the Xbox One/360 controller. The speed with which you can pick up an Arduino, a shield and have a PS4/Xbox One/360/etc. controller talking to Linux/Windows/Mac via serial is really impressive. It's well supported and has support for a wide range of USB controllers, including great example sketches.
 
 # Development/Building the Binary
 
@@ -128,7 +128,7 @@ This section of the document is still at an early stage...more/better to follow.
 
 ## Install Command Line Tools
 
-### Ubuntu etc
+### Ubuntu etc.
 
 * From a command prompt run: 
 ```
