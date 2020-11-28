@@ -30,12 +30,7 @@ In settings.h you can configure the following options:
 #include <XBOXUSB.h>
 
 
-// uint8_t playerID; //playerID is set in the main program based on the slot the Arduino is installed.
-
-//*********************
-// TO DO - reduce size of this array before turning into var
-USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for all four controllers.
-// uint8_t ConnectedXID = DUKE_CONTROLLER; //Default XID device to emulate
+USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for the controller
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
 uint32_t disconnectTimer=0; //Timer used to time disconnection between SB and Duke controller swapover
 
@@ -46,13 +41,6 @@ int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
 void setLedOn(LEDEnum led);
 bool controllerConnected();
-
-// XBOXONE XboxOneWired1(&UsbHost);
-// XBOXONE *XboxOneWired[1] = {&XboxOneWired1};
-
-// XBOXUSB Xbox360Wired1(&UsbHost);
-// XBOXUSB *Xbox360Wired[1] = {&Xbox360Wired1};
-
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 
@@ -73,12 +61,7 @@ int main(void)
 	SetupHardware();
 	GlobalInterruptEnable();
 
-	// playerID = 0;
-
-
-	//*********************
-	// TO DO - CHANGE THIS ONCE XboxOGDuke is no longer array
-	//Init the XboxOG data arrays to zero.
+	//Init the XboxOG data var to zero.
 	memset(&XboxOGDuke,0x00,sizeof(USB_XboxGamepad_Data_t));
 
 	/* MASTER DEVICE USB HOST CONTROLLER INIT */
@@ -95,14 +78,9 @@ int main(void)
 
 	while (1){
 
-		/*** MASTER TASKS ***/
 		UsbHost.busprobe();
-
-		// uint8_t i = 0;
 		UsbHost.Task();
 		if (controllerConnected()) {
-			//Button Mapping for Duke Controller
-			// if(ConnectedXID == DUKE_CONTROLLER || i != 0){ // TO DO Remove this
 
 			//Read Digital Buttons
 			XboxOGDuke.dButtons=0x0000;
@@ -132,7 +110,6 @@ int main(void)
 			XboxOGDuke.leftStickY = getAnalogHat(LeftHatY);
 			XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
 			XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
-			// }
 
 			//Anything that sends a command to the Xbox 360 controllers happens here.
 			//(i.e rumble, LED changes, controller off command)
@@ -156,13 +133,10 @@ int main(void)
 				//if you happen to press this reset combo mid rumble.
 				} else if (getButtonPress(START) && getButtonPress(BACK) && 
 							getButtonPress(L2)>0x00 && getButtonPress(R2)>0x00) {
-					//Turn off rumble on all controllers
-					// for(uint8_t j=0; j<4; j++){
-						// uint8_t j = 0;
+					//Turn off rumble on the controller
 						XboxOGDuke.left_actuator=0;
 						XboxOGDuke.right_actuator=0;
 						XboxOGDuke.rumbleUpdate=1;
-					// }
 				//If Xbox button isnt held down, send the rumble commands
 				} else {
 					xboxHoldTimer=0; //Reset the XBOX button hold time counter.
@@ -178,6 +152,7 @@ int main(void)
 			sendControllerHIDReport();
 
 		}
+
 		//Handle Player 1 controller connect/disconnect events.
 		if (controllerConnected() && disconnectTimer==0){
 			USB_Attach();
@@ -187,14 +162,10 @@ int main(void)
 		} else if(millis()>7000){
 			digitalWrite(ARDUINO_LED_PIN, HIGH);
 			USB_Detach(); //Disconnect from the OG Xbox port.
-			// Xbox360Wireless.chatPadInitNeeded[0]=1; // Why is this not within its own if block?
 		} else {
 			USB_Attach();
 			sendControllerHIDReport();
 		}
-
-		/***END MASTER TASKS ***/
-		// #endif
 
 		//THPS 2X is the only game I know that sends rumble commands to the USB OUT pipe
 		//instead of the control pipe. So unfortunately need to manually read the out pipe
@@ -219,17 +190,11 @@ int main(void)
 /* Send the HID report to the OG Xbox */
 void sendControllerHIDReport(){
 	USB_USBTask();
-	// switch (ConnectedXID){
-	// 	case DUKE_CONTROLLER:
-		if(USB_Device_GetFrameNumber()-DukeController_HID_Interface.State.PrevFrameNum>=4){
-			HID_Device_USBTask(&DukeController_HID_Interface); //Send OG Xbox HID Report
-		}
-		// break;
-	// }
+	if(USB_Device_GetFrameNumber()-DukeController_HID_Interface.State.PrevFrameNum>=4){
+		HID_Device_USBTask(&DukeController_HID_Interface); //Send OG Xbox HID Report
+	}
 }
 
-
-// #ifdef MASTER
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b){
 

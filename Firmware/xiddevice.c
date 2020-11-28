@@ -33,7 +33,6 @@ this software.
 #include "dukecontroller.h"
 
 extern bool enumerationComplete;
-// extern uint8_t ConnectedXID;
 
 USB_XboxGamepad_Data_t PrevDukeHIDReportBuffer;
 
@@ -76,12 +75,8 @@ void EVENT_USB_Device_Disconnect(void){
 /** Event handler for the library USB Configuration Changed event. */
 void EVENT_USB_Device_ConfigurationChanged(void){
 	bool ConfigSuccess = true;
-	// switch (ConnectedXID){
-	// 	case DUKE_CONTROLLER:
-		ConfigSuccess &= HID_Device_ConfigureEndpoints(&DukeController_HID_Interface);
-		ConfigSuccess &= Endpoint_ConfigureEndpoint(0x02, EP_TYPE_INTERRUPT, 6, 1); //Host Out endpoint opened manually for Duke.
-		// break;
-	// }
+	ConfigSuccess &= HID_Device_ConfigureEndpoints(&DukeController_HID_Interface);
+	ConfigSuccess &= Endpoint_ConfigureEndpoint(0x02, EP_TYPE_INTERRUPT, 6, 1); //Host Out endpoint opened manually for Duke.
 	USB_Device_EnableSOFEvents();
 	enumerationComplete=ConfigSuccess;
 }
@@ -97,55 +92,32 @@ void EVENT_USB_Device_ControlRequest(void){
 	if (USB_ControlRequest.bmRequestType == 0xC1){
 			if (USB_ControlRequest.bRequest == 0x06 && USB_ControlRequest.wValue == 0x4200) {
 				Endpoint_ClearSETUP();
-				// switch (ConnectedXID){
-				// 	case DUKE_CONTROLLER:
-					Endpoint_Write_Control_Stream_LE(&DUKE_HID_DESCRIPTOR_XID, 16);
-					// break;
-				// }
+				Endpoint_Write_Control_Stream_LE(&DUKE_HID_DESCRIPTOR_XID, 16);
 				Endpoint_ClearOUT();
 				return;
 			}
 			else if (USB_ControlRequest.bRequest == 0x01 && USB_ControlRequest.wValue == 0x0100) {
-				// Endpoint_ClearSETUP();
-				// switch (ConnectedXID){
-					// case DUKE_CONTROLLER:
-					Endpoint_Write_Control_Stream_LE(&DUKE_HID_CAPABILITIES_IN, 20);
-					// break;
-				// }
-
+				// Endpoint_ClearSETUP(); // TO DO - why is this here?
+				Endpoint_Write_Control_Stream_LE(&DUKE_HID_CAPABILITIES_IN, 20);
 				Endpoint_ClearOUT();
 				return;
 			}
 			else if (USB_ControlRequest.bRequest == 0x01 && USB_ControlRequest.wValue == 0x0200) {
 				Endpoint_ClearSETUP();
-				// switch (ConnectedXID){
-				// 	case DUKE_CONTROLLER:
-					Endpoint_Write_Control_Stream_LE(&DUKE_HID_CAPABILITIES_OUT, 6);
-					// break;
-				// }
+				Endpoint_Write_Control_Stream_LE(&DUKE_HID_CAPABILITIES_OUT, 6);
 				Endpoint_ClearOUT();
 				return;
 			}
 	}
 
 	//If the request is a standard HID control request, jump into the LUFA library to handle it for us.
-	// switch (ConnectedXID){
-	// 	case DUKE_CONTROLLER:
-		HID_Device_ProcessControlRequest(&DukeController_HID_Interface);
-	// 	break;
-	// }
+	HID_Device_ProcessControlRequest(&DukeController_HID_Interface);
 
 }
 
 /** Event handler for the USB device Start Of Frame event. */
 void EVENT_USB_Device_StartOfFrame(void){
-	// switch (ConnectedXID){
-	// 	case DUKE_CONTROLLER:
-		HID_Device_MillisecondElapsed(&DukeController_HID_Interface);
-	// 	break;
-	// }
-
-
+	HID_Device_MillisecondElapsed(&DukeController_HID_Interface);
 }
 
 // HID class driver callback function for the creation of HID reports to the host.
@@ -154,32 +126,25 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 													void* ReportData,	uint16_t* const ReportSize){
 
 	USB_XboxGamepad_Data_t* DukeReport = (USB_XboxGamepad_Data_t*)ReportData;
-
-	// switch (ConnectedXID){
-	// 	case DUKE_CONTROLLER:
-		DukeReport->startByte = 0x00;
-		DukeReport->bLength = 20;
-		DukeReport->dButtons = XboxOGDuke.dButtons;
-		DukeReport->reserved = 0x00;
-		DukeReport->A = XboxOGDuke.A;
-		DukeReport->B = XboxOGDuke.B;
-		DukeReport->X = XboxOGDuke.X;
-		DukeReport->Y = XboxOGDuke.Y;
-		DukeReport->BLACK = XboxOGDuke.BLACK;
-		DukeReport->WHITE = XboxOGDuke.WHITE;
-		DukeReport->L = XboxOGDuke.L;
-		DukeReport->R = XboxOGDuke.R;
-		DukeReport->leftStickX = XboxOGDuke.leftStickX;
-		DukeReport->leftStickY = XboxOGDuke.leftStickY;
-		DukeReport->rightStickX = XboxOGDuke.rightStickX;
-		DukeReport->rightStickY = XboxOGDuke.rightStickY;
-		*ReportSize = DukeReport->bLength;
-	// 	break;
-	// }
-
+	DukeReport->startByte = 0x00;
+	DukeReport->bLength = 20;
+	DukeReport->dButtons = XboxOGDuke.dButtons;
+	DukeReport->reserved = 0x00;
+	DukeReport->A = XboxOGDuke.A;
+	DukeReport->B = XboxOGDuke.B;
+	DukeReport->X = XboxOGDuke.X;
+	DukeReport->Y = XboxOGDuke.Y;
+	DukeReport->BLACK = XboxOGDuke.BLACK;
+	DukeReport->WHITE = XboxOGDuke.WHITE;
+	DukeReport->L = XboxOGDuke.L;
+	DukeReport->R = XboxOGDuke.R;
+	DukeReport->leftStickX = XboxOGDuke.leftStickX;
+	DukeReport->leftStickY = XboxOGDuke.leftStickY;
+	DukeReport->rightStickX = XboxOGDuke.rightStickX;
+	DukeReport->rightStickY = XboxOGDuke.rightStickY;
+	*ReportSize = DukeReport->bLength;
 	return false;
 }
-
 
 /* HID class driver callback for the user processing of a received HID OUT report. This callback may fire in response to
 *  either HID class control requests from the host, or by the normal HID endpoint polling procedure. Inside this callback
@@ -192,7 +157,6 @@ void CALLBACK_HID_Device_ProcessHIDReport(
 	//bit 3 is the left actuator value, bit 5 is the right actuator level.
 	//See http://euc.jp/periphs/xbox-controller.en.html - Output Report
 	if (ReportSize == 0x06) {
-	// if (ConnectedXID == DUKE_CONTROLLER && ReportSize == 0x06) {
 		XboxOGDuke.left_actuator =  ((uint8_t *)ReportData)[3];
 		XboxOGDuke.right_actuator = ((uint8_t *)ReportData)[5];
 		XboxOGDuke.rumbleUpdate = 1;
@@ -214,22 +178,15 @@ uint16_t CALLBACK_USB_GetDescriptor(
 	switch (DescriptorType)
 	{
 		case DTYPE_Device:
-		// switch (ConnectedXID){
-		// 	case DUKE_CONTROLLER:
-			Address = &DUKE_USB_DESCRIPTOR_DEVICE;
-			Size    = 18;
-		// 	break;
-		// }
+		Address = &DUKE_USB_DESCRIPTOR_DEVICE;
+		Size    = 18;
 		break;
-		case DTYPE_Configuration:
 
-		// switch (ConnectedXID){
-		// 	case DUKE_CONTROLLER:
-			Address = &DUKE_USB_DESCRIPTOR_CONFIGURATION;
-			Size    = 32;
-		// 	break;
-		// }
+		case DTYPE_Configuration:
+		Address = &DUKE_USB_DESCRIPTOR_CONFIGURATION;
+		Size    = 32;
 		break;
+
 		case DTYPE_String:
 		Address = &nullString; //OG Xbox controller doesn't use these.
 		Size    = NO_DESCRIPTOR;
