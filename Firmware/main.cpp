@@ -23,7 +23,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include <usbhub.h> // TO DO Take this out?
 #include <XBOXONE.h> // TO DO Look again at rumble settings in XBOXONE.cpp
 #include <XBOXUSB.h>
+#include <PS3USB.h>
+// #include <SPI.h>
 
+// #ifdef dobogusinclude
+// #include <spi4teensy3.h>
+// #endif
 
 USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for the controller
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
@@ -38,6 +43,7 @@ void setLedOn(LEDEnum led);
 bool controllerConnected();
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
+PS3USB PS3Wired(&UsbHost);
 
 int main(void)
 {
@@ -51,6 +57,9 @@ int main(void)
 	pinMode(PLAYER_ID2_PIN, INPUT_PULLUP);
 	digitalWrite(USB_HOST_RESET_PIN, LOW);
 	digitalWrite(ARDUINO_LED_PIN, HIGH);
+
+	Serial1.begin(9600);
+	Serial1.println("Serial Start");
 
 	//Init the LUFA USB Device Library
 	SetupHardware();
@@ -178,6 +187,29 @@ int main(void)
 			report[1]=0x00;
 		}
 		Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
+
+		if (PS3Wired.PS3Connected) {
+			if (PS3Wired.getAnalogHat(LeftHatX) > 137 || PS3Wired.getAnalogHat(LeftHatX) < 117 || PS3Wired.getAnalogHat(LeftHatY) > 137 || PS3Wired.getAnalogHat(LeftHatY) < 117 || PS3Wired.getAnalogHat(RightHatX) > 137 || PS3Wired.getAnalogHat(RightHatX) < 117 || PS3Wired.getAnalogHat(RightHatY) > 137 || PS3Wired.getAnalogHat(RightHatY) < 117) {
+				// Serial1.print(F("\r\nLeftHatX: "));
+				Serial1.print(PS3Wired.getAnalogHat(LeftHatX));
+				// Serial1.print(F("\tLeftHatY: "));
+				Serial1.print(PS3Wired.getAnalogHat(LeftHatY));
+
+				// if (PS3Wired.PS3Connected) { // The Navigation controller only have one joystick
+				// Serial1.print(F("\tRightHatX: "));
+				Serial1.print(PS3Wired.getAnalogHat(RightHatX));
+				// Serial1.print(F("\tRightHatY: "));
+				Serial1.print(PS3Wired.getAnalogHat(RightHatY));
+			// }
+			}
+		}
+
+		if (PS3Wired.getAnalogButton(L2) || PS3Wired.getAnalogButton(R2)) {
+			// Serial1.print(F("\r\nL2: "));
+			Serial1.print(PS3Wired.getAnalogButton(L2));
+			// Serial1.print(F("\tR2: "));
+			Serial1.print(PS3Wired.getAnalogButton(R2));
+    	}
 	}
 }
 
@@ -203,12 +235,18 @@ uint8_t getButtonPress(ButtonEnum b){
 		}
 	}
 
+	// TO DO - this almost certainly needs some work
+	if (PS3Wired.PS3Connected)
+	return (uint8_t)PS3Wired.getButtonPress(b);
+
 	return 0;
 }
 
 //Parse analog stick requests for each type of controller.
 int16_t getAnalogHat(AnalogHatEnum a){
 	int32_t val=0;
+	int16_t tmpVal=0;
+	uint8_t tmpVal_a=0;
 
 	if (Xbox360Wired.Xbox360Connected){
 		val = Xbox360Wired.getAnalogHat(a);
@@ -218,7 +256,16 @@ int16_t getAnalogHat(AnalogHatEnum a){
 	}
 
 	if (XboxOneWired.XboxOneConnected)
-		return XboxOneWired.getAnalogHat(a);
+		tmpVal = XboxOneWired.getAnalogHat(a);
+		Serial1.println(tmpVal);
+		return tmpVal;
+		// return XboxOneWired.getAnalogHat(a);
+
+	if (PS3Wired.PS3Connected)
+		tmpVal_a = PS3Wired.getAnalogHat(a);
+		Serial1.println(tmpVal_a);
+		return tmpVal_a;
+		// return (int16_t)PS3Wired.getAnalogHat(a);
 
 	return 0;
 }
@@ -234,6 +281,9 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue){
 	if (XboxOneWired.XboxOneConnected){
 		XboxOneWired.setRumbleOn(lValue/8, rValue/8, lValue/2, rValue/2);
 	}
+
+	//TO DO - Add PS3 Controller Support
+
 	#endif
 }
 
@@ -246,6 +296,9 @@ void setLedOn(LEDEnum led){
 	if (XboxOneWired.XboxOneConnected){
 		//no LEDs on Xbox One Controller. I think it is possible to adjust brightness but this is not implemented.
 	}
+
+	if (PS3Wired.PS3Connected)
+	PS3Wired.setLedOn(led);
 }
 
 bool controllerConnected(){
@@ -254,6 +307,9 @@ bool controllerConnected(){
 		return 1;
 
 	if (XboxOneWired.XboxOneConnected)
+		return 1;
+
+	if (PS3Wired.PS3Connected)
 		return 1;
 
 	return 0;
