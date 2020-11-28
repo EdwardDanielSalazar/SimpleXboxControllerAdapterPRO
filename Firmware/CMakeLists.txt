@@ -14,7 +14,7 @@ set(OPTIMIZATION_LEVEL "-Os")
 set(DEFAULT_BUILD_TYPE "Release")
 
 # Define project
-project(ogx360)
+project(sxbca)
 enable_language(C CXX)
 
 # Default common compiler flags
@@ -73,12 +73,12 @@ file(GLOB FIRMWARE_FILES
 )
 
 # Build the master firmware (without Steel Battalion controller support)
-add_executable(ogx360_32u4_master.elf "${FIRMWARE_FILES}")
-target_compile_definitions(ogx360_32u4_master.elf PRIVATE "-DDISABLE_BATTALION ")
-add_dependencies(ogx360_32u4_master.elf Arduino)
-add_dependencies(ogx360_32u4_master.elf LUFA)
-add_dependencies(ogx360_32u4_master.elf USB_Host_Shield)
-target_link_libraries(ogx360_32u4_master.elf Arduino)
-target_link_libraries(ogx360_32u4_master.elf LUFA)
-target_link_libraries(ogx360_32u4_master.elf USB_Host_Shield)
+add_executable(sxbca.elf "${FIRMWARE_FILES}")
+target_compile_definitions(sxbca.elf PRIVATE "-DDISABLE_BATTALION ")
+add_dependencies(sxbca.elf Arduino)
+add_dependencies(sxbca.elf LUFA)
+add_dependencies(sxbca.elf USB_Host_Shield)
+target_link_libraries(sxbca.elf Arduino)
+target_link_libraries(sxbca.elf LUFA)
+target_link_libraries(sxbca.elf USB_Host_Shield)
 
