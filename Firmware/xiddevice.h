@@ -43,7 +43,7 @@ this software.
 #include <LUFA/Drivers/USB/USB.h>
 #include "dukecontroller.h"
 
-#define DUKE_CONTROLLER 0
+// #define DUKE_CONTROLLER 0
 
 /* Function Prototypes: */
 #ifdef __cplusplus

@@ -35,7 +35,7 @@ In settings.h you can configure the following options:
 //*********************
 // TO DO - reduce size of this array before turning into var
 USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for all four controllers.
-uint8_t ConnectedXID = DUKE_CONTROLLER; //Default XID device to emulate
+// uint8_t ConnectedXID = DUKE_CONTROLLER; //Default XID device to emulate
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
 uint32_t disconnectTimer=0; //Timer used to time disconnection between SB and Duke controller swapover
 
@@ -219,13 +219,13 @@ int main(void)
 /* Send the HID report to the OG Xbox */
 void sendControllerHIDReport(){
 	USB_USBTask();
-	switch (ConnectedXID){
-		case DUKE_CONTROLLER:
+	// switch (ConnectedXID){
+	// 	case DUKE_CONTROLLER:
 		if(USB_Device_GetFrameNumber()-DukeController_HID_Interface.State.PrevFrameNum>=4){
 			HID_Device_USBTask(&DukeController_HID_Interface); //Send OG Xbox HID Report
 		}
-		break;
-	}
+		// break;
+	// }
 }
 
 

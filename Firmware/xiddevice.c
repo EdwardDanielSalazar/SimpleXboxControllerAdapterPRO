@@ -33,7 +33,7 @@ this software.
 #include "dukecontroller.h"
 
 extern bool enumerationComplete;
-extern uint8_t ConnectedXID;
+// extern uint8_t ConnectedXID;
 
 USB_XboxGamepad_Data_t PrevDukeHIDReportBuffer;
 
@@ -191,7 +191,8 @@ void CALLBACK_HID_Device_ProcessHIDReport(
 	//Only expect one HID report from the host and this is the actuator levels. The command is always 6 bytes long.
 	//bit 3 is the left actuator value, bit 5 is the right actuator level.
 	//See http://euc.jp/periphs/xbox-controller.en.html - Output Report
-	if (ConnectedXID == DUKE_CONTROLLER && ReportSize == 0x06) {
+	if (ReportSize == 0x06) {
+	// if (ConnectedXID == DUKE_CONTROLLER && ReportSize == 0x06) {
 		XboxOGDuke.left_actuator =  ((uint8_t *)ReportData)[3];
 		XboxOGDuke.right_actuator = ((uint8_t *)ReportData)[5];
 		XboxOGDuke.rumbleUpdate = 1;
