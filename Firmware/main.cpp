@@ -15,11 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-In settings.h you can configure the following options:
-1. Compile for MASTER of SLAVE (comment out #define MASTER) (Host is default)
-2. Enable or disable Steel Battalion Controller Support via Wireless Xbox 360 Chatpad (Enabled by Default)
-3. Enable or disable Xbox 360 Wired Support (Enabled by default)
-4. Enable or disable Xbox One Wired Support (Disabled by default)
 */
 
 #include "settings.h"
@@ -125,7 +120,6 @@ int main(void)
 						XboxOGDuke.dButtons = 0x00;
 						setRumbleOn(0, 0);
 						delay(10);
-						// Xbox360Wireless.disconnect(i);
 						xboxHoldTimer=0;
 					}
 				//START+BACK TRIGGERS is a standard soft reset command. 
@@ -232,6 +226,7 @@ int16_t getAnalogHat(AnalogHatEnum a){
 //Parse rumble activation requests for each type of controller.
 void setRumbleOn(uint8_t lValue, uint8_t rValue){
 
+	#ifdef ENABLERUMBLE
 	if (Xbox360Wired.Xbox360Connected){
 		Xbox360Wired.setRumbleOn(lValue, rValue); //If you have an externally power USB 2.0 hub you can uncomment this to enable rumble
 	}
@@ -239,6 +234,7 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue){
 	if (XboxOneWired.XboxOneConnected){
 		XboxOneWired.setRumbleOn(lValue/8, rValue/8, lValue/2, rValue/2);
 	}
+	#endif
 }
 
 //Parse LED activation requests for each type of controller.

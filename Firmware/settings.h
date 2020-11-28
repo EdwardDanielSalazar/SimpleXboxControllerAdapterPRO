@@ -22,6 +22,7 @@
 #define MASTER
 #define SUPPORTWIREDXBOXONE
 #define SUPPORTWIREDXBOX360
+// #define ENABLERUMBLE
 
 /* prototypes */
 void sendControllerHIDReport();
