@@ -19,13 +19,67 @@ A significant factor in basing this project on ogx360 rather than XBOXPadMicro/X
 
 ## Current State
 
-Release 1.0 is basically a pared back version of ogx360. The differences are
+Release 1.0 is basically a pared back version of ogx360. The differences are as follows:
+* Support for Xbox One and Xbox 360 *wireless* controllers has been removed.
+* Support for multiple controllers has been removed. It supports a single Xbox One/360 controller connected via USB.
+* Steel Batallion support has been removed, resulting in a smaller binary and space for additional (more common!) controllers to have support added later.
+* Rumble has been disabled via settings.h. Signficant rumble caused the device to hang. Future versions will address this though it can probably handle rumble if an => 6v power supply is connected to the Leonardo's power connector.
+
+## Making One
+
+For now, these instructions cover using a 'full size' Arduino Leonardo and USB Host Shield. You could get it working with an Arduino Micro, Pro Micro (set to use 5V) with a little adaptation and I'll add instructions for this in due course. Using a Leonardo is the simplest way, however.
+
+### You will need
+
+* An Ardunio Leonardo/clone. Make sure it has the ICSP pin header (the separate, 6 pin header in the rear/centre). All those I could see on a quick skim of Amazon and eBay seemed to have one but I've seen references online to clones which do not.
+* A standard size USB Host Shield (i.e. not one designed for a Pro Micro/Mini). Again, make sure this has the ICSP socket/header on the underside. Mine (made by ARCELI) needed three pads/jumpers soldering (instructions to be added at a later date) to ensure it provided 5V to the USB bus. Amazon and eBay have them from other manufacturers with this already done, in which case there's no soldering required at all to make this.
+* A USB-A female to Xbox Controller male/plug adapter. These are a few £/$ on eBay.
+* A total of two micro USB cables. Most Leonardos come with one.
+* (Optional) Another Arduino (Uno/Leonardo/Micro/Pro Micro) and some male to female jumper wires to re-flash the bootloader onto the Leonardo if something goes wrong when using Avrdude. If you follow the instructions it won't. You could also use a dedicated AVR hardware programmer, of course.
+
+### Hardware build
+
+* Check whether the pads need soldering on your USB Host Shield (I'll update this doc shortly with details).
+* Plug the USB Host Shield into the Leonardo.
+
+### Flashing the firmware
+
+Note: this section covers the process for Ubuntu/Debian and will be expanded with a bit more detail very soon...
+
+We need to use avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. Whatever code you flash to an Arduino with the IDE, it always appears to a connected host (i.e a PC) as a serial device, as this is a feature of the pre-flashed bootloader.
+
+No special hardware (e.g. a progammer is needed).
+
+* Open two terminal windows/panes
+* In one command prompt type ```sudo apt-get update && sudo apt-get install avrdude```
+* Get the [latest version of the binary (sxbca.bin)](https://github.com/jimnarey/SimpleXboxControllerAdapter/releases)
+* In one terminal type in ```dmesg -wH```
+* Plug in the Leonardo via USB and you should see some dmesg output about it.
+* In the second terminal window, navigate to where the sxbca.bin file is stored and - *without pressing Enter* - type in 
+```
+avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:ogx360_32u4_master.bin -C /etc/avrdude.conf'
+```
+* Press the reset button on the Leonardo and *when you see the dmesg output register a new USB device* as though one had just been plugged in, hit 'Enter'. Avrdude will then flash the firmware.
+* All done. Plug an Xbox One/360 controller into the USB Host Shield and the Leonardo into the Xbox console and everything should work.
+
+Note - the correct cmd for MacOS is probably the following but this will be tested/confirmed soon.
+```
+avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:sxbca.bin -C /usr/local/Cellar/avrdude/6.3_1/etc/avrdude.conf'
+```
+
+
+
+For the time being, these instructions are for Linux...
+
+* Plug in the Arduino as you would normally. You'll see some dmesg output about it being connected. 
+* Press the reset button on the Arduino or if using a Pro Micro, short the RST and GND pins twice in immediate sucession. When the dmesg output shows the Arduino as disconnected, then immediately reconnected, hit 'Enter' in the other window. If you get this wrong you'll need another Arduino or hardware programmer to fix it (search for burning Ardunio bootloaders using an Arduino as an ISP).
 
 ## Alternatives & other things to look at
 
 * [Ryzee119's ogx360 project](https://github.com/Ryzee119/ogx360/), on which this is based.
     * Uses up to four Arduino Pro Micros to provide up to four emulated original Xbox controllers, connected via a custom PCB to a MAX3421 USB Host Controller IC (the same IC used in Arduino USB Host Shields).
-    * Unfortunately, the MAX3421 is not (to the very best of my knowledge) available in a through-hole package making it tough work for a hobby project. Some people laugh in the face of surface mount soldering; I am not amongst them. 
+    * Unfortunately, the MAX3421 is not (to the very best of my knowledge) available in a through-hole package making it tough work for a hobby project. Some people laugh in the face of surface mount soldering; I am not amongst them.
+    * You can flash the [ogx360 master binary](https://github.com/Ryzee119/ogx360/releases) to a Leonardo/Pro Micro in the same way as this project's and it will work with a wired controller. This doesn't seem to be documented in the otherwise comprehensive readmes. Be careful with the rumble though.
 * [Another Ryzee199 project](https://github.com/Ryzee119/ogx360_t4) pretty much meets the aims of this one (simple, no soldering, other controller support) but relies on the [Teensy 4.1](https://www.pjrc.com/store/teensy41.html). This works with the Arduino IDE, PlatformIO etc but is a more expensive option, reflecting the fact the board has an integral USB host, SD card, ethernet support etc and a 32bit processor. But very straightforward.
 * [The XBOXPadMicro project](https://github.com/bootsector/XBOXPadMicro) allows for a customised controller to be built to work with a classic Xbox Console, using an Arduino's digital input pins. 
     * Doesn't include any USB host functionality, so you can't plug another controller into it. It has everything you need to build/adapt a custom controller, however. I intend to use this to get a [TAC-2](https://en.wikipedia.org/wiki/TAC-2) working with PC/Xbox. 
@@ -90,38 +144,14 @@ The project uses CMake to build itself from the three libraries (Arduino, LUFA, 
 ## Build
 
 * Enter the 'build' directory created by VS Code/CMake Tools.
-* Type `make` to build the project. It will create .elf file, containing the firmware to be burned onto an Arduino Leonardo or Pro Micro but not yet in the correct format. As things stand this is called 'ogx360_32u4_master.elf'.
+* Type `make` to build the project. It will create .elf file, containing the firmware to be burned onto an Arduino Leonardo or Pro Micro but not yet in the correct format.
 * MacOS/Brew, which uses a newer version of gcc-avr than Ubuntu, will likely throw some warnings when compiling the LUFA library. These can be ignored.
 * Enter 
 ```
-avr-objcopy -O binary ogx360_32u4_master.elf ./ogx360_32u4_master.bin
+avr-objcopy -O binary sxbca.elf ./sxbca.bin
 ```
-to create file we can burn to the Arduino
-* Open another terminal window and enter 'dmesg -wH' to provide dmesg output on a rolling basis.
-* In the original terminal window (which you just used to run avr-objcopy) enter the following command, but don't hit 'Enter'.
 
-Linux:
-```
-avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:ogx360_32u4_master.bin -C /etc/avrdude.conf'
-```
-MacOS [to do - test this]
-```
-avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:ogx360_32u4_master.bin -C /usr/local/Cellar/avrdude/6.3_1/etc/avrdude.conf'
-```
-## Burn
 
-We need to use avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. Whatever code you flash to an Arduino with the IDE, it always appears to a connected host (i.e a PC) as a serial device, as this is a feature of the pre-flashed bootloader.
-
-No special hardware (e.g. a progammer is needed).
-
-Performing this process successfully *ought* not prevent flashing the standard Arduino bootloader back onto the device using USB (no special hardware is needed), however I haven't tested this yet. 
-
-If something goes wrong, you may need to reflash the Arduino using a hardware programmer, which can be as simple as another properly configured Arduino. I have tested this, after running an incorrect avrdude command.
-
-For the time being, these instructions are for Linux...
-
-* Plug in the Arduino as you would normally. You'll see some dmesg output about it being connected. 
-* Press the reset button on the Arduino or if using a Pro Micro, short the RST and GND pins twice in immediate sucession. When the dmesg output shows the Arduino as disconnected, then immediately reconnected, hit 'Enter' in the other window. If you get this wrong you'll need another Arduino or hardware programmer to fix it (search for burning Ardunio bootloaders using an Arduino as an ISP).
 
 
 
