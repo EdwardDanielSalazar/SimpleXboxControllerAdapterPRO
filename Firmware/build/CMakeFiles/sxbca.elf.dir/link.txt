@@ -1,1 +1,0 @@
-/usr/bin/avr-g++  -mmcu=atmega32u4 -DMCU=atmega32u4 -DF_CPU=16000000UL -D__COMPILING_AVR_LIBC__ -ffunction-sections -fdata-sections -Os -DARDUINO=185 -DUSE_LUFA_CONFIG_HEADER  -DNDEBUG -DRELEASE  -Wl,--gc-sections CMakeFiles/sxbca.elf.dir/main.cpp.obj CMakeFiles/sxbca.elf.dir/xiddevice.c.obj  -o sxbca.elf  libArduino.a libLUFA.a libUSB_Host_Shield.a libArduino.a 
