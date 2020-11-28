@@ -55,7 +55,9 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 ### Flashing the firmware
 
-Note: this section covers the process for Ubuntu/Debian and will be expanded with a bit more detail very soon...
+Notes:
+* This section covers the process for Ubuntu/Debian and will be expanded with a bit more detail very soon...
+* The flash script under Firmware may need adapting to your own setup - don't run it without checking, use the method below.
 
 We need to use Avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. 
 
@@ -68,7 +70,8 @@ No special hardware (e.g. a programmer) is needed.
 * Get the [latest version of the binary](https://github.com/jimnarey/SimpleXboxControllerAdapter/releases) (sxbca.bin)
 * In one terminal type in ```dmesg -wH```
 * Plug in the Leonardo via USB and you should see some dmesg output about it. If the Leonardo has the standard bootloader installed it will appear as a composite keyboard and mouse. If it has the alternative Caterina bootloader installed it will appear as an Arduino device. It doesn't matter which.
-* In the second terminal window, navigate to where the sxbca.bin file is stored and - *without pressing Enter* - type in 
+* Note the serial port the Arduino is connected to. In my case it's always /dev/ttyACM0
+* In the second terminal window, navigate to where the sxbca.bin file is stored and - *without pressing Enter* - type in the following line, changing the name of the serial port if needed: 
 ```
 avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:sxbca.bin -C /etc/avrdude.conf'
 ```
