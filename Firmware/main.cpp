@@ -222,8 +222,6 @@ uint8_t getButtonPress(ButtonEnum b){
 //Parse analog stick requests for each type of controller.
 int16_t getAnalogHat(AnalogHatEnum a){
 	int32_t val=0;
-	int16_t tmpVal=0;
-	uint8_t tmpVal_a=0;
 
 	if (Xbox360Wired.Xbox360Connected){
 		val = Xbox360Wired.getAnalogHat(a);
