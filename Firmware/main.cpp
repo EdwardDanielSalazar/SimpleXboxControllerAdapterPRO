@@ -187,33 +187,6 @@ int main(void)
 			report[1]=0x00;
 		}
 		Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
-
-		if (XboxOneWired.XboxOneConnected){
-			Serial1.println(XboxOneWired.getButtonPress(R2));
-		}
-
-		// if (PS3Wired.PS3Connected) {
-		// 	if (PS3Wired.getAnalogHat(LeftHatX) > 137 || PS3Wired.getAnalogHat(LeftHatX) < 117 || PS3Wired.getAnalogHat(LeftHatY) > 137 || PS3Wired.getAnalogHat(LeftHatY) < 117 || PS3Wired.getAnalogHat(RightHatX) > 137 || PS3Wired.getAnalogHat(RightHatX) < 117 || PS3Wired.getAnalogHat(RightHatY) > 137 || PS3Wired.getAnalogHat(RightHatY) < 117) {
-		// 		// Serial1.print(F("\r\nLeftHatX: "));
-		// 		Serial1.print(PS3Wired.getAnalogHat(LeftHatX));
-		// 		// Serial1.print(F("\tLeftHatY: "));
-		// 		Serial1.print(PS3Wired.getAnalogHat(LeftHatY));
-
-		// 		// if (PS3Wired.PS3Connected) { // The Navigation controller only have one joystick
-		// 		// Serial1.print(F("\tRightHatX: "));
-		// 		Serial1.print(PS3Wired.getAnalogHat(RightHatX));
-		// 		// Serial1.print(F("\tRightHatY: "));
-		// 		Serial1.print(PS3Wired.getAnalogHat(RightHatY));
-		// 	// }
-		// 	}
-		// }
-
-		// if (PS3Wired.getAnalogButton(L2) || PS3Wired.getAnalogButton(R2)) {
-		// 	// Serial1.print(F("\r\nL2: "));
-		// 	Serial1.print(PS3Wired.getAnalogButton(L2));
-		// 	// Serial1.print(F("\tR2: "));
-		// 	Serial1.print(PS3Wired.getAnalogButton(R2));
-    	// }
 	}
 }
 
@@ -260,16 +233,10 @@ int16_t getAnalogHat(AnalogHatEnum a){
 	}
 
 	if (XboxOneWired.XboxOneConnected)
-		tmpVal = XboxOneWired.getAnalogHat(a);
-		// Serial1.println(tmpVal);
-		return tmpVal;
-		// return XboxOneWired.getAnalogHat(a);
+		return XboxOneWired.getAnalogHat(a);
 
 	if (PS3Wired.PS3Connected)
-		tmpVal_a = PS3Wired.getAnalogHat(a);
-		// Serial1.println(tmpVal_a);
-		return tmpVal_a;
-		// return (int16_t)PS3Wired.getAnalogHat(a);
+		return (int16_t)PS3Wired.getAnalogHat(a);
 
 	return 0;
 }
