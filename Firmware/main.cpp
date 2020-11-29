@@ -221,20 +221,26 @@ uint8_t getButtonPress(ButtonEnum b){
 
 //Parse analog stick requests for each type of controller.
 int16_t getAnalogHat(AnalogHatEnum a){
-	int32_t val=0;
+	int32_t xbOval=0;
+	uint8_t ps3val = 127;
+	int16_t ps3conv = 0;
 
 	if (Xbox360Wired.Xbox360Connected){
-		val = Xbox360Wired.getAnalogHat(a);
-		if(val==-32512) //8bitdo range fix
-			val=-32768;
-		return val;
+		xbOval = Xbox360Wired.getAnalogHat(a);
+		if(xbOval==-32512) //8bitdo range fix
+			xbOval=-32768;
+		return xbOval;
 	}
 
 	if (XboxOneWired.XboxOneConnected)
 		return XboxOneWired.getAnalogHat(a);
 
 	if (PS3Wired.PS3Connected)
-		return (int16_t)PS3Wired.getAnalogHat(a);
+		if (a == RightHatY || a == LeftHatY) {
+			return (PS3Wired.getAnalogHat(a) - 127) * -255;
+		} else {
+			return (PS3Wired.getAnalogHat(a) - 127) * 255;
+		}
 
 	return 0;
 }
