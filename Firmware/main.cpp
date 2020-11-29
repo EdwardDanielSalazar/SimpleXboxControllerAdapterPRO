@@ -213,9 +213,13 @@ uint8_t getButtonPress(ButtonEnum b){
 	}
 
 	// TO DO - this almost certainly needs some work
-	if (PS3Wired.PS3Connected)
-	return (uint8_t)PS3Wired.getButtonPress(b);
-
+	if (PS3Wired.PS3Connected) {
+		if (b == R2 || b == R1) {
+			return PS3Wired.getAnalogButton(b);
+		} else {
+			return (uint8_t)PS3Wired.getButtonPress(b); // TO DO - is this cast needed now?
+		}
+	}
 	return 0;
 }
 
