@@ -24,6 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include <XBOXONE.h> // TO DO Look again at rumble settings in XBOXONE.cpp
 #include <XBOXUSB.h>
 #include <PS3USB.h>
+// #include <PS4USB.h>
 
 USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for the controller
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
@@ -39,6 +40,7 @@ bool controllerConnected();
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost); //defines EP_MAXPKTSIZE = 32
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
+// PS4USB PS4Wired(&UsbHost);
 
 int main(void)
 {
