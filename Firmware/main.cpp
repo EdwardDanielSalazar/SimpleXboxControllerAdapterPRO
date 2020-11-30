@@ -200,6 +200,8 @@ void sendControllerHIDReport(){
 
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b){
+	uint8_t ps3Val = 0;
+
 
 	if (Xbox360Wired.Xbox360Connected)
 	return Xbox360Wired.getButtonPress(b);
@@ -214,11 +216,35 @@ uint8_t getButtonPress(ButtonEnum b){
 
 	// TO DO - this almost certainly needs some work
 	if (PS3Wired.PS3Connected) {
-		if (b == R2 || b == R1) {
-			return PS3Wired.getAnalogButton(b);
-		} else {
-			return (uint8_t)PS3Wired.getButtonPress(b); // TO DO - is this cast needed now?
+		switch (b) {
+			case A:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(CROSS); // TO DO - are these casts needed now?
+				break;
+			case B:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(CIRCLE);
+				break;
+			case X:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(SQUARE);
+				break;
+			case Y:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
+				break;
+			case R1:
+				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R1);
+				break;
+			case R2:
+				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R2);
+				break;
+			default:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(b);
 		}
+
+		// if (b == R2 || b == R1) {
+		// 	return PS3Wired.getAnalogButton(b);
+		// } else {
+		// 	return (uint8_t)PS3Wired.getButtonPress(b); // TO DO - is this cast needed now?
+		// }
+		return ps3Val;
 	}
 	return 0;
 }
