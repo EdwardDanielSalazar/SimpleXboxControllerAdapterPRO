@@ -190,8 +190,6 @@ avr-objcopy -O binary sxbca.elf ./sxbca.bin
 
 ## Develop/Extend
 
-The project contains a copy of the whole USB Host Library, which contains support for a wide range of controllers. So far, I have not been able to successfully build the project after instantiating the PS4USB class (any help from C++/CMake experts gratefully received! - try building the add_PS4_controller branch to see the linker errors).
-
 When adding PS3 controller support I used the Leonardo's second UART/Serial port ('Serial1' in the Arduino library) for debugging. This can be accessed on pins 20 and 21. You'll need an inexpensive USB to serial module to connect it to a PC/Mac. You can then open the Arduino IDE, point it to the correct serial port (in my case /dev/ttyUSB0) and start the Serial Monitor. On Ubuntu (at least) using 'screen' is more convenient - install with ```sudo apt-get install screen```.
 
 The lines for initialising Serial1 are in main.cpp and commented out in most commits. Assuming you uncomment these and don't change the baud from 9600, you'd then start screen with the following, amending the name of the serial port if necessary:
