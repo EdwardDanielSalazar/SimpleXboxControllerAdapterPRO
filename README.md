@@ -5,29 +5,41 @@
 This is a 'work in progress' adaptation of Ryzee119's excellent [four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers on an original Xbox console. 
 
 The objectives of this project are:
-* The simplest possible hardware build, using only off-the-shelf parts (ideally an Arduino Leonardo/Pro Micro paired with a generic USB Host Shield). 
-* Initially, simple (through-hole/jumper pad only) soldering. It later became clear a no solder version is possible if using the right brand of USB Host Shield. 
+* The simplest possible hardware build, using only off-the-shelf parts (at present, an Arduino Leonardo paired with a generic USB Host Shield). 
+* Simple soldering (through-hole/jumper pad only). *A no solder version is possible if using the right brand of USB Host Shield*. 
 * Reduced, simpler code to make playing around with it as straightforward as possible.
-* Reduced functionality, reflecting the simpler code - it will be wired-only and not offer Steel Battalion support. 
-* Eventually (I hope) allow for use of a wider range of controllers.
-* To provide full, foolproof instructions to enable anyone who's broadly comfortable with an Arduino to put together an adapter and anyone who is broadly comfortable with the command line and IDEs to edit and build the code. So this document is a key part of the project.
+* Reduced functionality, reflecting the simpler code. Only wired controllers are supported and Steel Battalion is not. 
+* Support for additional controllers (so far, PS3 controller support has been added).
+* To provide full, foolproof instructions to enable anyone who's broadly comfortable with an Arduino to make an adapter and anyone who is broadly comfortable with the command line and IDEs to edit and build the code. So this document is a key part of the project.
 
-This started when I dusted off my old Xbox and wanted to make something to use newer (and I'll just say it - better) controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do this. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable, free/open-source tools.
+This started when I dusted off my old Xbox and wanted to make something to use newer controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do this. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable, free/open-source tools.
 
-A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible (for me) to clone, edit, extend and build without too much fighting with build tools/IDEs etc. That being said, the ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
+A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible (for me) to clone, edit, extend and build without too much fighting with build tools/IDEs etc. The ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but it kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
 
 
-## Current State
+### Current State
 
-Release 1.0 is basically a pared back version of ogx360. The differences are as follows:
+Release 1.1 differs from ogx360 as follows:
 * Support for Xbox One and Xbox 360 *wireless* controllers has been removed.
-* Support for multiple controllers has been removed. It supports a single Xbox One/360 controller connected via USB.
-* Steel Battalion support has been removed, resulting in a smaller binary and space for additional (more common!) controllers to have support added later.
+* Support for multiple controllers has been removed. It supports a single controller connected via USB.
+* Steel Battalion support has been removed, resulting in a smaller binary (and space for more controllers to be supported).
 * Rumble has been disabled via settings.h. Significant rumble caused the device to hang. Future versions will address this though it can probably handle rumble if an => 6v power supply is connected to the Leonardo's power connector.
+* PS3 controller support (via USB) has been added! Rumble isn't implemented at all for the time being, as opposed to being disabled in the case of the Xbox One/360 controllers.
+
+### Future Development
+
+These are broadly the priorities for now, not necessarily in order:
+* Add support for more controllers
+* Add instructions for building with a Arduino Pro Micro and mini USB Host Shield. This won't be a no-solder option but will be more compact. I have some mini shields on the way.
+* Add STL files for 3D printable cases for both hardware builds
+* Investigate power/rumble issue
+* Possibly add some user input/output on the device itself via an I2C OLED screen. Not really in the spirit of keeping things simple, but fun.
+* Improving this document and not just by adding more Vic Reeves references. The current build instructions rely on using VS Code and don't (fully) cover MacOS/Windows.
+* Adding some scripts to make flashing the binary easier. 
 
 ## Making One
 
-For now, these instructions cover using a 'full size' Arduino Leonardo and USB Host Shield. You could get it working with an Arduino Micro, Pro Micro (set to use 5V) with a little adaptation and I'll add instructions for this in due course. Using a Leonardo is the simplest way, however.
+For now, these instructions cover using a 'full size' Arduino Leonardo and USB Host Shield. You could get it working with an Arduino Micro, Pro Micro (set to run on 5V at 16Mhz) with a little adaptation and I'll add instructions for this in due course. Using a Leonardo is the simplest way, however.
 
 ### You will need
 
@@ -45,7 +57,7 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 * A USB-A female to Xbox Controller male/plug adapter. These are a few £/$ on eBay and [a better choice than hacking apart an Xbox peripheral](https://xboxdevwiki.net/Xbox_Input_Devices#USB_Adapters)
 * A total of two micro USB cables. Most Leonardos come with one.
-* (Optional) Another Arduino (Uno/Leonardo/Micro/Pro Micro) and some male to female jumper wires to re-flash the bootloader onto the Leonardo if something goes wrong when using Avrdude. If you follow the instructions and - in particular - are very careful to reproduce the Avrdude command correctly, it won't. You could of course use a dedicated AVR hardware programmer for this, if you have one.
+* (Optional) Another Arduino (Uno/Leonardo/Micro/Pro Micro) and some male to female jumper wires to re-flash the bootloader onto the Leonardo if something goes wrong when using Avrdude. If you follow the instructions and - in particular - are very careful to (re-)produce the Avrdude command correctly, it won't. You could of course use a dedicated AVR hardware programmer for this if you have one.
 
 ### Hardware build
 
@@ -56,8 +68,8 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 ### Flashing the firmware
 
 Notes:
-* This section covers the process for Ubuntu/Debian and will be expanded with a bit more detail very soon...
-* The flash script under Firmware may need adapting to your own setup - don't run it without checking, use the method below.
+* This section covers the process for Ubuntu/Debian and will be expanded with more detail and MacOS instructions soon. I'll get round to Windows eventually but for now the process is well explained in [one of the ogx360 readmes](https://github.com/Ryzee119/ogx360/tree/master/Firmware).
+* The flash script under /Firmware was written for my own convenience and may need adapting to your own setup - don't run it without checking. Use the method below.
 
 We need to use Avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. 
 
@@ -176,6 +188,35 @@ The project uses CMake to build itself from the three libraries (Arduino, LUFA, 
 avr-objcopy -O binary sxbca.elf ./sxbca.bin
 ```
 
+## Develop/Extend
+
+The project contains a copy of the whole USB Host Library, which contains support for a wide range of controllers. So far, I have not been able to successfully build the project after instantiating the PS4USB class (any help from C++/CMake experts gratefully received! - try building the add_PS4_controller branch to see the linker errors).
+
+When adding PS3 controller support I used the Leonardo's second UART/Serial port ('Serial1' in the Arduino library) for debugging. This can be accessed on pins 20 and 21. You'll need an inexpensive USB to serial module to connect it to a PC/Mac. You can then open the Arduino IDE, point it to the correct serial port (in my case /dev/ttyUSB0) and start the Serial Monitor. On Ubuntu (at least) using 'screen' is more convenient - install with ```sudo apt-get install screen```.
+
+The lines for initialising Serial1 are in main.cpp and commented out in most commits. Assuming you uncomment these and don't change the baud from 9600, you'd then start screen with the following, amending the name of the serial port if necessary:
+
+```
+screen /dev/ttyUSB0 9600
+```
+
+### Steps for adding additional controllers
+
+Adding PS3 controller support basically involved the following:
+* Adding an #include for the PS3USB library
+* Instantiating the PS3USB class using the same format as the existing Xbox controller classes (pass it a pointer to the USB object)
+* Adding a check for whether a PS3 controller is connected to controllerConnected()
+* Reproducing the calls to the two Xbox controller classes in getButtonPress() and getAnalogHat()
+* When only some buttons worked, using the output from Serial1 (via the USB to serial module) to see what was coming back from the controller by adding temporary code to the main loop, e.g.
+```
+if (PS3Wired.PS3Connected) {
+    Serial1.println(PS3Wired.getButtonPress(R2));
+}
+```
+* Adding lines like this for one button at a time makes it much easier to make sense of the serial output
+* Making necessary changes to the values returned from the controller. For example, the Xbox expects a value from each axis on each analog stick between -32768 and 32767 - so a signed 16bit int. The PS3 controller provides an unsigned 8bit int instead: 0 - 255. The lines of code which deal with this are commented. The face buttons also needed remapping to their physical counterparts on the Xbox controller.
+
+I plan to adapt this approach for other controllers. Remember - any help with getting the PS4 controller to work would be great! You know you want to...
 
 
 
