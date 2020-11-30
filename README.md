@@ -30,7 +30,7 @@ Release 1.1 differs from ogx360 as follows:
 
 These are broadly the priorities for now, not necessarily in order:
 * Add support for more controllers
-* Add instructions for building with a Arduino Pro Micro and mini USB Host Shield. This won't be a no-solder option but will be more compact. I have some mini shields on the way.
+* Add instructions for building with an Arduino Pro Micro and mini USB Host Shield. This won't be a no-solder option but will be more compact. I have some mini shields on the way.
 * Add STL files for 3D printable cases for both hardware builds
 * Investigate power/rumble issue
 * Possibly add some user input/output on the device itself via an I2C OLED screen. Not really in the spirit of keeping things simple, but fun.
