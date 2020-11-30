@@ -226,9 +226,9 @@ uint8_t getButtonPress(ButtonEnum b){
 				ps3Val = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
 				break;
 			// Call a different function from the PS3USB library to get the level of
-			// pressure applied to the R2 and L2 triggers, not just 'on' or 'off
-			case R1:
-				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R1);
+			// pressure applied to the L2 and R2 triggers, not just 'on' or 'off
+			case L2:
+				ps3Val = (uint8_t)PS3Wired.getAnalogButton(L2);
 				break;
 			case R2:
 				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R2);
