@@ -23,7 +23,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include <usbhub.h> // TO DO Take this out?
 #include <XBOXONE.h> // TO DO Look again at rumble settings in XBOXONE.cpp
 #include <XBOXUSB.h>
-
+#include <PS3USB.h>
 
 USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for the controller
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
@@ -37,7 +37,8 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue);
 void setLedOn(LEDEnum led);
 bool controllerConnected();
 XBOXONE XboxOneWired(&UsbHost);
-XBOXUSB Xbox360Wired(&UsbHost);
+XBOXUSB Xbox360Wired(&UsbHost); //defines EP_MAXPKTSIZE = 32
+PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 
 int main(void)
 {
@@ -51,6 +52,12 @@ int main(void)
 	pinMode(PLAYER_ID2_PIN, INPUT_PULLUP);
 	digitalWrite(USB_HOST_RESET_PIN, LOW);
 	digitalWrite(ARDUINO_LED_PIN, HIGH);
+
+	// The Serial1 port on the Arduino Leonardo (pins 20 & 21) is useful for debugging via a USB to Serial module
+	// while the Arduino appears as an Xbox controller via its built in USB port
+
+	// Serial1.begin(9600);
+	// Serial1.println("Serial Start");
 
 	//Init the LUFA USB Device Library
 	SetupHardware();
@@ -142,12 +149,11 @@ int main(void)
 				commandTimer=millis();
 			}
 
-			/*Check/send the Player 1 HID report every loop to minimise lag even more on the master*/
 			sendControllerHIDReport();
 
 		}
 
-		//Handle Player 1 controller connect/disconnect events.
+		//Handle controller connect/disconnect events.
 		if (controllerConnected() && disconnectTimer==0){
 			USB_Attach();
 			if(enumerationComplete){
@@ -191,6 +197,7 @@ void sendControllerHIDReport(){
 
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b){
+	uint8_t ps3Val = 0;
 
 	if (Xbox360Wired.Xbox360Connected)
 	return Xbox360Wired.getButtonPress(b);
@@ -203,22 +210,62 @@ uint8_t getButtonPress(ButtonEnum b){
 		}
 	}
 
+	if (PS3Wired.PS3Connected) {
+		switch (b) {
+			// Remap the PS3 controller face buttons to their Xbox counterparts
+			case A:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(CROSS); // TO DO - are these casts needed now?
+				break;
+			case B:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(CIRCLE);
+				break;
+			case X:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(SQUARE);
+				break;
+			case Y:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
+				break;
+			// Call a different function from the PS3USB library to get the level of
+			// pressure applied to the L2 and R2 triggers, not just 'on' or 'off
+			case L2:
+				ps3Val = (uint8_t)PS3Wired.getAnalogButton(L2);
+				break;
+			case R2:
+				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R2);
+				break;
+			// Requests for the start, select, R1, L1 and the D-pad buttons can be called normally
+			default:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(b);
+		}
+		return ps3Val;
+	}
 	return 0;
 }
 
 //Parse analog stick requests for each type of controller.
 int16_t getAnalogHat(AnalogHatEnum a){
-	int32_t val=0;
+	int32_t xbOval=0;
+	uint8_t ps3val = 127;
+	int16_t ps3conv = 0;
 
 	if (Xbox360Wired.Xbox360Connected){
-		val = Xbox360Wired.getAnalogHat(a);
-		if(val==-32512) //8bitdo range fix
-			val=-32768;
-		return val;
+		xbOval = Xbox360Wired.getAnalogHat(a);
+		if(xbOval==-32512) //8bitdo range fix
+			xbOval=-32768;
+		return xbOval;
 	}
 
 	if (XboxOneWired.XboxOneConnected)
 		return XboxOneWired.getAnalogHat(a);
+
+	if (PS3Wired.PS3Connected)
+		// Scale up the unsigned 8bit values produced by the PS3 analog sticks to the
+		// signed 16bit values expected by the Xbox. In the case of the Y axes, invert the result
+		if (a == RightHatY || a == LeftHatY) {
+			return (PS3Wired.getAnalogHat(a) - 127) * -255;
+		} else {
+			return (PS3Wired.getAnalogHat(a) - 127) * 255;
+		}
 
 	return 0;
 }
@@ -234,6 +281,9 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue){
 	if (XboxOneWired.XboxOneConnected){
 		XboxOneWired.setRumbleOn(lValue/8, rValue/8, lValue/2, rValue/2);
 	}
+
+	//TO DO - Add PS3 Controller Support
+
 	#endif
 }
 
@@ -246,6 +296,9 @@ void setLedOn(LEDEnum led){
 	if (XboxOneWired.XboxOneConnected){
 		//no LEDs on Xbox One Controller. I think it is possible to adjust brightness but this is not implemented.
 	}
+
+	if (PS3Wired.PS3Connected)
+	PS3Wired.setLedOn(led);
 }
 
 bool controllerConnected(){
@@ -254,6 +307,9 @@ bool controllerConnected(){
 		return 1;
 
 	if (XboxOneWired.XboxOneConnected)
+		return 1;
+
+	if (PS3Wired.PS3Connected)
 		return 1;
 
 	return 0;
