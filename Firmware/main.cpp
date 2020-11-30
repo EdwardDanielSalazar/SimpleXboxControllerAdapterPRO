@@ -24,11 +24,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 #include <XBOXONE.h> // TO DO Look again at rumble settings in XBOXONE.cpp
 #include <XBOXUSB.h>
 #include <PS3USB.h>
-// #include <SPI.h>
-
-// #ifdef dobogusinclude
-// #include <spi4teensy3.h>
-// #endif
 
 USB_XboxGamepad_Data_t XboxOGDuke; //Xbox gamepad data structure to store all button and actuator states for the controller
 bool enumerationComplete=false; //Flag is set when the device has been successfully setup by the OG Xbox
@@ -43,7 +38,7 @@ void setLedOn(LEDEnum led);
 bool controllerConnected();
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost); //defines EP_MAXPKTSIZE = 32
-PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64
+PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 
 int main(void)
 {
@@ -58,8 +53,11 @@ int main(void)
 	digitalWrite(USB_HOST_RESET_PIN, LOW);
 	digitalWrite(ARDUINO_LED_PIN, HIGH);
 
-	Serial1.begin(9600);
-	Serial1.println("Serial Start");
+	// The Serial1 port on the Arduino Leonardo (pins 20 & 21) is useful for debugging via a USB to Serial module
+	// while the Arduino appears as an Xbox controller via its built in USB port
+
+	// Serial1.begin(9600);
+	// Serial1.println("Serial Start");
 
 	//Init the LUFA USB Device Library
 	SetupHardware();
@@ -151,12 +149,11 @@ int main(void)
 				commandTimer=millis();
 			}
 
-			/*Check/send the Player 1 HID report every loop to minimise lag even more on the master*/
 			sendControllerHIDReport();
 
 		}
 
-		//Handle Player 1 controller connect/disconnect events.
+		//Handle controller connect/disconnect events.
 		if (controllerConnected() && disconnectTimer==0){
 			USB_Attach();
 			if(enumerationComplete){
@@ -202,7 +199,6 @@ void sendControllerHIDReport(){
 uint8_t getButtonPress(ButtonEnum b){
 	uint8_t ps3Val = 0;
 
-
 	if (Xbox360Wired.Xbox360Connected)
 	return Xbox360Wired.getButtonPress(b);
 
@@ -214,9 +210,9 @@ uint8_t getButtonPress(ButtonEnum b){
 		}
 	}
 
-	// TO DO - this almost certainly needs some work
 	if (PS3Wired.PS3Connected) {
 		switch (b) {
+			// Remap the PS3 controller face buttons to their Xbox counterparts
 			case A:
 				ps3Val = (uint8_t)PS3Wired.getButtonPress(CROSS); // TO DO - are these casts needed now?
 				break;
@@ -229,21 +225,18 @@ uint8_t getButtonPress(ButtonEnum b){
 			case Y:
 				ps3Val = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
 				break;
+			// Call a different function from the PS3USB library to get the level of
+			// pressure applied to the R2 and L2 triggers, not just 'on' or 'off
 			case R1:
 				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R1);
 				break;
 			case R2:
 				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R2);
 				break;
+			// Requests for the start, select, R1, L1 and the D-pad buttons can be called normally
 			default:
 				ps3Val = (uint8_t)PS3Wired.getButtonPress(b);
 		}
-
-		// if (b == R2 || b == R1) {
-		// 	return PS3Wired.getAnalogButton(b);
-		// } else {
-		// 	return (uint8_t)PS3Wired.getButtonPress(b); // TO DO - is this cast needed now?
-		// }
 		return ps3Val;
 	}
 	return 0;
@@ -266,6 +259,8 @@ int16_t getAnalogHat(AnalogHatEnum a){
 		return XboxOneWired.getAnalogHat(a);
 
 	if (PS3Wired.PS3Connected)
+		// Scale up the unsigned 8bit values produced by the PS3 analog sticks to the
+		// signed 16bit values expected by the Xbox. In the case of the Y axes, invert the result
 		if (a == RightHatY || a == LeftHatY) {
 			return (PS3Wired.getAnalogHat(a) - 127) * -255;
 		} else {
