@@ -16,13 +16,15 @@ The objectives of this project are:
 * Support for additional controllers (so far, PS3 & PS4 controller support has been added).
 * To provide full, foolproof instructions to enable anyone who's broadly comfortable with an Arduino to make an adapter and anyone who is broadly comfortable with the command line and IDEs to edit and build the code. So this document is a key part of the project.
 
-This started when I dusted off my old Xbox and wanted to make something to use newer controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do this. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable, free/open-source tools.
+This started when I dusted off my old Xbox and wanted to make something to use newer controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do it. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable, free/open-source tools.
 
-A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible, with a bit of help from Ryzee119, to clone, edit, extend and build without too much fighting with build tools/IDEs etc. The ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but it kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
+A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible to clone, edit, and build without too much fighting with tools/IDE(s). The ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but it kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
 
-### Current State
+Another important factor was starting with something which included the Xbox console's vendor-specific challenge/response values (see 'Alternatives & other projects to look at' below for more on this).
 
-Release 1.1 differs from ogx360 as follows:
+### Status
+
+Release 1.2 differs from ogx360 as follows:
 * Support for Xbox One and Xbox 360 *wireless* controllers has been removed.
 * Support for multiple controllers has been removed. It supports a single controller connected via USB.
 * Steel Battalion support has been removed, resulting in a smaller binary (and space for more controllers to be supported).
