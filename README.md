@@ -1,21 +1,24 @@
-# Simple Xbox Controller Adapter - Overview
+# Simple Xbox Controller Adapter
 
-## Purpose
+## Functionality
 
-This is a 'work in progress' adaptation of Ryzee119's excellent [four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers on an original Xbox console. 
+Following the instructions below and using the [latest release](https://github.com/jimnarey/SimpleXboxControllerAdapter/releases) of this project you can create a simple Arduino-based adapter to use Xbox 360, Xbox One, PS3 and PS4 controllers with an original Xbox console.
+
+## Background
+
+This is an adaptation of Ryzee119's excellent [four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers (wired and wireless) on an original Xbox console. 
 
 The objectives of this project are:
 * The simplest possible hardware build, using only off-the-shelf parts (at present, an Arduino Leonardo paired with a generic USB Host Shield). 
-* Simple soldering (through-hole/jumper pad only). *A no solder version is possible if using the right brand of USB Host Shield*. 
+* Simple soldering (through-hole/jumper pad only). *A no solder version is possible if using the right choice of USB Host Shield*. 
 * Reduced, simpler code to make playing around with it as straightforward as possible.
-* Reduced functionality, reflecting the simpler code. Only wired controllers are supported and Steel Battalion is not. 
-* Support for additional controllers (so far, PS3 controller support has been added).
+* Reduced functionality, reflecting the simpler code. Only wired controllers are supported and Steel Battalion emulation is not. 
+* Support for additional controllers (so far, PS3 & PS4 controller support has been added).
 * To provide full, foolproof instructions to enable anyone who's broadly comfortable with an Arduino to make an adapter and anyone who is broadly comfortable with the command line and IDEs to edit and build the code. So this document is a key part of the project.
 
 This started when I dusted off my old Xbox and wanted to make something to use newer controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do this. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable, free/open-source tools.
 
-A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible (for me) to clone, edit, extend and build without too much fighting with build tools/IDEs etc. The ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but it kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
-
+A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible, with a bit of help from Ryzee119, to clone, edit, extend and build without too much fighting with build tools/IDEs etc. The ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but it kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
 
 ### Current State
 
@@ -24,18 +27,19 @@ Release 1.1 differs from ogx360 as follows:
 * Support for multiple controllers has been removed. It supports a single controller connected via USB.
 * Steel Battalion support has been removed, resulting in a smaller binary (and space for more controllers to be supported).
 * Rumble has been disabled via settings.h. Significant rumble caused the device to hang. Future versions will address this though it can probably handle rumble if an => 6v power supply is connected to the Leonardo's power connector.
-* PS3 controller support (via USB) has been added! Rumble isn't implemented at all for the time being, as opposed to being disabled in the case of the Xbox One/360 controllers.
+* PS3 controller support (via USB) has been added. Rumble isn't implemented at all for the time being, as opposed to being disabled in the case of the Xbox One/360 controllers.
+* PS4 controller support (via USB) has been added. As with the PS3 controller, rumble isn't implemented (for now) and nor is support for doing anything with the LED.
 
-### Future Development
+### Future Work
 
 These are broadly the priorities for now, not necessarily in order:
-* Add support for more controllers
 * Add instructions for building with an Arduino Pro Micro and mini USB Host Shield. This won't be a no-solder option but will be more compact. I have some mini shields on the way.
 * Add STL files for 3D printable cases for both hardware builds
 * Investigate power/rumble issue
+* Improving this document and not by adding more Vic Reeves references. The current build instructions rely on using VS Code (a command line only option will follow) and don't fully cover MacOS or cover Windows at all.
+* Adding some scripts to make flashing the binary easier.
 * Possibly add some user input/output on the device itself via an I2C OLED screen. Not really in the spirit of keeping things simple, but fun.
-* Improving this document and not just by adding more Vic Reeves references. The current build instructions rely on using VS Code and don't (fully) cover MacOS/Windows.
-* Adding some scripts to make flashing the binary easier. 
+* Possibly adding more controllers. The binary is now up to more than 26K and adding in anything involving bluetooth support puts it way over 32K. So I need to do a bit of digging to see what's possible here.
 
 ## Making One
 
@@ -198,12 +202,14 @@ The lines for initialising Serial1 are in main.cpp and commented out in most com
 screen /dev/ttyUSB0 9600
 ```
 
+As noted above, there isn't a huge amount of space left on the ATmega32u4's flash with the current build so it may be necessary to remove support for one or more controllers in order to add in support for others.
+
 ### Steps for adding additional controllers
 
-Adding PS3 controller support basically involved the following:
-* Adding an #include for the PS3USB library
-* Instantiating the PS3USB class using the same format as the existing Xbox controller classes (pass it a pointer to the USB object)
-* Adding a check for whether a PS3 controller is connected to controllerConnected()
+Adding PS3 and PS4 controller support involved the following:
+* Adding an #include for the PS3USB/PS4USB library
+* Instantiating the PS3USB/PS4USB class using the same format as the existing Xbox controller classes (pass it a pointer to the 'USBHost' object)
+* Adding a check for whether a PS3/PS4 controller is connected to controllerConnected()
 * Reproducing the calls to the two Xbox controller classes in getButtonPress() and getAnalogHat()
 * When only some buttons worked, using the output from Serial1 (via the USB to serial module) to see what was coming back from the controller by adding temporary code to the main loop, e.g.
 ```
@@ -212,9 +218,11 @@ if (PS3Wired.PS3Connected) {
 }
 ```
 * Adding lines like this for one button at a time makes it much easier to make sense of the serial output
-* Making necessary changes to the values returned from the controller. For example, the Xbox expects a value from each axis on each analog stick between -32768 and 32767 - so a signed 16bit int. The PS3 controller provides an unsigned 8bit int instead: 0 - 255. The lines of code which deal with this are commented. The face buttons also needed remapping to their physical counterparts on the Xbox controller.
+* Making necessary changes to the values returned from the controller. For example, the Xbox expects a value from each axis on each analog stick between -32768 and 32767 - so a signed 16bit int. The PS3 and PS4 controller each provides an unsigned 8bit int instead: 0 - 255. The lines of code which deal with this are commented. The face buttons also needed remapping to their physical counterparts on the Xbox controller.
 
-I plan to adapt this approach for other controllers. Remember - any help with getting the PS4 controller to work would be great! You know you want to...
+Thanks to Ryzee119 for helping resolve some (to me) incomprehensible linker errors when trying to import the PS4 library for the first time.
+
+I have since tested importing and instantiating the classes for Bluetooth, Wii controllers and general HID controllers so making use of these should be possible without any additional dependencies being used. However, all of these together with the current functionality resulted in a 43K binary, so they can't all be used together.
 
 
 
