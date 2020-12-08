@@ -62,21 +62,6 @@ USB_ClassInfo_HID_Device_t DukeController_HID_Interface = {
     },
 };
 
-// #ifdef SUPPORTBATTALION
-// USB_ClassInfo_HID_Device_t SteelBattalion_HID_Interface = {
-//     .Config = {
-//         .InterfaceNumber = 0x00,
-//         .ReportINEndpoint = {
-//             .Address = 0x82,
-//             .Size = 26,
-//             .Banks = 1,
-//         },
-//         .PrevReportINBuffer = &PrevBattalionHIDReportBuffer,
-//         .PrevReportINBufferSize = sizeof(PrevBattalionHIDReportBuffer),
-//     },
-// };
-// #endif
-
 /** Configures the board hardware and chip peripherals */
 void SetupHardware(void)
 {
@@ -108,12 +93,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
         ConfigSuccess &= HID_Device_ConfigureEndpoints(&DukeController_HID_Interface);
         ConfigSuccess &= Endpoint_ConfigureEndpoint(0x02, EP_TYPE_INTERRUPT, 6, 1); //Host Out endpoint opened manually for Duke.
         break;
-// #ifdef SUPPORTBATTALION
-//     case STEELBATTALION:
-//         ConfigSuccess &= HID_Device_ConfigureEndpoints(&SteelBattalion_HID_Interface);
-//         ConfigSuccess &= Endpoint_ConfigureEndpoint(0x01, EP_TYPE_INTERRUPT, 32, 1); //Host Out endpoint opened manually for SB.
-//         break;
-// #endif
+
     }
     USB_Device_EnableSOFEvents();
     enumerationComplete = ConfigSuccess;
@@ -155,11 +135,7 @@ void EVENT_USB_Device_ControlRequest(void)
             case DUKE_CONTROLLER:
                 Endpoint_Write_Control_Stream_LE(&DUKE_HID_CAPABILITIES_IN, 20);
                 break;
-// #ifdef SUPPORTBATTALION
-//             case STEELBATTALION:
-//                 Endpoint_Write_Control_Stream_LE(&BATTALION_HID_CAPABILITIES_IN, 21);
-//                 break;
-// #endif
+
             }
 
             Endpoint_ClearOUT();
@@ -173,11 +149,7 @@ void EVENT_USB_Device_ControlRequest(void)
             case DUKE_CONTROLLER:
                 Endpoint_Write_Control_Stream_LE(&DUKE_HID_CAPABILITIES_OUT, 6);
                 break;
-// #ifdef SUPPORTBATTALION
-//             case STEELBATTALION:
-//                 Endpoint_Write_Control_Stream_LE(&BATTALION_HID_CAPABILITIES_OUT, 22);
-//                 break;
-// #endif
+
             }
             Endpoint_ClearOUT();
             return;
@@ -190,11 +162,7 @@ void EVENT_USB_Device_ControlRequest(void)
     case DUKE_CONTROLLER:
         HID_Device_ProcessControlRequest(&DukeController_HID_Interface);
         break;
-// #ifdef SUPPORTBATTALION
-//     case STEELBATTALION:
-//         HID_Device_ProcessControlRequest(&SteelBattalion_HID_Interface);
-//         break;
-// #endif
+
     }
 }
 
@@ -206,11 +174,7 @@ void EVENT_USB_Device_StartOfFrame(void)
     case DUKE_CONTROLLER:
         HID_Device_MillisecondElapsed(&DukeController_HID_Interface);
         break;
-// #ifdef SUPPORTBATTALION
-//     case STEELBATTALION:
-//         HID_Device_MillisecondElapsed(&SteelBattalion_HID_Interface);
-//         break;
-// #endif
+
     }
 }
 
@@ -246,26 +210,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t *const HIDIn
         DukeReport->rightStickY = XboxOGDuke.rightStickY;
         *ReportSize = DukeReport->bLength;
         break;
-// #ifdef SUPPORTBATTALION
-//     case STEELBATTALION:
-//         BattalionReport->startByte = 0x00;
-//         BattalionReport->bLength = 26;
-//         BattalionReport->dButtons[0] = XboxOGSteelBattalion.dButtons[0];
-//         BattalionReport->dButtons[1] = XboxOGSteelBattalion.dButtons[1];
-//         BattalionReport->dButtons[2] = XboxOGSteelBattalion.dButtons[2];
-//         BattalionReport->aimingX = XboxOGSteelBattalion.aimingX;
-//         BattalionReport->aimingY = XboxOGSteelBattalion.aimingY;
-//         BattalionReport->rotationLever = XboxOGSteelBattalion.rotationLever;
-//         BattalionReport->sightChangeX = XboxOGSteelBattalion.sightChangeX;
-//         BattalionReport->sightChangeY = XboxOGSteelBattalion.sightChangeY;
-//         BattalionReport->leftPedal = XboxOGSteelBattalion.leftPedal;
-//         BattalionReport->middlePedal = XboxOGSteelBattalion.middlePedal;
-//         BattalionReport->rightPedal = XboxOGSteelBattalion.rightPedal;
-//         BattalionReport->tunerDial = XboxOGSteelBattalion.tunerDial;
-//         BattalionReport->gearLever = XboxOGSteelBattalion.gearLever;
-//         *ReportSize = BattalionReport->bLength;
-//         break;
-// #endif
+
     }
 
     return false;
@@ -311,12 +256,7 @@ uint16_t CALLBACK_USB_GetDescriptor(
             Address = &DUKE_USB_DESCRIPTOR_DEVICE;
             Size = 18;
             break;
-// #ifdef SUPPORTBATTALION
-//         case STEELBATTALION:
-//             Address = &BATTALION_USB_DESCRIPTOR_DEVICE;
-//             Size = 18;
-//             break;
-// #endif
+
         }
         break;
     case DTYPE_Configuration:
@@ -327,12 +267,7 @@ uint16_t CALLBACK_USB_GetDescriptor(
             Address = &DUKE_USB_DESCRIPTOR_CONFIGURATION;
             Size = 32;
             break;
-// #ifdef SUPPORTBATTALION
-//         case STEELBATTALION:
-//             Address = &BATTALION_USB_DESCRIPTOR_CONFIGURATION;
-//             Size = 32;
-//             break;
-// #endif
+
         }
         break;
     case DTYPE_String:

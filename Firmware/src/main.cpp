@@ -189,8 +189,6 @@ int main(void)
                 commandTimer = millis();
             }
 
-    
-
             /*Check/send the Player 1 HID report every loop to minimise lag even more on the master*/
             sendControllerHIDReport();
         }
@@ -238,6 +236,8 @@ int main(void)
         }
         Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
 
+
+// NOTE has old XboxOGDuke reference!!!!
 #ifndef MASTER
         // if (inputBuffer[0] != 0xF0)
         // {

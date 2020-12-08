@@ -78,10 +78,6 @@ extern "C"
     extern USB_ClassInfo_HID_Device_t DukeController_HID_Interface;
     extern USB_ClassInfo_HID_Device_t SteelBattalion_HID_Interface;
     extern USB_XboxGamepad_Data_t XboxOGDuke;
-// #ifdef SUPPORTBATTALION
-//     extern USB_XboxSteelBattalion_Data_t XboxOGSteelBattalion;
-//     extern USB_XboxSteelBattalion_Feedback_t XboxOGSteelBattalionFeedback;
-// #endif
     extern bool enumerationComplete;
     extern uint8_t playerID;
 #ifdef __cplusplus
