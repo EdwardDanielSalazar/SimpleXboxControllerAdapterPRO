@@ -318,6 +318,7 @@ int16_t getAnalogHat(AnalogHatEnum a)
     return 0;
 }
 
+
 //Parse rumble activation requests for each type of controller.
 void setRumbleOn(uint8_t lValue, uint8_t rValue)
 {
