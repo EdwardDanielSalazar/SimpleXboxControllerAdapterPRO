@@ -324,15 +324,15 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
     // if (Xbox360Wireless.Xbox360Connected[controller])
     //     Xbox360Wireless.setRumbleOn(lValue, rValue, controller);
 
-    if (Xbox360Wired.Xbox360Connected)
-    {
-        Xbox360Wired.setRumbleOn(lValue, rValue); 
-    }
+    // if (Xbox360Wired.Xbox360Connected)
+    // {
+    //     Xbox360Wired.setRumbleOn(lValue, rValue); 
+    // }
 
-    if (XboxOneWired.XboxOneConnected)
-    {
-        XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
-    }
+    // if (XboxOneWired.XboxOneConnected)
+    // {
+    //     XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+    // }
 
 }
 
