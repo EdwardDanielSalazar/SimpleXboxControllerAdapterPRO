@@ -25,30 +25,36 @@
 //#define DISABLE_WIREDXBOX360
 //#define DISABLE_BATTALION
 
-#ifndef COMPILE_SLAVE
+// #ifndef COMPILE_SLAVE
 #define MASTER
-#endif
-
-#ifdef MASTER
-/* Define this to add support for Steel Battalion Controller
-   emulation with an Xbox 360 Wireless Controller Chatpad.
-   (It wont work with any wired controllers) */
-#ifndef DISABLE_BATTALION
 #define SUPPORTBATTALION
-#endif
-
-/* Define this to add support for Wired Xbox One Controllers. */
-#ifndef DISABLE_WIREDXBOXONE
 #define SUPPORTWIREDXBOXONE
-#endif
-
-/* Define this to add support for Wired Xbox 360 Controllers.
-   This has to be enabled for 8bitdo controller support too */
-#ifndef DISABLE_WIREDXBOX360
 #define SUPPORTWIREDXBOX360
-#endif
 
-#endif
+// #endif
+
+// #ifdef MASTER
+
+
+// /* Define this to add support for Steel Battalion Controller
+//    emulation with an Xbox 360 Wireless Controller Chatpad.
+//    (It wont work with any wired controllers) */
+// #ifndef DISABLE_BATTALION
+// #define SUPPORTBATTALION
+// #endif
+
+// /* Define this to add support for Wired Xbox One Controllers. */
+// #ifndef DISABLE_WIREDXBOXONE
+// #define SUPPORTWIREDXBOXONE
+// #endif
+
+// /* Define this to add support for Wired Xbox 360 Controllers.
+//    This has to be enabled for 8bitdo controller support too */
+// #ifndef DISABLE_WIREDXBOX360
+// #define SUPPORTWIREDXBOX360
+// #endif
+
+// #endif
 
 /* prototypes */
 void sendControllerHIDReport();
