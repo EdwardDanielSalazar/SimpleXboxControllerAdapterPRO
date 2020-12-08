@@ -45,16 +45,19 @@ uint32_t disconnectTimer = 0;
 
 USB UsbHost;
 USBHub Hub(&UsbHost);
-XBOXRECV Xbox360Wireless(&UsbHost);
-uint8_t getButtonPress(ButtonEnum b, uint8_t controller);
-int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller);
-void setRumbleOn(uint8_t lValue, uint8_t rValue, uint8_t controller);
-void setLedOn(LEDEnum led, uint8_t controller);
-bool controllerConnected(uint8_t controller);
-XBOXONE XboxOneWired1(&UsbHost);
-XBOXONE *XboxOneWired[4] = {&XboxOneWired1};
-XBOXUSB Xbox360Wired1(&UsbHost);
-XBOXUSB *Xbox360Wired[4] = {&Xbox360Wired1};
+// XBOXRECV Xbox360Wireless(&UsbHost);
+uint8_t getButtonPress(ButtonEnum b);
+int16_t getAnalogHat(AnalogHatEnum a);
+void setRumbleOn(uint8_t lValue, uint8_t rValue);
+void setLedOn(LEDEnum led);
+bool controllerConnected();
+// XBOXONE XboxOneWired1(&UsbHost);
+// XBOXONE *XboxOneWired[4] = {&XboxOneWired1};
+// XBOXUSB Xbox360Wired1(&UsbHost);
+// XBOXUSB *Xbox360Wired[4] = {&Xbox360Wired1};
+
+XBOXONE XboxOneWired(&UsbHost);
+XBOXUSB Xbox360Wired(&UsbHost);
 
 
 int main(void)
@@ -106,38 +109,38 @@ int main(void)
         /*** MASTER TASKS ***/
         UsbHost.busprobe();
         UsbHost.Task();
-        static uint8_t i = 0;
-        if (controllerConnected(i))
+        // static uint8_t i = 0;
+        if (controllerConnected())
         {
         
             //Read Digital Buttons
             XboxOGDuke.dButtons=0x0000;
-            if (getButtonPress(UP, i))      XboxOGDuke.dButtons |= DUP;
-            if (getButtonPress(DOWN, i))    XboxOGDuke.dButtons |= DDOWN;
-            if (getButtonPress(LEFT, i))    XboxOGDuke.dButtons |= DLEFT;
-            if (getButtonPress(RIGHT, i))   XboxOGDuke.dButtons |= DRIGHT;;
-            if (getButtonPress(START, i))   XboxOGDuke.dButtons |= START_BTN;
-            if (getButtonPress(BACK, i))    XboxOGDuke.dButtons |= BACK_BTN;
-            if (getButtonPress(L3, i))      XboxOGDuke.dButtons |= LS_BTN;
-            if (getButtonPress(R3, i))      XboxOGDuke.dButtons |= RS_BTN;
+            if (getButtonPress(UP))      XboxOGDuke.dButtons |= DUP;
+            if (getButtonPress(DOWN))    XboxOGDuke.dButtons |= DDOWN;
+            if (getButtonPress(LEFT))    XboxOGDuke.dButtons |= DLEFT;
+            if (getButtonPress(RIGHT))   XboxOGDuke.dButtons |= DRIGHT;;
+            if (getButtonPress(START))   XboxOGDuke.dButtons |= START_BTN;
+            if (getButtonPress(BACK))    XboxOGDuke.dButtons |= BACK_BTN;
+            if (getButtonPress(L3))      XboxOGDuke.dButtons |= LS_BTN;
+            if (getButtonPress(R3))      XboxOGDuke.dButtons |= RS_BTN;
 
             //Read Analog Buttons - have to be converted to digital because x360 controllers don't have analog buttons
-            getButtonPress(A, i)    ? XboxOGDuke.A = 0xFF      : XboxOGDuke.A = 0x00;
-            getButtonPress(B, i)    ? XboxOGDuke.B = 0xFF      : XboxOGDuke.B = 0x00;
-            getButtonPress(X, i)    ? XboxOGDuke.X = 0xFF      : XboxOGDuke.X = 0x00;
-            getButtonPress(Y, i)    ? XboxOGDuke.Y = 0xFF      : XboxOGDuke.Y = 0x00;
-            getButtonPress(L1, i)   ? XboxOGDuke.WHITE = 0xFF  : XboxOGDuke.WHITE = 0x00;
-            getButtonPress(R1, i)   ? XboxOGDuke.BLACK = 0xFF  : XboxOGDuke.BLACK = 0x00;
+            getButtonPress(A)    ? XboxOGDuke.A = 0xFF      : XboxOGDuke.A = 0x00;
+            getButtonPress(B)    ? XboxOGDuke.B = 0xFF      : XboxOGDuke.B = 0x00;
+            getButtonPress(X)    ? XboxOGDuke.X = 0xFF      : XboxOGDuke.X = 0x00;
+            getButtonPress(Y)    ? XboxOGDuke.Y = 0xFF      : XboxOGDuke.Y = 0x00;
+            getButtonPress(L1)   ? XboxOGDuke.WHITE = 0xFF  : XboxOGDuke.WHITE = 0x00;
+            getButtonPress(R1)   ? XboxOGDuke.BLACK = 0xFF  : XboxOGDuke.BLACK = 0x00;
 
             //Read Analog triggers
-            XboxOGDuke.L = getButtonPress(L2, i); //0x00 to 0xFF
-            XboxOGDuke.R = getButtonPress(R2, i); //0x00 to 0xFF
+            XboxOGDuke.L = getButtonPress(L2); //0x00 to 0xFF
+            XboxOGDuke.R = getButtonPress(R2); //0x00 to 0xFF
 
             //Read Control Sticks (16bit signed short)
-            XboxOGDuke.leftStickX = getAnalogHat(LeftHatX, i);
-            XboxOGDuke.leftStickY = getAnalogHat(LeftHatY, i);
-            XboxOGDuke.rightStickX = getAnalogHat(RightHatX, i);
-            XboxOGDuke.rightStickY = getAnalogHat(RightHatY, i);
+            XboxOGDuke.leftStickX = getAnalogHat(LeftHatX);
+            XboxOGDuke.leftStickY = getAnalogHat(LeftHatY);
+            XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
+            XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
 
 
 
@@ -148,7 +151,7 @@ int main(void)
             if (millis() - commandTimer > 16)
             {
                 //If you hold the XBOX button for more than ~1second, turn off controller
-                if (getButtonPress(XBOX, i))
+                if (getButtonPress(XBOX))
                 {
                     if (xboxHoldTimer == 0)
                     {
@@ -157,17 +160,17 @@ int main(void)
                     if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
                     {
                         XboxOGDuke.dButtons = 0x00;
-                        setRumbleOn(0, 0, i);
+                        setRumbleOn(0, 0);
                         delay(10);
-                        Xbox360Wireless.disconnect(i);
+                        // Xbox360Wireless.disconnect(i);
                         xboxHoldTimer = 0;
                     }
                 }
                 //START+BACK TRIGGERS is a standard soft reset command.
                 //We turn off the rumble motors here to prevent them getting locked on
                 //if you happen to press this reset combo mid rumble.
-                else if (getButtonPress(START, i) && getButtonPress(BACK, i) &&
-                            getButtonPress(L2, i) > 0x00 && getButtonPress(R2, i) > 0x00)
+                else if (getButtonPress(START) && getButtonPress(BACK) &&
+                            getButtonPress(L2) > 0x00 && getButtonPress(R2) > 0x00)
                 {
                     //Turn off rumble on all controllers
                     for (uint8_t j = 0; j < MAX_CONTROLLERS; j++)
@@ -183,7 +186,7 @@ int main(void)
                     xboxHoldTimer = 0; //Reset the XBOX button hold time counter.
                     if (XboxOGDuke.rumbleUpdate == 1)
                     {
-                        setRumbleOn(XboxOGDuke.left_actuator, XboxOGDuke.right_actuator, i);
+                        setRumbleOn(XboxOGDuke.left_actuator, XboxOGDuke.right_actuator);
                         XboxOGDuke.rumbleUpdate = 0;
                     }
                 }
@@ -196,7 +199,7 @@ int main(void)
 
 
         //Handle Player 1 controller connect/disconnect events.
-        if (controllerConnected(0) && disconnectTimer == 0)
+        if (controllerConnected() && disconnectTimer == 0)
         {
             USB_Attach();
             if (enumerationComplete)
@@ -208,7 +211,7 @@ int main(void)
         {
             digitalWrite(ARDUINO_LED_PIN, HIGH);
             USB_Detach(); //Disconnect from the OG Xbox port.
-            Xbox360Wireless.chatPadInitNeeded[0] = 1;
+            // Xbox360Wireless.chatPadInitNeeded[0] = 1;
         }
         else
         {
@@ -269,25 +272,25 @@ void sendControllerHIDReport()
 
 // #ifdef MASTER
 //Parse button presses for each type of controller
-uint8_t getButtonPress(ButtonEnum b, uint8_t controller)
+uint8_t getButtonPress(ButtonEnum b)
 {
-    if (Xbox360Wireless.Xbox360Connected[controller])
-        return Xbox360Wireless.getButtonPress(b, controller);
+    // if (Xbox360Wireless.Xbox360Connected[controller])
+    //     return Xbox360Wireless.getButtonPress(b, controller);
 
 
-    if (Xbox360Wired[controller]->Xbox360Connected)
-        return Xbox360Wired[controller]->getButtonPress(b);
+    if (Xbox360Wired.Xbox360Connected)
+        return Xbox360Wired.getButtonPress(b);
 
-    if (XboxOneWired[controller]->XboxOneConnected)
+    if (XboxOneWired.XboxOneConnected)
     {
         if (b == L2 || b == R2)
         {
             //Xbone one triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
-            return (uint8_t)(XboxOneWired[controller]->getButtonPress(b) >> 2); 
+            return (uint8_t)(XboxOneWired.getButtonPress(b) >> 2); 
         }
         else
         {
-            return (uint8_t)XboxOneWired[controller]->getButtonPress(b);
+            return (uint8_t)XboxOneWired.getButtonPress(b);
         }
     }
 
@@ -295,70 +298,70 @@ uint8_t getButtonPress(ButtonEnum b, uint8_t controller)
 }
 
 //Parse analog stick requests for each type of controller.
-int16_t getAnalogHat(AnalogHatEnum a, uint8_t controller)
+int16_t getAnalogHat(AnalogHatEnum a)
 {
-    if (Xbox360Wireless.Xbox360Connected[controller])
-        return Xbox360Wireless.getAnalogHat(a, controller);
+    // if (Xbox360Wireless.Xbox360Connected[controller])
+    //     return Xbox360Wireless.getAnalogHat(a, controller);
 
-    if (Xbox360Wired[controller]->Xbox360Connected)
+    if (Xbox360Wired.Xbox360Connected)
     {
         int16_t val;
-        val = Xbox360Wired[controller]->getAnalogHat(a);
+        val = Xbox360Wired.getAnalogHat(a);
         if (val == -32512) //8bitdo range fix
             val = -32768;
         return val;
     }
 
-    if (XboxOneWired[controller]->XboxOneConnected)
-        return XboxOneWired[controller]->getAnalogHat(a);
+    if (XboxOneWired.XboxOneConnected)
+        return XboxOneWired.getAnalogHat(a);
 
     return 0;
 }
 
 //Parse rumble activation requests for each type of controller.
-void setRumbleOn(uint8_t lValue, uint8_t rValue, uint8_t controller)
+void setRumbleOn(uint8_t lValue, uint8_t rValue)
 {
-    if (Xbox360Wireless.Xbox360Connected[controller])
-        Xbox360Wireless.setRumbleOn(lValue, rValue, controller);
+    // if (Xbox360Wireless.Xbox360Connected[controller])
+    //     Xbox360Wireless.setRumbleOn(lValue, rValue, controller);
 
-    if (Xbox360Wired[controller]->Xbox360Connected)
+    if (Xbox360Wired.Xbox360Connected)
     {
-        Xbox360Wired[controller]->setRumbleOn(lValue, rValue); 
+        Xbox360Wired.setRumbleOn(lValue, rValue); 
     }
 
-    if (XboxOneWired[controller]->XboxOneConnected)
+    if (XboxOneWired.XboxOneConnected)
     {
-        XboxOneWired[controller]->setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+        XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
     }
 
 }
 
 //Parse LED activation requests for each type of controller.
-void setLedOn(LEDEnum led, uint8_t controller)
+void setLedOn(LEDEnum led)
 {
-    if (Xbox360Wireless.Xbox360Connected[controller])
-        Xbox360Wireless.setLedOn(led, controller);
+    // if (Xbox360Wireless.Xbox360Connected[controller])
+    //     Xbox360Wireless.setLedOn(led, controller);
 
 
-    if (Xbox360Wired[controller]->Xbox360Connected)
-        Xbox360Wired[controller]->setLedOn(led);
+    if (Xbox360Wired.Xbox360Connected)
+        Xbox360Wired.setLedOn(led);
 
-    if (XboxOneWired[controller]->XboxOneConnected)
+    if (XboxOneWired.XboxOneConnected)
     {
         //no LEDs on Xbox One Controller. I think it is possible to adjust brightness but this is not implemented.
     }
 
 }
 
-bool controllerConnected(uint8_t controller)
+bool controllerConnected()
 {
-    if (Xbox360Wireless.Xbox360Connected[controller])
+    // if (Xbox360Wireless.Xbox360Connected[controller])
+    //     return 1;
+
+    if (Xbox360Wired.Xbox360Connected)
         return 1;
 
-    if (Xbox360Wired[controller]->Xbox360Connected)
-        return 1;
-
-    if (XboxOneWired[controller]->XboxOneConnected)
+    if (XboxOneWired.XboxOneConnected)
         return 1;
 
     return 0;
