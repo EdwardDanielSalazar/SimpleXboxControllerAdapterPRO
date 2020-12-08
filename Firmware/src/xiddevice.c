@@ -230,20 +230,20 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t *const HIDIn
     case DUKE_CONTROLLER:
         DukeReport->startByte = 0x00;
         DukeReport->bLength = 20;
-        DukeReport->dButtons = XboxOGDuke[0].dButtons;
+        DukeReport->dButtons = XboxOGDuke.dButtons;
         DukeReport->reserved = 0x00;
-        DukeReport->A = XboxOGDuke[0].A;
-        DukeReport->B = XboxOGDuke[0].B;
-        DukeReport->X = XboxOGDuke[0].X;
-        DukeReport->Y = XboxOGDuke[0].Y;
-        DukeReport->BLACK = XboxOGDuke[0].BLACK;
-        DukeReport->WHITE = XboxOGDuke[0].WHITE;
-        DukeReport->L = XboxOGDuke[0].L;
-        DukeReport->R = XboxOGDuke[0].R;
-        DukeReport->leftStickX = XboxOGDuke[0].leftStickX;
-        DukeReport->leftStickY = XboxOGDuke[0].leftStickY;
-        DukeReport->rightStickX = XboxOGDuke[0].rightStickX;
-        DukeReport->rightStickY = XboxOGDuke[0].rightStickY;
+        DukeReport->A = XboxOGDuke.A;
+        DukeReport->B = XboxOGDuke.B;
+        DukeReport->X = XboxOGDuke.X;
+        DukeReport->Y = XboxOGDuke.Y;
+        DukeReport->BLACK = XboxOGDuke.BLACK;
+        DukeReport->WHITE = XboxOGDuke.WHITE;
+        DukeReport->L = XboxOGDuke.L;
+        DukeReport->R = XboxOGDuke.R;
+        DukeReport->leftStickX = XboxOGDuke.leftStickX;
+        DukeReport->leftStickY = XboxOGDuke.leftStickY;
+        DukeReport->rightStickX = XboxOGDuke.rightStickX;
+        DukeReport->rightStickY = XboxOGDuke.rightStickY;
         *ReportSize = DukeReport->bLength;
         break;
 // #ifdef SUPPORTBATTALION
@@ -284,9 +284,9 @@ void CALLBACK_HID_Device_ProcessHIDReport(
     //See http://euc.jp/periphs/xbox-controller.en.html - Output Report
     if (ConnectedXID == DUKE_CONTROLLER && ReportSize == 0x06)
     {
-        XboxOGDuke[0].left_actuator = ((uint8_t *)ReportData)[3];
-        XboxOGDuke[0].right_actuator = ((uint8_t *)ReportData)[5];
-        XboxOGDuke[0].rumbleUpdate = 1;
+        XboxOGDuke.left_actuator = ((uint8_t *)ReportData)[3];
+        XboxOGDuke.right_actuator = ((uint8_t *)ReportData)[5];
+        XboxOGDuke.rumbleUpdate = 1;
     }
 }
 
