@@ -1,11 +1,18 @@
 /* Copyright (C) 2011 Circuits At Home, LTD. All rights reserved.
 
-This software may be distributed and modified under the terms of the GNU
-General Public License version 2 (GPL2) as published by the Free Software
-Foundation and appearing in the file GPL2.TXT included in the packaging of
-this file. Please note that GPL2 Section 2[b] requires that all works based
-on this software must also be made publicly available under the terms of
-the GPL2 ("Copyleft").
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 Contact information
 -------------------
@@ -75,8 +82,8 @@ public:
                 SPI_MISO::SetDirRead();
                 SPI_SS::SetDirWrite();
                 /* mode 00 (CPOL=0, CPHA=0) master, fclk/2. Mode 11 (CPOL=11, CPHA=11) is also supported by MAX3421E */
-                SPCR = 0x50; //SPI Enable and MASTER,
-                SPSR = 0x00; // 0x01 = SPI2X Ryzee119, changed from 0x01 to 0x00 to disable SPI2X. Speed is fclk/4 now.
+                SPCR = 0x50;
+                SPSR = 0x01; // 0x01
                 /**/
                 //tmp = SPSR;
                 //tmp = SPDR;
@@ -133,6 +140,7 @@ public:
         uint8_t regRd(uint8_t reg);
         uint8_t* bytesRd(uint8_t reg, uint8_t nbytes, uint8_t* data_p);
         uint8_t gpioRd();
+        uint8_t gpioRdOutput();
         uint16_t reset();
         int8_t Init();
         int8_t Init(int mseconds);
@@ -169,7 +177,7 @@ template< typename SPI_SS, typename INTR >
 void MAX3421e< SPI_SS, INTR >::regWr(uint8_t reg, uint8_t data) {
         XMEM_ACQUIRE_SPI();
 #if defined(SPI_HAS_TRANSACTION)
-        USB_SPI.beginTransaction(SPISettings(12000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
+        USB_SPI.beginTransaction(SPISettings(26000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
 #endif
         SPI_SS::Clear();
 
@@ -212,7 +220,7 @@ template< typename SPI_SS, typename INTR >
 uint8_t* MAX3421e< SPI_SS, INTR >::bytesWr(uint8_t reg, uint8_t nbytes, uint8_t* data_p) {
         XMEM_ACQUIRE_SPI();
 #if defined(SPI_HAS_TRANSACTION)
-        USB_SPI.beginTransaction(SPISettings(12000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
+        USB_SPI.beginTransaction(SPISettings(26000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
 #endif
         SPI_SS::Clear();
 
@@ -220,20 +228,15 @@ uint8_t* MAX3421e< SPI_SS, INTR >::bytesWr(uint8_t reg, uint8_t nbytes, uint8_t*
         spi4teensy3::send(reg | 0x02);
         spi4teensy3::send(data_p, nbytes);
         data_p += nbytes;
-#elif defined(SPI_HAS_TRANSACTION) && !defined(ESP8266) && !defined(ESP32)
-        USB_SPI.transfer(reg | 0x02);
-        USB_SPI.transfer(data_p, nbytes);
-        data_p += nbytes;
-#elif defined(__ARDUINO_X86__)
-        USB_SPI.transfer(reg | 0x02);
-        USB_SPI.transferBuffer(data_p, NULL, nbytes);
-        data_p += nbytes;
 #elif defined(STM32F4)
         uint8_t data = reg | 0x02;
         HAL_SPI_Transmit(&SPI_Handle, &data, 1, HAL_MAX_DELAY);
         HAL_SPI_Transmit(&SPI_Handle, data_p, nbytes, HAL_MAX_DELAY);
         data_p += nbytes;
-#elif !defined(SPDR) // ESP8266, ESP32
+#elif !defined(__AVR__) || !defined(SPDR)
+#if defined(ESP8266) || defined(ESP32)
+        yield();
+#endif
         USB_SPI.transfer(reg | 0x02);
         while(nbytes) {
                 USB_SPI.transfer(*data_p);
@@ -275,7 +278,7 @@ template< typename SPI_SS, typename INTR >
 uint8_t MAX3421e< SPI_SS, INTR >::regRd(uint8_t reg) {
         XMEM_ACQUIRE_SPI();
 #if defined(SPI_HAS_TRANSACTION)
-        USB_SPI.beginTransaction(SPISettings(12000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
+        USB_SPI.beginTransaction(SPISettings(26000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
 #endif
         SPI_SS::Clear();
 
@@ -314,7 +317,7 @@ template< typename SPI_SS, typename INTR >
 uint8_t* MAX3421e< SPI_SS, INTR >::bytesRd(uint8_t reg, uint8_t nbytes, uint8_t* data_p) {
         XMEM_ACQUIRE_SPI();
 #if defined(SPI_HAS_TRANSACTION)
-        USB_SPI.beginTransaction(SPISettings(12000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
+        USB_SPI.beginTransaction(SPISettings(26000000, MSBFIRST, SPI_MODE0)); // The MAX3421E can handle up to 26MHz, use MSB First and SPI mode 0
 #endif
         SPI_SS::Clear();
 
@@ -337,6 +340,7 @@ uint8_t* MAX3421e< SPI_SS, INTR >::bytesRd(uint8_t reg, uint8_t nbytes, uint8_t*
         HAL_SPI_Receive(&SPI_Handle, data_p, nbytes, HAL_MAX_DELAY);
         data_p += nbytes;
 #elif !defined(SPDR) // ESP8266, ESP32
+        yield();
         USB_SPI.transfer(reg);
         while(nbytes) {
             *data_p++ = USB_SPI.transfer(0);
@@ -372,6 +376,9 @@ uint8_t* MAX3421e< SPI_SS, INTR >::bytesRd(uint8_t reg, uint8_t nbytes, uint8_t*
 }
 /* GPIO read. See gpioWr for explanation */
 
+/** @brief  Reads the current GPI input values
+*   @retval uint8_t Bitwise value of all 8 GPI inputs
+*/
 /* GPIN pins are in high nibbles of IOPINS1, IOPINS2    */
 template< typename SPI_SS, typename INTR >
 uint8_t MAX3421e< SPI_SS, INTR >::gpioRd() {
@@ -380,6 +387,19 @@ uint8_t MAX3421e< SPI_SS, INTR >::gpioRd() {
         gpin &= 0xf0; //clean lower nibble
         gpin |= (regRd(rIOPINS1) >> 4); //shift low bits and OR with upper from previous operation.
         return ( gpin);
+}
+
+/** @brief  Reads the current GPI output values
+*   @retval uint8_t Bitwise value of all 8 GPI outputs
+*/
+/* GPOUT pins are in low nibbles of IOPINS1, IOPINS2    */
+template< typename SPI_SS, typename INTR >
+uint8_t MAX3421e< SPI_SS, INTR >::gpioRdOutput() {
+        uint8_t gpout = 0;
+        gpout = regRd(rIOPINS1); //pins 0-3
+        gpout &= 0x0f; //clean upper nibble
+        gpout |= (regRd(rIOPINS2) << 4); //shift high bits and OR with lower from previous operation.
+        return ( gpout);
 }
 
 /* reset MAX3421E. Returns number of cycles it took for PLL to stabilize after reset
