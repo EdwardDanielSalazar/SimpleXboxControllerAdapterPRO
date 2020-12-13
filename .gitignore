@@ -60,3 +60,5 @@ dkms.conf
 # CMake Files
 Firmware/build
 
+Firmware/.pio
+
