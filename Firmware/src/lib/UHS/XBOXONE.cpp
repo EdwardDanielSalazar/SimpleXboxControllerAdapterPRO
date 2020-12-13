@@ -302,7 +302,7 @@ uint8_t XBOXONE::Poll() {
 
         if(!bPollEnable)
                 return 0;
-
+				
         if((int32_t)((uint32_t)millis() - qNextPollTime) >= 0L) { // Do not poll if shorter than polling interval
                 qNextPollTime = (uint32_t)millis() + pollInterval; // Set new poll time
                 uint16_t length =  (uint16_t)epInfo[ XBOX_ONE_INPUT_PIPE ].maxPktSize; // Read the maximum packet size from the endpoint
@@ -411,7 +411,7 @@ int16_t XBOXONE::getAnalogHat(AnalogHatEnum a) {
 
 /* Xbox Controller commands */
 uint8_t XBOXONE::XboxCommand(uint8_t* data, uint16_t nbytes) {
-        data[2] = cmdCounter++; // Increment the output command counter
+        data[2] = cmdCounter++; 
         uint8_t rcode = pUsb->outTransfer(bAddress, epInfo[ XBOX_ONE_OUTPUT_PIPE ].epAddr, nbytes, data);
 #ifdef DEBUG_USB_HOST
         Notify(PSTR("\r\nXboxCommand, Return: "), 0x80);
@@ -423,7 +423,7 @@ uint8_t XBOXONE::XboxCommand(uint8_t* data, uint16_t nbytes) {
 // The Xbox One packets are described at: https://github.com/quantus/xbox-one-controller-protocol
 void XBOXONE::onInit() {
         // A short buzz to show the controller is active
-        uint8_t writeBuf[13];
+        /*uint8_t writeBuf[13];
 
         // Activate rumble
         writeBuf[0] = 0x09;
@@ -441,7 +441,8 @@ void XBOXONE::onInit() {
         writeBuf[10] = 0x80; // Length of pulse
         writeBuf[11] = 0x00; // Off period
         writeBuf[12] = 0x00; // Repeat count
-        XboxCommand(writeBuf, 13);
+        XboxCommand(writeBuf, 13);*/
+		setRumbleOff();
 
         if(pFuncOnInit)
                 pFuncOnInit(); // Call the user function
