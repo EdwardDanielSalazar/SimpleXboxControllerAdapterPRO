@@ -60,6 +60,8 @@ bool controllerConnected();
 
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
+PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
+PS4USB PS4Wired(&UsbHost);
 
 
 int main(void)
@@ -276,6 +278,8 @@ void sendControllerHIDReport()
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b)
 {
+    uint8_t ps3Val = 0;
+	uint8_t ps4Val = 0; // TO DO - merge these vars
     // if (Xbox360Wireless.Xbox360Connected[controller])
     //     return Xbox360Wireless.getButtonPress(b, controller);
 
@@ -295,6 +299,65 @@ uint8_t getButtonPress(ButtonEnum b)
             return (uint8_t)XboxOneWired.getButtonPress(b);
         }
     }
+
+    if (PS3Wired.PS3Connected) {
+		switch (b) {
+			// Remap the PS3 controller face buttons to their Xbox counterparts
+			case A:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(CROSS); // TO DO - are these casts needed now? And in PS4 code.
+				break;
+			case B:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(CIRCLE);
+				break;
+			case X:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(SQUARE);
+				break;
+			case Y:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
+				break;
+			// Call a different function from the PS3USB library to get the level of
+			// pressure applied to the L2 and R2 triggers, not just 'on' or 'off
+			case L2:
+				ps3Val = (uint8_t)PS3Wired.getAnalogButton(L2);
+				break;
+			case R2:
+				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R2);
+				break;
+			// Requests for the start, select, R1, L1 and the D-pad buttons can be called normally
+			default:
+				ps3Val = (uint8_t)PS3Wired.getButtonPress(b);
+		}
+		return ps3Val;
+	}
+
+	if (PS4Wired.connected()) {
+		switch (b) {
+			// Remap the PS4 controller face buttons to their Xbox counterparts
+			case A:
+				ps4Val = (uint8_t)PS4Wired.getButtonPress(CROSS);
+				break;
+			case B:
+				ps4Val = (uint8_t)PS4Wired.getButtonPress(CIRCLE);
+				break;
+			case X:
+				ps4Val = (uint8_t)PS4Wired.getButtonPress(SQUARE);
+				break;
+			case Y:
+				ps4Val = (uint8_t)PS4Wired.getButtonPress(TRIANGLE);
+				break;
+			// Call a different function from the PS4USB library to get the level of
+			// pressure applied to the L2 and R2 triggers, not just 'on' or 'off
+			case L2:
+				ps4Val = (uint8_t)PS4Wired.getAnalogButton(L2);
+				break;
+			case R2:
+				ps4Val = (uint8_t)PS4Wired.getAnalogButton(R2);
+				break;
+			default:
+				ps4Val = (uint8_t)PS4Wired.getButtonPress(b);
+		}
+		return ps4Val;
+	}
 
     return 0;
 }
@@ -316,6 +379,24 @@ int16_t getAnalogHat(AnalogHatEnum a)
 
     if (XboxOneWired.XboxOneConnected)
         return XboxOneWired.getAnalogHat(a);
+
+    if (PS3Wired.PS3Connected) {
+		// Scale up the unsigned 8bit values produced by the PS3 analog sticks to the
+		// signed 16bit values expected by the Xbox. In the case of the Y axes, invert the result
+		if (a == RightHatY || a == LeftHatY) {
+			return (PS3Wired.getAnalogHat(a) - 127) * -255;
+		} else {
+			return (PS3Wired.getAnalogHat(a) - 127) * 255;
+		}
+	}
+
+	if (PS4Wired.connected()) {
+		if (a == RightHatY || a == LeftHatY) {
+			return (PS4Wired.getAnalogHat(a) - 127) * -255;
+		} else {
+			return (PS4Wired.getAnalogHat(a) - 127) * 255;
+		}
+	}
 
     return 0;
 }
@@ -354,6 +435,9 @@ void setLedOn(LEDEnum led)
         //no LEDs on Xbox One Controller. I think it is possible to adjust brightness but this is not implemented.
     }
 
+    if (PS3Wired.PS3Connected)
+	PS3Wired.setLedOn(led);
+
 }
 
 bool controllerConnected()
@@ -366,6 +450,12 @@ bool controllerConnected()
 
     if (XboxOneWired.XboxOneConnected)
         return 1;
+
+    if (PS3Wired.PS3Connected)
+		return 1;
+
+	if (PS4Wired.connected())
+		return 1;
 
     return 0;
 }
