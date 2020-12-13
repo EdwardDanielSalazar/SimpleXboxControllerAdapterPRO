@@ -280,8 +280,6 @@ uint8_t getButtonPress(ButtonEnum b)
 {
     uint8_t ps3Val = 0;
 	uint8_t ps4Val = 0; // TO DO - merge these vars
-    // if (Xbox360Wireless.Xbox360Connected[controller])
-    //     return Xbox360Wireless.getButtonPress(b, controller);
 
 
     if (Xbox360Wired.Xbox360Connected)
