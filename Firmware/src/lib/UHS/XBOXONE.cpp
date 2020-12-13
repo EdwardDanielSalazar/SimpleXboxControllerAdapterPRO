@@ -302,7 +302,7 @@ uint8_t XBOXONE::Poll() {
 
         if(!bPollEnable)
                 return 0;
-
+				
         if((int32_t)((uint32_t)millis() - qNextPollTime) >= 0L) { // Do not poll if shorter than polling interval
                 qNextPollTime = (uint32_t)millis() + pollInterval; // Set new poll time
                 uint16_t length =  (uint16_t)epInfo[ XBOX_ONE_INPUT_PIPE ].maxPktSize; // Read the maximum packet size from the endpoint
@@ -411,7 +411,7 @@ int16_t XBOXONE::getAnalogHat(AnalogHatEnum a) {
 
 /* Xbox Controller commands */
 uint8_t XBOXONE::XboxCommand(uint8_t* data, uint16_t nbytes) {
-        data[2] = cmdCounter++; // Increment the output command counter
+        data[2] = cmdCounter++; 
         uint8_t rcode = pUsb->outTransfer(bAddress, epInfo[ XBOX_ONE_OUTPUT_PIPE ].epAddr, nbytes, data);
 #ifdef DEBUG_USB_HOST
         Notify(PSTR("\r\nXboxCommand, Return: "), 0x80);
@@ -422,30 +422,28 @@ uint8_t XBOXONE::XboxCommand(uint8_t* data, uint16_t nbytes) {
 
 // The Xbox One packets are described at: https://github.com/quantus/xbox-one-controller-protocol
 void XBOXONE::onInit() {
+        // A short buzz to show the controller is active
+        /*uint8_t writeBuf[13];
 
-        // Mirror code in Ryzee implementation - why set like this?
+        // Activate rumble
+        writeBuf[0] = 0x09;
+        writeBuf[1] = 0x00;
+        // Byte 2 is set in "XboxCommand"
 
-        // // A short buzz to show the controller is active
-        // uint8_t writeBuf[13];
+        // Single rumble effect
+        writeBuf[3] = 0x09; // Substructure (what substructure rest of this packet has)
+        writeBuf[4] = 0x00; // Mode
+        writeBuf[5] = 0x0F; // Rumble mask (what motors are activated) (0000 lT rT L R)
+        writeBuf[6] = 0x04; // lT force
+        writeBuf[7] = 0x04; // rT force
+        writeBuf[8] = 0x20; // L force
+        writeBuf[9] = 0x20; // R force
+        writeBuf[10] = 0x80; // Length of pulse
+        writeBuf[11] = 0x00; // Off period
+        writeBuf[12] = 0x00; // Repeat count
+        XboxCommand(writeBuf, 13);*/
+		setRumbleOff();
 
-        // // Activate rumble
-        // writeBuf[0] = 0x09;
-        // writeBuf[1] = 0x00;
-        // // Byte 2 is set in "XboxCommand"
-
-        // // Single rumble effect
-        // writeBuf[3] = 0x09; // Substructure (what substructure rest of this packet has)
-        // writeBuf[4] = 0x00; // Mode
-        // writeBuf[5] = 0x0F; // Rumble mask (what motors are activated) (0000 lT rT L R)
-        // writeBuf[6] = 0x04; // lT force
-        // writeBuf[7] = 0x04; // rT force
-        // writeBuf[8] = 0x20; // L force
-        // writeBuf[9] = 0x20; // R force
-        // writeBuf[10] = 0x80; // Length of pulse
-        // writeBuf[11] = 0x00; // Off period
-        // writeBuf[12] = 0x00; // Repeat count
-        // XboxCommand(writeBuf, 13);
-        setRumbleOff();
         if(pFuncOnInit)
                 pFuncOnInit(); // Call the user function
 }
