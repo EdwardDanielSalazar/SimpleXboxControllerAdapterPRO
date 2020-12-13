@@ -46,7 +46,7 @@ e-mail   :  support@circuitsathome.com
  * For example Serial3.
  */
 #ifndef USB_HOST_SERIAL
-#define USB_HOST_SERIAL Serial
+#define USB_HOST_SERIAL Serial1
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////

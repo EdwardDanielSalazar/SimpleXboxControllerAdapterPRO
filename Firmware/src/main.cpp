@@ -24,12 +24,14 @@ In settings.h you can configure the following options:
 
 #include "settings.h"
 #include "xiddevice.h"
-#include "Wire.h" // Remove this
+// #include "Wire.h" // Remove this
 #include "EEPROM.h" // ?? Remove this ??
-#include <XBOXRECV.h>
-#include <usbhub.h> // Remove this
+// #include <XBOXRECV.h>
+// #include <usbhub.h> // Remove this
 #include <XBOXONE.h>
 #include <XBOXUSB.h>
+#include <PS3USB.h>
+#include <PS4USB.h>
 
 
 //playerID is set in the main program based on the slot the Arduino is installed.
@@ -44,7 +46,7 @@ bool enumerationComplete = false;
 uint32_t disconnectTimer = 0;
 
 USB UsbHost;
-USBHub Hub(&UsbHost);
+// USBHub Hub(&UsbHost);
 // XBOXRECV Xbox360Wireless(&UsbHost);
 uint8_t getButtonPress(ButtonEnum b);
 int16_t getAnalogHat(AnalogHatEnum a);
