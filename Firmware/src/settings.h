@@ -22,6 +22,8 @@
 #define ENABLE_OLED
 #define I2C_ADDRESS 0x3C
 
+#define ENABLE_RUMBLE
+
 /* prototypes */
 void sendControllerHIDReport();
 

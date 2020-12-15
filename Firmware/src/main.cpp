@@ -52,7 +52,8 @@ uint8_t getButtonPress(ButtonEnum b);
 int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
 void setLedOn(LEDEnum led);
-bool controllerConnected();
+// bool controllerConnected();
+uint8_t controllerConnected();
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
@@ -167,6 +168,8 @@ int main(void)
                 else if (getButtonPress(START) && getButtonPress(BACK) &&
                             getButtonPress(L2) > 0x00 && getButtonPress(R2) > 0x00)
                 {
+                    
+                    // TO DO - fix this
                     //Turn off rumble on all controllers
                     for (uint8_t j = 0; j < MAX_CONTROLLERS; j++)
                     {
@@ -380,18 +383,28 @@ int16_t getAnalogHat(AnalogHatEnum a)
 //Parse rumble activation requests for each type of controller.
 void setRumbleOn(uint8_t lValue, uint8_t rValue)
 {
-    // if (Xbox360Wireless.Xbox360Connected[controller])
-    //     Xbox360Wireless.setRumbleOn(lValue, rValue, controller);
+    #ifdef ENABLE_RUMBLE
+    if (Xbox360Wired.Xbox360Connected)
+    {
+        Xbox360Wired.setRumbleOn(lValue, rValue); 
+    }
 
-    // if (Xbox360Wired.Xbox360Connected)
-    // {
-    //     Xbox360Wired.setRumbleOn(lValue, rValue); 
-    // }
+    if (XboxOneWired.XboxOneConnected)
+    {
+        XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+    }
 
-    // if (XboxOneWired.XboxOneConnected)
-    // {
-    //     XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
-    // }
+    // TO DO - add left and right values
+    if (PS3Wired.PS3Connected)
+    {
+		PS3Wired.setRumbleOn(RumbleLow);
+    }
+
+	if (PS4Wired.connected())
+    {
+		PS4Wired.setRumbleOn(RumbleLow);
+    }
+    #endif
 
 }
 
@@ -410,34 +423,26 @@ void setLedOn(LEDEnum led)
     if (PS3Wired.PS3Connected)
 	PS3Wired.setLedOn(led);
 
+    // if (PS3Wired.PS3Connected)
+	// PS3Wired.setLedOn(led);
+
 }
 
-bool controllerConnected()
+uint8_t controllerConnected()
 {
+    uint8_t controllerType = 0;
 
     if (Xbox360Wired.Xbox360Connected)
-        #ifdef ENABLE_OLED
-        // oled.p
-        #endif
-        return 1;
+        controllerType =  1;
 
     if (XboxOneWired.XboxOneConnected)
-        #ifdef ENABLE_OLED
-
-        #endif
-        return 1;
+        controllerType =  2;
 
     if (PS3Wired.PS3Connected)
-        #ifdef ENABLE_OLED
-
-        #endif
-		return 1;
+		controllerType =  3;
 
 	if (PS4Wired.connected())
-        #ifdef ENABLE_OLED
+		controllerType =  4;
 
-        #endif
-		return 1;
-
-    return 0;
+    return controllerType;
 }
