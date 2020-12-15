@@ -24,10 +24,7 @@ In settings.h you can configure the following options:
 
 #include "settings.h"
 #include "xiddevice.h"
-// #include "Wire.h" // Remove this
 #include "EEPROM.h" // ?? Remove this ??
-// #include <XBOXRECV.h>
-// #include <usbhub.h> // Remove this
 #include <XBOXONE.h>
 #include <XBOXUSB.h>
 #include <PS3USB.h>
@@ -35,7 +32,7 @@ In settings.h you can configure the following options:
 
 
 //playerID is set in the main program based on the slot the Arduino is installed.
-uint8_t playerID;
+// uint8_t playerID;
 //Xbox gamepad data structure to store all button and actuator states for all four controllers.
 USB_XboxGamepad_Data_t XboxOGDuke;
 //Default XID device to emulate
@@ -46,23 +43,15 @@ bool enumerationComplete = false;
 uint32_t disconnectTimer = 0;
 
 USB UsbHost;
-// USBHub Hub(&UsbHost);
-// XBOXRECV Xbox360Wireless(&UsbHost);
 uint8_t getButtonPress(ButtonEnum b);
 int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
 void setLedOn(LEDEnum led);
 bool controllerConnected();
-// XBOXONE XboxOneWired1(&UsbHost);
-// XBOXONE *XboxOneWired[4] = {&XboxOneWired1};
-// XBOXUSB Xbox360Wired1(&UsbHost);
-// XBOXUSB *Xbox360Wired[4] = {&Xbox360Wired1};
-
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 PS4USB PS4Wired(&UsbHost);
-
 
 int main(void)
 {
@@ -84,14 +73,6 @@ int main(void)
     //Initialise the Serial Port
     //Serial1.begin(500000);
 
-    //Determine what player this board is. Used for the slave devices mainly.
-    //There is 2 ID pins on the PCB which are read in.
-    //00 = Player 1
-    //01 = Player 2
-    //10 = Player 3
-    //11 = Player 4
-    playerID = digitalRead(PLAYER_ID1_PIN) << 1 | digitalRead(PLAYER_ID2_PIN);
-
     //Init the XboxOG data arrays to zero.
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t) * MAX_CONTROLLERS);
 
@@ -110,10 +91,8 @@ int main(void)
     while (1)
     {
 
-        /*** MASTER TASKS ***/
         UsbHost.busprobe();
         UsbHost.Task();
-        // static uint8_t i = 0;
         if (controllerConnected())
         {
         
@@ -145,8 +124,6 @@ int main(void)
             XboxOGDuke.leftStickY = getAnalogHat(LeftHatY);
             XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
             XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
-
-
 
             //Anything that sends a command to the Xbox 360 controllers happens here.
             //(i.e rumble, LED changes, controller off command)
@@ -197,7 +174,6 @@ int main(void)
                 commandTimer = millis();
             }
 
-            /*Check/send the Player 1 HID report every loop to minimise lag even more on the master*/
             sendControllerHIDReport();
         }
 
@@ -215,7 +191,6 @@ int main(void)
         {
             digitalWrite(ARDUINO_LED_PIN, HIGH);
             USB_Detach(); //Disconnect from the OG Xbox port.
-            // Xbox360Wireless.chatPadInitNeeded[0] = 1;
         }
         else
         {
@@ -244,15 +219,6 @@ int main(void)
         }
         Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
 
-
-// NOTE has old XboxOGDuke reference!!!!
-#ifndef MASTER
-        // if (inputBuffer[0] != 0xF0)
-        // {
-        //     memcpy(&XboxOGDuke[0], inputBuffer, 20);
-        // }
-        // sendControllerHIDReport();
-#endif
     }
 }
 
@@ -274,7 +240,6 @@ void sendControllerHIDReport()
     USB_USBTask();
 }
 
-// #ifdef MASTER
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b)
 {
@@ -363,8 +328,6 @@ uint8_t getButtonPress(ButtonEnum b)
 //Parse analog stick requests for each type of controller.
 int16_t getAnalogHat(AnalogHatEnum a)
 {
-    // if (Xbox360Wireless.Xbox360Connected[controller])
-    //     return Xbox360Wireless.getAnalogHat(a, controller);
 
     if (Xbox360Wired.Xbox360Connected)
     {
@@ -421,9 +384,6 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
 //Parse LED activation requests for each type of controller.
 void setLedOn(LEDEnum led)
 {
-    // if (Xbox360Wireless.Xbox360Connected[controller])
-    //     Xbox360Wireless.setLedOn(led, controller);
-
 
     if (Xbox360Wired.Xbox360Connected)
         Xbox360Wired.setLedOn(led);
@@ -440,8 +400,6 @@ void setLedOn(LEDEnum led)
 
 bool controllerConnected()
 {
-    // if (Xbox360Wireless.Xbox360Connected[controller])
-    //     return 1;
 
     if (Xbox360Wired.Xbox360Connected)
         return 1;
