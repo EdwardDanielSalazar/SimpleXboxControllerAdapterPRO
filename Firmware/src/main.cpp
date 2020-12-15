@@ -58,6 +58,11 @@ XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 PS4USB PS4Wired(&UsbHost);
+
+#ifdef ENABLE_RUMBLE
+bool rumbleOn = true;
+#endif
+
 #ifdef ENABLE_OLED
 SSD1306AsciiAvrI2c oled;
 #endif
@@ -396,13 +401,21 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
 
     // TO DO - add left and right values
     if (PS3Wired.PS3Connected)
-    {
-		PS3Wired.setRumbleOn(RumbleLow);
+    {   
+        if (lValue == 0 && rValue == 0) {
+            PS3Wired.setRumbleOff();
+        } else {
+		    PS3Wired.setRumbleOn(RumbleLow);
+        }
     }
 
 	if (PS4Wired.connected())
-    {
-		PS4Wired.setRumbleOn(RumbleLow);
+    {   
+        if (lValue == 0 && rValue == 0) {
+            PS3Wired.setRumbleOff();
+        } else {
+		    PS4Wired.setRumbleOn(RumbleLow);
+        }
     }
     #endif
 
