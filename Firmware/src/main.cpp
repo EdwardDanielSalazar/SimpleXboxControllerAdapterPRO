@@ -25,11 +25,16 @@ In settings.h you can configure the following options:
 #include "settings.h"
 #include "xiddevice.h"
 #include "EEPROM.h" // ?? Remove this ??
+#include <SPI.h>
 #include <XBOXONE.h>
 #include <XBOXUSB.h>
 #include <PS3USB.h>
 #include <PS4USB.h>
 
+#ifdef ENABLE_OLED
+#include <SSD1306Ascii.h>
+#include <SSD1306AsciiAvrI2c.h>
+#endif
 
 //playerID is set in the main program based on the slot the Arduino is installed.
 // uint8_t playerID;
@@ -52,6 +57,9 @@ XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 PS4USB PS4Wired(&UsbHost);
+#ifdef ENABLE_OLED
+SSD1306AsciiAvrI2c oled;
+#endif
 
 int main(void)
 {
@@ -76,7 +84,6 @@ int main(void)
     //Init the XboxOG data arrays to zero.
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t) * MAX_CONTROLLERS);
 
-
     digitalWrite(USB_HOST_RESET_PIN, LOW);
     delay(20); //wait 20ms to reset the IC. Reseting at startup improves reliability in my experience.
     digitalWrite(USB_HOST_RESET_PIN, HIGH);
@@ -86,6 +93,13 @@ int main(void)
         digitalWrite(ARDUINO_LED_PIN, !digitalRead(ARDUINO_LED_PIN));
         delay(500);
     }
+
+    // Setup OLED
+    #ifdef ENABLE_OLED
+    oled.setFont(SystemFont5x7);
+    oled.displayRemap(true);
+    oled.clear();
+    #endif
 
 
     while (1)
@@ -402,15 +416,27 @@ bool controllerConnected()
 {
 
     if (Xbox360Wired.Xbox360Connected)
+        #ifdef ENABLE_OLED
+        // oled.p
+        #endif
         return 1;
 
     if (XboxOneWired.XboxOneConnected)
+        #ifdef ENABLE_OLED
+
+        #endif
         return 1;
 
     if (PS3Wired.PS3Connected)
+        #ifdef ENABLE_OLED
+
+        #endif
 		return 1;
 
 	if (PS4Wired.connected())
+        #ifdef ENABLE_OLED
+
+        #endif
 		return 1;
 
     return 0;
