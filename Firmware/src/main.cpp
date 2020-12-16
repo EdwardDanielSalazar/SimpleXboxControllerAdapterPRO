@@ -102,9 +102,11 @@ int main(void)
 
     // Setup OLED
     #ifdef ENABLE_OLED
+    oled.begin(&Adafruit128x64, I2C_ADDRESS);
     oled.setFont(SystemFont5x7);
     oled.displayRemap(true);
     oled.clear();
+    oled.println("OLED ON");
     #endif
 
 
@@ -400,6 +402,7 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
     }
 
     // TO DO - add left and right values
+    // TO DO - consider separate rumbleOff function
     if (PS3Wired.PS3Connected)
     {   
         if (lValue == 0 && rValue == 0) {
