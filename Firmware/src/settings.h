@@ -11,11 +11,17 @@
 
 #define USB_HOST_RESET_PIN 9
 #define ARDUINO_LED_PIN 17
-
-#define ENABLE_OLED
 #define I2C_ADDRESS 0x3C
+#define VCC_READ_PIN A0
 
+// VCC Read Resistor Values in KOhm
+#define LARGE_RESISTOR 390
+#define SMALL_RESISTOR 100
+
+// Build Options
+#define ENABLE_OLED
 #define ENABLE_RUMBLE
+#define ENABLE_MOTION
 
 /* prototypes */
 void sendControllerHIDReport();

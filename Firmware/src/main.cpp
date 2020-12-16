@@ -62,7 +62,12 @@ PS4USB PS4Wired(&UsbHost);
 bool rumbleOn = true;
 #endif
 
+#ifdef ENABLE_MOTION
+bool motionOn = true;
+#endif
+
 #ifdef ENABLE_OLED
+void updateOled();
 SSD1306AsciiAvrI2c oled;
 #endif
 
@@ -103,7 +108,7 @@ int main(void)
     oled.setFont(SystemFont5x7);
     oled.displayRemap(true);
     oled.clear();
-    oled.println("OLED ON");
+    updateOled();
     #endif
 
 
@@ -171,16 +176,11 @@ int main(void)
                 //if you happen to press this reset combo mid rumble.
                 else if (getButtonPress(START) && getButtonPress(BACK) &&
                             getButtonPress(L2) > 0x00 && getButtonPress(R2) > 0x00)
-                {
-                    
-                    // TO DO - fix this
-                    //Turn off rumble on all controllers
-                    // for (uint8_t j = 0; j < MAX_CONTROLLERS; j++)
-                    // {
-                        XboxOGDuke.left_actuator = 0;
-                        XboxOGDuke.right_actuator = 0;
-                        XboxOGDuke.rumbleUpdate = 1;
-                    // }
+                {                    
+                    //Turn off rumble
+                    XboxOGDuke.left_actuator = 0;
+                    XboxOGDuke.right_actuator = 0;
+                    XboxOGDuke.rumbleUpdate = 1;
                 }
                 //If Xbox button isnt held down, send the rumble commands
                 else
@@ -451,3 +451,33 @@ uint8_t controllerConnected()
 
     return controllerType;
 }
+
+#ifdef ENABLE_OLED
+void updateOled() {
+    uint8_t controllerType = 0;
+    controllerType = controllerConnected();
+    if (controllerType == 1) {
+        oled.println("Xbox 360");
+    } else if (controllerType == 2) {
+        oled.println("Xbox One");
+    } else if (controllerType == 3) {
+        oled.println("PS3");
+    } else if (controllerType == 4) {
+        oled.println("PS4");
+    }
+
+    // TO DO - save a few bytes here
+    if (rumbleOn == true) {
+        oled.println("Rumble On");
+    } else {
+        oled.println("Rumble Off");
+    }
+
+    // TO DO - save a few bytes here
+    if (motionOn == true) {
+        oled.println("Motion On");
+    } else {
+        oled.println("Motion Off");
+    }
+}
+#endif
