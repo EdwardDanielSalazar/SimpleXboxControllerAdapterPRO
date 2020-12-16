@@ -268,8 +268,9 @@ void sendControllerHIDReport()
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b)
 {
-    uint8_t ps3Val = 0;
-	uint8_t ps4Val = 0; // TO DO - merge these vars
+    // uint8_t ps3Val = 0;
+	// uint8_t ps4Val = 0; // TO DO - merge these vars
+    uint8_t psVal = 0;
 
 
     if (Xbox360Wired.Xbox360Connected)
@@ -292,59 +293,59 @@ uint8_t getButtonPress(ButtonEnum b)
 		switch (b) {
 			// Remap the PS3 controller face buttons to their Xbox counterparts
 			case A:
-				ps3Val = (uint8_t)PS3Wired.getButtonPress(CROSS); // TO DO - are these casts needed now? And in PS4 code.
+				psVal = (uint8_t)PS3Wired.getButtonPress(CROSS); // TO DO - are these casts needed now? And in PS4 code.
 				break;
 			case B:
-				ps3Val = (uint8_t)PS3Wired.getButtonPress(CIRCLE);
+				psVal = (uint8_t)PS3Wired.getButtonPress(CIRCLE);
 				break;
 			case X:
-				ps3Val = (uint8_t)PS3Wired.getButtonPress(SQUARE);
+				psVal = (uint8_t)PS3Wired.getButtonPress(SQUARE);
 				break;
 			case Y:
-				ps3Val = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
+				psVal = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
 				break;
 			// Call a different function from the PS3USB library to get the level of
 			// pressure applied to the L2 and R2 triggers, not just 'on' or 'off
 			case L2:
-				ps3Val = (uint8_t)PS3Wired.getAnalogButton(L2);
+				psVal = (uint8_t)PS3Wired.getAnalogButton(L2);
 				break;
 			case R2:
-				ps3Val = (uint8_t)PS3Wired.getAnalogButton(R2);
+				psVal = (uint8_t)PS3Wired.getAnalogButton(R2);
 				break;
 			// Requests for the start, select, R1, L1 and the D-pad buttons can be called normally
 			default:
-				ps3Val = (uint8_t)PS3Wired.getButtonPress(b);
+				psVal = (uint8_t)PS3Wired.getButtonPress(b);
 		}
-		return ps3Val;
+		return psVal;
 	}
 
 	if (PS4Wired.connected()) {
 		switch (b) {
 			// Remap the PS4 controller face buttons to their Xbox counterparts
 			case A:
-				ps4Val = (uint8_t)PS4Wired.getButtonPress(CROSS);
+				psVal = (uint8_t)PS4Wired.getButtonPress(CROSS);
 				break;
 			case B:
-				ps4Val = (uint8_t)PS4Wired.getButtonPress(CIRCLE);
+				psVal = (uint8_t)PS4Wired.getButtonPress(CIRCLE);
 				break;
 			case X:
-				ps4Val = (uint8_t)PS4Wired.getButtonPress(SQUARE);
+				psVal = (uint8_t)PS4Wired.getButtonPress(SQUARE);
 				break;
 			case Y:
-				ps4Val = (uint8_t)PS4Wired.getButtonPress(TRIANGLE);
+				psVal = (uint8_t)PS4Wired.getButtonPress(TRIANGLE);
 				break;
 			// Call a different function from the PS4USB library to get the level of
 			// pressure applied to the L2 and R2 triggers, not just 'on' or 'off
 			case L2:
-				ps4Val = (uint8_t)PS4Wired.getAnalogButton(L2);
+				psVal = (uint8_t)PS4Wired.getAnalogButton(L2);
 				break;
 			case R2:
-				ps4Val = (uint8_t)PS4Wired.getAnalogButton(R2);
+				psVal = (uint8_t)PS4Wired.getAnalogButton(R2);
 				break;
 			default:
-				ps4Val = (uint8_t)PS4Wired.getButtonPress(b);
+				psVal = (uint8_t)PS4Wired.getButtonPress(b);
 		}
-		return ps4Val;
+		return psVal;
 	}
 
     return 0;
