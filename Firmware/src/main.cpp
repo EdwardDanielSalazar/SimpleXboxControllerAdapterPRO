@@ -51,8 +51,7 @@ USB UsbHost;
 uint8_t getButtonPress(ButtonEnum b);
 int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
-void setLedOn(LEDEnum led);
-// bool controllerConnected();
+void setLedOn(LEDEnum led); // TO DO - do something with this
 uint8_t controllerConnected();
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
@@ -75,8 +74,6 @@ int main(void)
     //Init IO
     pinMode(USB_HOST_RESET_PIN, OUTPUT);
     pinMode(ARDUINO_LED_PIN, OUTPUT);
-    // pinMode(PLAYER_ID1_PIN, INPUT_PULLUP);
-    // pinMode(PLAYER_ID2_PIN, INPUT_PULLUP);
     digitalWrite(USB_HOST_RESET_PIN, LOW);
     digitalWrite(ARDUINO_LED_PIN, HIGH);
 
@@ -88,7 +85,6 @@ int main(void)
     //Serial1.begin(500000);
 
     //Init the XboxOG data arrays to zero.
-    // memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t) * MAX_CONTROLLERS);
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t));
 
     digitalWrite(USB_HOST_RESET_PIN, LOW);
@@ -247,29 +243,20 @@ int main(void)
     }
 }
 
-// TO DO - Remove this switch/case
-
 /* Send the HID report to the OG Xbox */
 void sendControllerHIDReport()
 {
-    // switch (ConnectedXID)
-    // {
-    // case DUKE_CONTROLLER:
-        if (USB_Device_GetFrameNumber() - DukeController_HID_Interface.State.PrevFrameNum >= 4)
-        {
-            HID_Device_USBTask(&DukeController_HID_Interface); //Send OG Xbox HID Report
-        }
-        // break;
-
-    // }
+    if (USB_Device_GetFrameNumber() - DukeController_HID_Interface.State.PrevFrameNum >= 4)
+    {
+        HID_Device_USBTask(&DukeController_HID_Interface); //Send OG Xbox HID Report
+    }
     USB_USBTask();
 }
 
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b)
 {
-    // uint8_t ps3Val = 0;
-	// uint8_t ps4Val = 0; // TO DO - merge these vars
+
     uint8_t psVal = 0;
 
 
