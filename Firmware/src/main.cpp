@@ -75,8 +75,8 @@ int main(void)
     //Init IO
     pinMode(USB_HOST_RESET_PIN, OUTPUT);
     pinMode(ARDUINO_LED_PIN, OUTPUT);
-    pinMode(PLAYER_ID1_PIN, INPUT_PULLUP);
-    pinMode(PLAYER_ID2_PIN, INPUT_PULLUP);
+    // pinMode(PLAYER_ID1_PIN, INPUT_PULLUP);
+    // pinMode(PLAYER_ID2_PIN, INPUT_PULLUP);
     digitalWrite(USB_HOST_RESET_PIN, LOW);
     digitalWrite(ARDUINO_LED_PIN, HIGH);
 
@@ -88,7 +88,8 @@ int main(void)
     //Serial1.begin(500000);
 
     //Init the XboxOG data arrays to zero.
-    memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t) * MAX_CONTROLLERS);
+    // memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t) * MAX_CONTROLLERS);
+    memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t));
 
     digitalWrite(USB_HOST_RESET_PIN, LOW);
     delay(20); //wait 20ms to reset the IC. Reseting at startup improves reliability in my experience.
@@ -178,12 +179,12 @@ int main(void)
                     
                     // TO DO - fix this
                     //Turn off rumble on all controllers
-                    for (uint8_t j = 0; j < MAX_CONTROLLERS; j++)
-                    {
+                    // for (uint8_t j = 0; j < MAX_CONTROLLERS; j++)
+                    // {
                         XboxOGDuke.left_actuator = 0;
                         XboxOGDuke.right_actuator = 0;
                         XboxOGDuke.rumbleUpdate = 1;
-                    }
+                    // }
                 }
                 //If Xbox button isnt held down, send the rumble commands
                 else
@@ -251,16 +252,16 @@ int main(void)
 /* Send the HID report to the OG Xbox */
 void sendControllerHIDReport()
 {
-    switch (ConnectedXID)
-    {
-    case DUKE_CONTROLLER:
+    // switch (ConnectedXID)
+    // {
+    // case DUKE_CONTROLLER:
         if (USB_Device_GetFrameNumber() - DukeController_HID_Interface.State.PrevFrameNum >= 4)
         {
             HID_Device_USBTask(&DukeController_HID_Interface); //Send OG Xbox HID Report
         }
-        break;
+        // break;
 
-    }
+    // }
     USB_USBTask();
 }
 
