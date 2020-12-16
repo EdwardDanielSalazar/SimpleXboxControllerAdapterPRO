@@ -415,7 +415,7 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
 	if (PS4Wired.connected())
     {   
         if (lValue == 0 && rValue == 0) {
-            PS3Wired.setRumbleOff();
+            PS4Wired.setRumbleOff();
         } else {
 		    PS4Wired.setRumbleOn(RumbleLow);
         }
