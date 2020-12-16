@@ -102,7 +102,7 @@ int main(void)
 
     // Setup OLED
     #ifdef ENABLE_OLED
-    oled.begin(&Adafruit128x64, I2C_ADDRESS);
+    oled.begin(&Adafruit128x32, I2C_ADDRESS);
     oled.setFont(SystemFont5x7);
     oled.displayRemap(true);
     oled.clear();
