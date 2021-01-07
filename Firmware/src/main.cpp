@@ -464,6 +464,8 @@ void updateOled() {
         oled.println("PS3");
     } else if (controllerType == 4) {
         oled.println("PS4");
+    } else {
+        oled.println("N/C");
     }
 
     // TO DO - save a few bytes here
