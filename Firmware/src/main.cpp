@@ -53,10 +53,22 @@ int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
 void setLedOn(LEDEnum led); // TO DO - do something with this
 uint8_t controllerConnected();
+void checkControllerChange();
+void checkVoltage();
+void recordVoltage();
+void softwareReset();
+float readableVoltage(float var);
+
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 PS4USB PS4Wired(&UsbHost);
+uint8_t controllerType = 0;
+
+uint16_t voltageRaw = 0;
+uint16_t voltageRawUpper = 0;
+uint16_t voltageRawLower = 0;
+float voltage = 0;
 
 #ifdef ENABLE_RUMBLE
 bool rumbleOn = true;
@@ -102,6 +114,9 @@ int main(void)
         delay(500);
     }
 
+    // Record init supply voltage
+    recordVoltage();
+
     // Setup OLED
     #ifdef ENABLE_OLED
     oled.begin(&Adafruit128x32, I2C_ADDRESS);
@@ -114,10 +129,12 @@ int main(void)
 
     while (1)
     {
-
+        checkVoltage();
         UsbHost.busprobe();
         UsbHost.Task();
-        if (controllerConnected())
+
+        checkControllerChange();
+        if (controllerType)
         {
         
             //Read Digital Buttons
@@ -239,6 +256,8 @@ int main(void)
             report[1] = 0x00;
         }
         Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
+
+        // checkVoltage();
 
     }
 }
@@ -452,10 +471,19 @@ uint8_t controllerConnected()
     return controllerType;
 }
 
+void checkControllerChange() {
+    uint8_t currentController = controllerConnected();
+    if (currentController != controllerType) {
+        controllerType = currentController;
+        updateOled();
+    }
+}
+
 #ifdef ENABLE_OLED
 void updateOled() {
-    uint8_t controllerType = 0;
-    controllerType = controllerConnected();
+    oled.clear();
+    // uint8_t controllerType = 0;
+    // controllerType = controllerConnected();
     if (controllerType == 1) {
         oled.println("Xbox 360");
     } else if (controllerType == 2) {
@@ -481,5 +509,38 @@ void updateOled() {
     } else {
         oled.println("Motion Off");
     }
+    // oled.print(voltageRaw);
+    oled.print(voltage);
+    oled.println('V');
 }
 #endif
+
+void checkVoltage() {
+    uint16_t currentVoltage = 0;
+    currentVoltage = analogRead(A0);
+    if (currentVoltage > voltageRawUpper || currentVoltage < voltageRawLower) {
+        #ifdef ENABLE_OLED
+        oled.println("Resetting...");
+        #endif
+        softwareReset();
+    }
+}
+
+//  TO DO - consider speeding this up (currently only called on device init)
+void recordVoltage() {
+    voltageRaw = analogRead(A0);
+    voltageRawLower = voltageRaw - 30;
+    voltageRawUpper = voltageRaw + 30;
+    voltage = readableVoltage(voltageRaw);
+}
+
+void softwareReset() {
+  wdt_enable(WDTO_15MS);
+  while(1) {}
+}
+
+float readableVoltage(float analogVal) { 
+    float value = (float)analogVal / RAW_VOLTAGE_DIVISOR;
+    value = (int)(value * 100 + .5); 
+    return (float)value / 100;
+} 

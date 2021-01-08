@@ -15,8 +15,9 @@
 #define VCC_READ_PIN A0
 
 // VCC Read Resistor Values in KOhm
-#define LARGE_RESISTOR 390
-#define SMALL_RESISTOR 100
+// #define LARGE_RESISTOR 390
+// #define SMALL_RESISTOR 100
+#define RAW_VOLTAGE_DIVISOR 43
 
 // Build Options
 #define ENABLE_OLED
