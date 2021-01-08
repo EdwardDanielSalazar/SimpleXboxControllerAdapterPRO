@@ -531,7 +531,7 @@ void recordVoltage() {
     voltageRaw = analogRead(A0);
     voltageRawLower = voltageRaw - 30;
     voltageRawUpper = voltageRaw + 30;
-    voltage = readableVoltage(voltageRaw);
+    // voltage = readableVoltage(voltageRaw);
 }
 
 void softwareReset() {

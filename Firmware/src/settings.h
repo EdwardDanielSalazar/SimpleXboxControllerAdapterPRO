@@ -17,7 +17,8 @@
 // VCC Read Resistor Values in KOhm
 // #define LARGE_RESISTOR 390
 // #define SMALL_RESISTOR 100
-#define RAW_VOLTAGE_DIVISOR 43
+// #define RAW_VOLTAGE_DIVISOR 43
+#define HIGH_POWER_THRESHOLD 240
 
 // Build Options
 #define ENABLE_OLED
