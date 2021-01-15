@@ -18,11 +18,11 @@
 // #define LARGE_RESISTOR 390
 // #define SMALL_RESISTOR 100
 // #define RAW_VOLTAGE_DIVISOR 43
-#define HIGH_POWER_THRESHOLD 240
+// #define HIGH_POWER_THRESHOLD 240
 
 // Build Options
 #define ENABLE_OLED
-#define ENABLE_RUMBLE
+// #define ENABLE_RUMBLE
 #define ENABLE_MOTION
 
 /* prototypes */
