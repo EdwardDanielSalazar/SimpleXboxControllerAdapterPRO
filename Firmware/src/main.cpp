@@ -24,7 +24,7 @@ In settings.h you can configure the following options:
 
 #include "settings.h"
 #include "xiddevice.h"
-#include "EEPROM.h" // ?? Remove this ??
+// #include "EEPROM.h" // ?? Remove this ??
 #include <SPI.h>
 #include <XBOXONE.h>
 #include <XBOXUSB.h>
@@ -62,7 +62,7 @@ PS4USB PS4Wired(&UsbHost);
 uint8_t controllerType = 0;
 
 #ifdef ENABLE_RUMBLE
-bool rumbleOn = true;
+bool rumbleOn = false;
 #endif
 
 #ifdef ENABLE_MOTION
@@ -164,7 +164,7 @@ int main(void)
             if (millis() - commandTimer > 16)
             {
                 //If you hold the XBOX button for more than ~1second, turn off controller
-                if (getButtonPress(XBOX))
+                if (getButtonPress(XBOX) && getButtonPress(R2) > 0x00)
                 {
                     if (xboxHoldTimer == 0)
                     {
@@ -172,33 +172,54 @@ int main(void)
                     }
                     if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
                     {
-                        XboxOGDuke.dButtons = 0x00;
-                        setRumbleOn(0, 0);
-                        delay(10);
-                        // Xbox360Wireless.disconnect(i);
+
                         xboxHoldTimer = 0;
+                        motionOn = !motionOn;
+                        #ifdef ENABLE_OLED
+                        updateOled();
+                        #endif
                     }
                 }
+                else if (getButtonPress(XBOX) && getButtonPress(L2) > 0x00)
+                {
+                    if (xboxHoldTimer == 0)
+                    {
+                        xboxHoldTimer = millis();
+                    }
+                    if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
+                    {
+
+                        xboxHoldTimer = 0;
+                        rumbleOn = !rumbleOn;
+                        #ifdef ENABLE_OLED
+                        updateOled();
+                        #endif
+                    }
+                }
+                #ifdef ENABLE_RUMBLE
                 //START+BACK TRIGGERS is a standard soft reset command.
                 //We turn off the rumble motors here to prevent them getting locked on
                 //if you happen to press this reset combo mid rumble.
                 else if (getButtonPress(START) && getButtonPress(BACK) &&
                             getButtonPress(L2) > 0x00 && getButtonPress(R2) > 0x00)
-                {                    
+                {       
                     //Turn off rumble
                     XboxOGDuke.left_actuator = 0;
                     XboxOGDuke.right_actuator = 0;
                     XboxOGDuke.rumbleUpdate = 1;
+                    
                 }
-                //If Xbox button isnt held down, send the rumble commands
+                #endif
                 else
-                {
+                {   
                     xboxHoldTimer = 0; //Reset the XBOX button hold time counter.
+                    #ifdef ENABLE_RUMBLE 
                     if (XboxOGDuke.rumbleUpdate == 1)
-                    {
+                    {   
                         setRumbleOn(XboxOGDuke.left_actuator, XboxOGDuke.right_actuator);
                         XboxOGDuke.rumbleUpdate = 0;
                     }
+                    #endif
                 }
                 commandTimer = millis();
             }
@@ -385,43 +406,43 @@ int16_t getAnalogHat(AnalogHatEnum a)
     return 0;
 }
 
-
+#ifdef ENABLE_RUMBLE
 //Parse rumble activation requests for each type of controller.
 void setRumbleOn(uint8_t lValue, uint8_t rValue)
 {
-    #ifdef ENABLE_RUMBLE
-    if (Xbox360Wired.Xbox360Connected)
-    {
-        Xbox360Wired.setRumbleOn(lValue, rValue); 
-    }
+    if (rumbleOn) {
+        if (Xbox360Wired.Xbox360Connected)
+        {
+            Xbox360Wired.setRumbleOn(lValue, rValue); 
+        }
 
-    if (XboxOneWired.XboxOneConnected)
-    {
-        XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
-    }
+        if (XboxOneWired.XboxOneConnected)
+        {
+            XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+        }
 
-    // TO DO - add left and right values
-    // TO DO - consider separate rumbleOff function
-    if (PS3Wired.PS3Connected)
-    {   
-        if (lValue == 0 && rValue == 0) {
-            PS3Wired.setRumbleOff();
-        } else {
-		    PS3Wired.setRumbleOn(RumbleLow);
+        // TO DO - add left and right values
+        // TO DO - consider separate rumbleOff function
+        if (PS3Wired.PS3Connected)
+        {   
+            if (lValue == 0 && rValue == 0) {
+                PS3Wired.setRumbleOff();
+            } else {
+                PS3Wired.setRumbleOn(RumbleLow);
+            }
+        }
+
+        if (PS4Wired.connected())
+        {   
+            if (lValue == 0 && rValue == 0) {
+                PS4Wired.setRumbleOff();
+            } else {
+                PS4Wired.setRumbleOn(RumbleLow);
+            }
         }
     }
-
-	if (PS4Wired.connected())
-    {   
-        if (lValue == 0 && rValue == 0) {
-            PS4Wired.setRumbleOff();
-        } else {
-		    PS4Wired.setRumbleOn(RumbleLow);
-        }
-    }
-    #endif
-
 }
+#endif
 
 //Parse LED activation requests for each type of controller.
 void setLedOn(LEDEnum led)
@@ -466,15 +487,15 @@ void checkControllerChange() {
     uint8_t currentController = controllerConnected();
     if (currentController != controllerType) {
         controllerType = currentController;
+        #ifdef ENABLE_OLED
         updateOled();
+        #endif
     }
 }
 
 #ifdef ENABLE_OLED
 void updateOled() {
     oled.clear();
-    // uint8_t controllerType = 0;
-    // controllerType = controllerConnected();
     if (controllerType == 1) {
         oled.println("Xbox 360");
     } else if (controllerType == 2) {
@@ -487,12 +508,18 @@ void updateOled() {
         oled.println("N/C");
     }
 
-
-    // TO DO - save a few bytes here
-    if (motionOn == true) {
-        oled.println("Motion On");
+    oled.print("Rumble ");
+    if (rumbleOn == true) {
+        oled.println("On");
     } else {
-        oled.println("Motion Off");
+        oled.println("Off");
+    }
+
+    oled.print("Motion ");
+    if (motionOn == true) {
+        oled.println("On");
+    } else {
+        oled.println("Off");
     }
 }
 #endif

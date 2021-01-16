@@ -16,7 +16,7 @@
 
 // Build Options
 #define ENABLE_OLED
-// #define ENABLE_RUMBLE
+#define ENABLE_RUMBLE
 #define ENABLE_MOTION
 
 /* prototypes */
