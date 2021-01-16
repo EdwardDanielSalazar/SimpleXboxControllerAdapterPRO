@@ -48,18 +48,38 @@ bool enumerationComplete = false;
 uint32_t disconnectTimer = 0;
 
 USB UsbHost;
+
+// Controller control functions
 uint8_t getButtonPress(ButtonEnum b);
 int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
 void setLedOn(LEDEnum led); // TO DO - do something with this
+
+// Controller connection checking and recording
 uint8_t controllerConnected();
 void checkControllerChange();
+uint8_t controllerType = 0;
 
+// USB Host Lib controller objects
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 PS4USB PS4Wired(&UsbHost);
-uint8_t controllerType = 0;
+
+// Voltage checking
+#ifdef ENABLE_POWER_CHECK
+void checkExternalPower();
+void checkPowerChange();
+// float readableVoltage(float var);
+// uint16_t voltageRaw = 0;
+bool extPower = false; 
+// uint16_t voltageRawUpper = 0;
+// uint16_t voltageRawLower = 0;
+// float voltageReadable = 0;
+#endif
+
+// Software reset of Arduino
+void softwareReset();
 
 #ifdef ENABLE_RUMBLE
 bool rumbleOn = false;
@@ -105,8 +125,10 @@ int main(void)
         delay(500);
     }
 
-    // Record init supply voltage
-    // recordVoltage();
+    // Check for external power supply
+    #ifdef ENABLE_POWER_CHECK
+    checkExternalPower();
+    #endif
 
     // Setup OLED
     #ifdef ENABLE_OLED
@@ -120,10 +142,12 @@ int main(void)
 
     while (1)
     {
-        // checkVoltage();
         UsbHost.busprobe();
         UsbHost.Task();
 
+        #ifdef ENABLE_POWER_CHECK
+        checkPowerChange();
+        #endif
         checkControllerChange();
         if (controllerType)
         {
@@ -268,8 +292,6 @@ int main(void)
             report[1] = 0x00;
         }
         Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
-
-        // checkVoltage();
 
     }
 }
@@ -521,5 +543,43 @@ void updateOled() {
     } else {
         oled.println("Off");
     }
+
+    #ifdef ENABLE_POWER_CHECK
+    oled.print("Power: ");
+    if (extPower == true) {
+        oled.println("Ext");
+    } else {
+        oled.println("USB");
+    }
+    #endif
+}
+#endif
+
+#ifdef ENABLE_POWER_CHECK
+void checkPowerChange() {
+    uint16_t currentVoltage = 0;
+    currentVoltage = analogRead(VCC_READ_PIN);
+    if (extPower) {
+        if (currentVoltage < POWER_THRESHOLD) {
+            softwareReset();
+        }
+    } else {
+        if (currentVoltage > POWER_THRESHOLD) {
+            softwareReset();
+        }
+    }
+}
+
+void checkExternalPower() {
+    uint16_t currentVoltage = 0;
+    currentVoltage = analogRead(VCC_READ_PIN);
+    if (currentVoltage >= POWER_THRESHOLD) {
+        extPower = true;
+    }
+}
+
+void softwareReset() {
+  wdt_enable(WDTO_15MS);
+  while(1) {}
 }
 #endif
