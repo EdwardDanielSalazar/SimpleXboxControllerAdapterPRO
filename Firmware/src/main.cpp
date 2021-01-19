@@ -55,11 +55,14 @@ void setLedOn(LEDEnum led); // TO DO - do something with this
 uint8_t controllerConnected();
 void checkControllerChange();
 
+void getStatus();
+
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 PS4USB PS4Wired(&UsbHost);
 uint8_t controllerType = 0;
+uint8_t status = 0;
 
 #ifdef ENABLE_RUMBLE
 bool rumbleOn = false;
@@ -67,16 +70,22 @@ bool rumbleOn = false;
 
 #ifdef ENABLE_MOTION
 bool motionOn = false;
-int16_t initMotionX = 180;
-int16_t initMotionY = 180;
-int16_t currentMotionX = 180;
-int16_t currentMotionY = 180;
-int16_t motionXMod = 180;
-int16_t motionYMod = 180;
-float motionAdjustXf = 0;
-float motionAdjustYf = 0;
-int16_t motionAdjustX = 0;
-int16_t motionAdjustY = 0;
+void getMotion();
+// void startMotion();
+// int16_t initMotionX = 180;
+// int16_t initMotionY = 180;
+int16_t currentMotionX = 0;
+int16_t currentMotionY = 0;
+// int16_t newMotionX = 180;
+// int16_t newMotionY = 180;
+int16_t oldMotionX = 0;
+int16_t oldMotionY = 0;
+// int16_t motionXMod = 180;
+// int16_t motionYMod = 180;
+// float motionAdjustXf = 0;
+// float motionAdjustYf = 0;
+// int16_t motionAdjustX = 0;
+// int16_t motionAdjustY = 0;
 #endif
 
 #ifdef ENABLE_OLED
@@ -127,6 +136,9 @@ int main(void)
     updateOled();
     #endif
 
+    #ifdef ENABLE_MOTION
+
+    #endif
 
     while (1)
     {
@@ -169,24 +181,25 @@ int main(void)
 
             if (motionOn == true) {
 				if (PS3Wired.PS3Connected) {
-					currentMotionX = (int16_t)PS3Wired.getAngle(Roll);
-					currentMotionY = (int16_t)PS3Wired.getAngle(Pitch);
-					currentMotionX = (currentMotionX > 225) ? 225 : currentMotionX;
-					currentMotionX = (currentMotionX < 135) ? 135 : currentMotionX;
-					currentMotionY = (currentMotionY > 225) ? 225 : currentMotionY;
-					currentMotionY = (currentMotionY < 135) ? 135 : currentMotionY;
+                    getMotion();
+					// newMotionX = (int16_t)PS3Wired.getAngle(Roll);
+					// newMotionY = (int16_t)PS3Wired.getAngle(Pitch);
+					// currentMotionX = (currentMotionX > 225) ? 225 : currentMotionX;
+					// currentMotionX = (currentMotionX < 135) ? 135 : currentMotionX;
+					// currentMotionY = (currentMotionY > 225) ? 225 : currentMotionY;
+					// currentMotionY = (currentMotionY < 135) ? 135 : currentMotionY;
 					// currentMotionX = (currentMotionX > initMotionX + 45) ? initMotionX + 45 : currentMotionX + motionXMod;
 					// currentMotionX = (currentMotionX < initMotionX - 45) ? initMotionX - 45 : currentMotionX + motionXMod;
 					// currentMotionY = (currentMotionY > initMotionY + 45) ? initMotionY + 45 : currentMotionY + motionYMod;
 					// currentMotionY = (currentMotionY < initMotionY - 45) ? initMotionY - 45 : currentMotionY + motionYMod;
-					currentMotionX = currentMotionX - 180; // Value between -45 and 45
-					currentMotionY = currentMotionY - 180;
-					motionAdjustXf = (float)currentMotionX / 45;
-					motionAdjustYf = (float)currentMotionY / 45;
-					motionAdjustX = (int16_t)motionAdjustXf * 32767;
-					motionAdjustY = (int16_t)motionAdjustYf * 32767;
-					XboxOGDuke.rightStickX = motionAdjustX;
-					XboxOGDuke.rightStickY = motionAdjustY;
+					// currentMotionX = currentMotionX - 180; // Value between -45 and 45
+					// currentMotionY = currentMotionY - 180;
+					// motionAdjustXf = (float)currentMotionX / 45;
+					// motionAdjustYf = (float)currentMotionY / 45;
+					// motionAdjustX = (int16_t)motionAdjustXf * 32767;
+					// motionAdjustY = (int16_t)motionAdjustYf * 32767;
+					// XboxOGDuke.rightStickX = motionAdjustX;
+					// XboxOGDuke.rightStickY = motionAdjustY;
 
 				} else if (PS4Wired.connected()) {
 
@@ -213,6 +226,13 @@ int main(void)
 
                         xboxHoldTimer = 0;
                         motionOn = !motionOn;
+                        #ifdef ENABLE_MOTION
+                        if (motionOn) {
+                            getMotion();
+                            oldMotionX = currentMotionX;
+                            oldMotionY = currentMotionY;
+                        }
+                        #endif
                         #ifdef ENABLE_OLED
                         updateOled();
                         #endif
@@ -559,5 +579,39 @@ void updateOled() {
     } else {
         oled.println("Off");
     }
+
+    getStatus();
+    oled.println(status);
 }
 #endif
+
+#ifdef ENABLE_MOTION
+void getMotion() {
+
+    if (controllerType == 3) {
+        currentMotionX = (int16_t)PS3Wired.getAngle(Roll);
+        currentMotionY = (int16_t)PS3Wired.getAngle(Pitch);
+    } else if (controllerType == 4) {
+        currentMotionX = (int16_t)PS4Wired.getAngle(Roll);
+        currentMotionY = (int16_t)PS4Wired.getAngle(Pitch);
+    }
+}
+
+#endif
+
+void getStatus() {
+    if (controllerType == 3) {
+        if (PS3Wired.getStatus(Full)) {
+            status = 15;
+        } else if (PS3Wired.getStatus(High)) {
+            status = 10;
+        } else if (PS3Wired.getStatus(Low)) {
+            status = 5;
+        } else if (PS3Wired.getStatus(Dying)) {
+            status = 1;
+        }
+        
+    } else if (controllerType == 4) {
+        status = PS4Wired.getBatteryLevel();
+    }
+}
