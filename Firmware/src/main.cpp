@@ -66,7 +66,17 @@ bool rumbleOn = false;
 #endif
 
 #ifdef ENABLE_MOTION
-bool motionOn = true;
+bool motionOn = false;
+int16_t initMotionX = 180;
+int16_t initMotionY = 180;
+int16_t currentMotionX = 180;
+int16_t currentMotionY = 180;
+int16_t motionXMod = 180;
+int16_t motionYMod = 180;
+float motionAdjustXf = 0;
+float motionAdjustYf = 0;
+int16_t motionAdjustX = 0;
+int16_t motionAdjustY = 0;
 #endif
 
 #ifdef ENABLE_OLED
@@ -156,6 +166,34 @@ int main(void)
             XboxOGDuke.leftStickY = getAnalogHat(LeftHatY);
             XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
             XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
+
+            if (motionOn == true) {
+				if (PS3Wired.PS3Connected) {
+					currentMotionX = (int16_t)PS3Wired.getAngle(Roll);
+					currentMotionY = (int16_t)PS3Wired.getAngle(Pitch);
+					currentMotionX = (currentMotionX > 225) ? 225 : currentMotionX;
+					currentMotionX = (currentMotionX < 135) ? 135 : currentMotionX;
+					currentMotionY = (currentMotionY > 225) ? 225 : currentMotionY;
+					currentMotionY = (currentMotionY < 135) ? 135 : currentMotionY;
+					// currentMotionX = (currentMotionX > initMotionX + 45) ? initMotionX + 45 : currentMotionX + motionXMod;
+					// currentMotionX = (currentMotionX < initMotionX - 45) ? initMotionX - 45 : currentMotionX + motionXMod;
+					// currentMotionY = (currentMotionY > initMotionY + 45) ? initMotionY + 45 : currentMotionY + motionYMod;
+					// currentMotionY = (currentMotionY < initMotionY - 45) ? initMotionY - 45 : currentMotionY + motionYMod;
+					currentMotionX = currentMotionX - 180; // Value between -45 and 45
+					currentMotionY = currentMotionY - 180;
+					motionAdjustXf = (float)currentMotionX / 45;
+					motionAdjustYf = (float)currentMotionY / 45;
+					motionAdjustX = (int16_t)motionAdjustXf * 32767;
+					motionAdjustY = (int16_t)motionAdjustYf * 32767;
+					XboxOGDuke.rightStickX = motionAdjustX;
+					XboxOGDuke.rightStickY = motionAdjustY;
+
+				} else if (PS4Wired.connected()) {
+
+				}
+
+			}
+
 
             //Anything that sends a command to the Xbox 360 controllers happens here.
             //(i.e rumble, LED changes, controller off command)
