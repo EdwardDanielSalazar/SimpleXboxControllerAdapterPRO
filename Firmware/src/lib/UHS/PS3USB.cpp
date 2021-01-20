@@ -175,18 +175,19 @@ uint8_t PS3USB::Init(uint8_t parent, uint8_t port, bool lowspeed) {
         if(rcode)
                 goto FailSetConfDescr;
 
-        if(PID == PS3_PID || PID == PS3NAVIGATION_PID) {
+        // if(PID == PS3_PID || PID == PS3NAVIGATION_PID) {
                 if(PID == PS3_PID) {
-#ifdef DEBUG_USB_HOST
-                        Notify(PSTR("\r\nDualshock 3 Controller Connected"), 0x80);
-#endif
+// #ifdef DEBUG_USB_HOST
+//                         Notify(PSTR("\r\nDualshock 3 Controller Connected"), 0x80);
+// #endif
                         PS3Connected = true;
-                } else { // must be a navigation controller
-#ifdef DEBUG_USB_HOST
-                        Notify(PSTR("\r\nNavigation Controller Connected"), 0x80);
-#endif
-                        PS3NavigationConnected = true;
-                }
+                } 
+//                 else { // must be a navigation controller
+// #ifdef DEBUG_USB_HOST
+//                         Notify(PSTR("\r\nNavigation Controller Connected"), 0x80);
+// #endif
+//                         PS3NavigationConnected = true;
+//                 }
                 enable_sixaxis(); // The PS3 controller needs a special command before it starts sending data
 
                 // Needed for PS3 Dualshock and Navigation commands to work
@@ -195,18 +196,19 @@ uint8_t PS3USB::Init(uint8_t parent, uint8_t port, bool lowspeed) {
 
                 for(uint8_t i = 6; i < 10; i++)
                         readBuf[i] = 0x7F; // Set the analog joystick values to center position
-        } else { // must be a Motion controller
-#ifdef DEBUG_USB_HOST
-                Notify(PSTR("\r\nMotion Controller Connected"), 0x80);
-#endif
-                PS3MoveConnected = true;
-                writeBuf[0] = 0x02; // Set report ID, this is needed for Move commands to work
-        }
-        if(my_bdaddr[0] != 0x00 || my_bdaddr[1] != 0x00 || my_bdaddr[2] != 0x00 || my_bdaddr[3] != 0x00 || my_bdaddr[4] != 0x00 || my_bdaddr[5] != 0x00) {
+        // } 
+//         else { // must be a Motion controller
+// #ifdef DEBUG_USB_HOST
+//                 Notify(PSTR("\r\nMotion Controller Connected"), 0x80);
+// #endif
+//                 PS3MoveConnected = true;
+//                 writeBuf[0] = 0x02; // Set report ID, this is needed for Move commands to work
+//         }
+        // if(my_bdaddr[0] != 0x00 || my_bdaddr[1] != 0x00 || my_bdaddr[2] != 0x00 || my_bdaddr[3] != 0x00 || my_bdaddr[4] != 0x00 || my_bdaddr[5] != 0x00) {
                 // if(PS3MoveConnected)
                 //         setMoveBdaddr(my_bdaddr); // Set internal Bluetooth address
                 // else
-                //         setBdaddr(my_bdaddr); // Set internal Bluetooth address
+                        // setBdaddr(my_bdaddr); // Set internal Bluetooth address
 
 #ifdef DEBUG_USB_HOST
                 Notify(PSTR("\r\nBluetooth Address was set to: "), 0x80);
@@ -216,7 +218,7 @@ uint8_t PS3USB::Init(uint8_t parent, uint8_t port, bool lowspeed) {
                 }
                 D_PrintHex<uint8_t > (my_bdaddr[0], 0x80);
 #endif
-        }
+        // }
         onInit();
 
         bPollEnable = true;
