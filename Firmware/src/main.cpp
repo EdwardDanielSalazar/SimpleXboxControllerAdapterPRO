@@ -71,6 +71,7 @@ bool rumbleOn = false;
 #ifdef ENABLE_MOTION
 bool motionOn = false;
 void getMotion();
+void startMotion();
 // void startMotion();
 // int16_t initMotionX = 180;
 // int16_t initMotionY = 180;
@@ -78,14 +79,17 @@ int16_t currentMotionX = 0;
 int16_t currentMotionY = 0;
 // int16_t newMotionX = 180;
 // int16_t newMotionY = 180;
-int16_t oldMotionX = 0;
-int16_t oldMotionY = 0;
+int16_t lastMotionX = 0;
+int16_t lastMotionY = 0;
 // int16_t motionXMod = 180;
 // int16_t motionYMod = 180;
 // float motionAdjustXf = 0;
 // float motionAdjustYf = 0;
-// int16_t motionAdjustX = 0;
-// int16_t motionAdjustY = 0;
+int16_t motionAdjustX = 0;
+int16_t motionAdjustY = 0;
+unsigned long motionStartMillis = 0;
+unsigned long motionCurrentMillis = 0;
+const uint8_t motionPeriod = 1;
 #endif
 
 #ifdef ENABLE_OLED
@@ -108,8 +112,8 @@ int main(void)
     SetupHardware();
     GlobalInterruptEnable();
 
-    //Initialise the Serial Port
-    //Serial1.begin(500000);
+    // Initialise the Serial Port
+    Serial1.begin(500000);
 
     //Init the XboxOG data arrays to zero.
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t));
@@ -180,8 +184,22 @@ int main(void)
             XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
 
             if (motionOn == true) {
-				if (PS3Wired.PS3Connected) {
-                    getMotion();
+				if (controllerType == 3 || controllerType == 4) {
+                    motionCurrentMillis = millis();
+                    if (motionCurrentMillis - motionStartMillis >= motionPeriod) {
+                        getMotion();
+                        if (currentMotionX != lastMotionX) {
+                            motionAdjustX = currentMotionX - lastMotionX;
+                            lastMotionX = currentMotionX;
+                            Serial1.println(motionAdjustX);
+                        }
+                        if (currentMotionY != lastMotionY) {
+                            motionAdjustY = currentMotionY - lastMotionY;
+                            lastMotionY = currentMotionY;
+                            // Serial1.println(motionAdjustY);
+                        }
+                        motionStartMillis = motionCurrentMillis;
+                    }
 					// newMotionX = (int16_t)PS3Wired.getAngle(Roll);
 					// newMotionY = (int16_t)PS3Wired.getAngle(Pitch);
 					// currentMotionX = (currentMotionX > 225) ? 225 : currentMotionX;
@@ -200,8 +218,6 @@ int main(void)
 					// motionAdjustY = (int16_t)motionAdjustYf * 32767;
 					// XboxOGDuke.rightStickX = motionAdjustX;
 					// XboxOGDuke.rightStickY = motionAdjustY;
-
-				} else if (PS4Wired.connected()) {
 
 				}
 
@@ -228,9 +244,10 @@ int main(void)
                         motionOn = !motionOn;
                         #ifdef ENABLE_MOTION
                         if (motionOn) {
-                            getMotion();
-                            oldMotionX = currentMotionX;
-                            oldMotionY = currentMotionY;
+                            startMotion();
+                            // getMotion();
+                            // oldMotionX = currentMotionX;
+                            // oldMotionY = currentMotionY;
                         }
                         #endif
                         #ifdef ENABLE_OLED
@@ -310,22 +327,22 @@ int main(void)
         //THPS 2X is the only game I know that sends rumble commands to the USB OUT pipe
         //instead of the control pipe. So unfortunately need to manually read the out pipe
         //and update rumble values as needed!
-        uint8_t ep = Endpoint_GetCurrentEndpoint();
-        static uint8_t report[6];
-        Endpoint_SelectEndpoint(0x02); //0x02 is the out endpoint address for the Duke Controller
-        if (Endpoint_IsOUTReceived())
-        {
-            Endpoint_Read_Stream_LE(report, 6, NULL);
-            Endpoint_ClearOUT();
-            if (report[1] == 0x06)
-            {
-                XboxOGDuke.left_actuator = report[3];
-                XboxOGDuke.right_actuator = report[5];
-                XboxOGDuke.rumbleUpdate = 1;
-            }
-            report[1] = 0x00;
-        }
-        Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
+        // uint8_t ep = Endpoint_GetCurrentEndpoint();
+        // static uint8_t report[6];
+        // Endpoint_SelectEndpoint(0x02); //0x02 is the out endpoint address for the Duke Controller
+        // if (Endpoint_IsOUTReceived())
+        // {
+        //     Endpoint_Read_Stream_LE(report, 6, NULL);
+        //     Endpoint_ClearOUT();
+        //     if (report[1] == 0x06)
+        //     {
+        //         XboxOGDuke.left_actuator = report[3];
+        //         XboxOGDuke.right_actuator = report[5];
+        //         XboxOGDuke.rumbleUpdate = 1;
+        //     }
+        //     report[1] = 0x00;
+        // }
+        // Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
 
         // checkVoltage();
 
@@ -596,6 +613,14 @@ void getMotion() {
         currentMotionY = (int16_t)PS4Wired.getAngle(Pitch);
     }
 }
+
+void startMotion() {
+    getMotion();
+    lastMotionX = currentMotionX;
+    lastMotionY = currentMotionY;
+    motionStartMillis = millis();
+}
+
 
 #endif
 
