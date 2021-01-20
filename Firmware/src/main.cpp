@@ -55,18 +55,41 @@ void setLedOn(LEDEnum led); // TO DO - do something with this
 uint8_t controllerConnected();
 void checkControllerChange();
 
+void getStatus();
+
 XBOXONE XboxOneWired(&UsbHost);
 XBOXUSB Xbox360Wired(&UsbHost);
 PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 PS4USB PS4Wired(&UsbHost);
 uint8_t controllerType = 0;
+uint8_t status = 0;
 
 #ifdef ENABLE_RUMBLE
 bool rumbleOn = false;
 #endif
 
 #ifdef ENABLE_MOTION
-bool motionOn = true;
+bool motionOn = false;
+void getMotion();
+void startMotion();
+// void startMotion();
+// int16_t initMotionX = 180;
+// int16_t initMotionY = 180;
+int16_t currentMotionX = 0;
+int16_t currentMotionY = 0;
+// int16_t newMotionX = 180;
+// int16_t newMotionY = 180;
+int16_t lastMotionX = 0;
+int16_t lastMotionY = 0;
+// int16_t motionXMod = 180;
+// int16_t motionYMod = 180;
+// float motionAdjustXf = 0;
+// float motionAdjustYf = 0;
+int16_t motionAdjustX = 0;
+int16_t motionAdjustY = 0;
+unsigned long motionStartMillis = 0;
+unsigned long motionCurrentMillis = 0;
+const uint8_t motionPeriod = 1;
 #endif
 
 #ifdef ENABLE_OLED
@@ -89,8 +112,8 @@ int main(void)
     SetupHardware();
     GlobalInterruptEnable();
 
-    //Initialise the Serial Port
-    //Serial1.begin(500000);
+    // Initialise the Serial Port
+    Serial1.begin(500000);
 
     //Init the XboxOG data arrays to zero.
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t));
@@ -117,6 +140,9 @@ int main(void)
     updateOled();
     #endif
 
+    #ifdef ENABLE_MOTION
+
+    #endif
 
     while (1)
     {
@@ -157,6 +183,47 @@ int main(void)
             XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
             XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
 
+            if (motionOn == true) {
+				if (controllerType == 3 || controllerType == 4) {
+                    motionCurrentMillis = millis();
+                    if (motionCurrentMillis - motionStartMillis >= motionPeriod) {
+                        getMotion();
+                        if (currentMotionX != lastMotionX) {
+                            motionAdjustX = currentMotionX - lastMotionX;
+                            lastMotionX = currentMotionX;
+                            Serial1.println(motionAdjustX);
+                        }
+                        if (currentMotionY != lastMotionY) {
+                            motionAdjustY = currentMotionY - lastMotionY;
+                            lastMotionY = currentMotionY;
+                            // Serial1.println(motionAdjustY);
+                        }
+                        motionStartMillis = motionCurrentMillis;
+                    }
+					// newMotionX = (int16_t)PS3Wired.getAngle(Roll);
+					// newMotionY = (int16_t)PS3Wired.getAngle(Pitch);
+					// currentMotionX = (currentMotionX > 225) ? 225 : currentMotionX;
+					// currentMotionX = (currentMotionX < 135) ? 135 : currentMotionX;
+					// currentMotionY = (currentMotionY > 225) ? 225 : currentMotionY;
+					// currentMotionY = (currentMotionY < 135) ? 135 : currentMotionY;
+					// currentMotionX = (currentMotionX > initMotionX + 45) ? initMotionX + 45 : currentMotionX + motionXMod;
+					// currentMotionX = (currentMotionX < initMotionX - 45) ? initMotionX - 45 : currentMotionX + motionXMod;
+					// currentMotionY = (currentMotionY > initMotionY + 45) ? initMotionY + 45 : currentMotionY + motionYMod;
+					// currentMotionY = (currentMotionY < initMotionY - 45) ? initMotionY - 45 : currentMotionY + motionYMod;
+					// currentMotionX = currentMotionX - 180; // Value between -45 and 45
+					// currentMotionY = currentMotionY - 180;
+					// motionAdjustXf = (float)currentMotionX / 45;
+					// motionAdjustYf = (float)currentMotionY / 45;
+					// motionAdjustX = (int16_t)motionAdjustXf * 32767;
+					// motionAdjustY = (int16_t)motionAdjustYf * 32767;
+					// XboxOGDuke.rightStickX = motionAdjustX;
+					// XboxOGDuke.rightStickY = motionAdjustY;
+
+				}
+
+			}
+
+
             //Anything that sends a command to the Xbox 360 controllers happens here.
             //(i.e rumble, LED changes, controller off command)
             static uint32_t commandTimer = 0;
@@ -175,6 +242,14 @@ int main(void)
 
                         xboxHoldTimer = 0;
                         motionOn = !motionOn;
+                        #ifdef ENABLE_MOTION
+                        if (motionOn) {
+                            startMotion();
+                            // getMotion();
+                            // oldMotionX = currentMotionX;
+                            // oldMotionY = currentMotionY;
+                        }
+                        #endif
                         #ifdef ENABLE_OLED
                         updateOled();
                         #endif
@@ -252,22 +327,22 @@ int main(void)
         //THPS 2X is the only game I know that sends rumble commands to the USB OUT pipe
         //instead of the control pipe. So unfortunately need to manually read the out pipe
         //and update rumble values as needed!
-        uint8_t ep = Endpoint_GetCurrentEndpoint();
-        static uint8_t report[6];
-        Endpoint_SelectEndpoint(0x02); //0x02 is the out endpoint address for the Duke Controller
-        if (Endpoint_IsOUTReceived())
-        {
-            Endpoint_Read_Stream_LE(report, 6, NULL);
-            Endpoint_ClearOUT();
-            if (report[1] == 0x06)
-            {
-                XboxOGDuke.left_actuator = report[3];
-                XboxOGDuke.right_actuator = report[5];
-                XboxOGDuke.rumbleUpdate = 1;
-            }
-            report[1] = 0x00;
-        }
-        Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
+        // uint8_t ep = Endpoint_GetCurrentEndpoint();
+        // static uint8_t report[6];
+        // Endpoint_SelectEndpoint(0x02); //0x02 is the out endpoint address for the Duke Controller
+        // if (Endpoint_IsOUTReceived())
+        // {
+        //     Endpoint_Read_Stream_LE(report, 6, NULL);
+        //     Endpoint_ClearOUT();
+        //     if (report[1] == 0x06)
+        //     {
+        //         XboxOGDuke.left_actuator = report[3];
+        //         XboxOGDuke.right_actuator = report[5];
+        //         XboxOGDuke.rumbleUpdate = 1;
+        //     }
+        //     report[1] = 0x00;
+        // }
+        // Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
 
         // checkVoltage();
 
@@ -521,5 +596,47 @@ void updateOled() {
     } else {
         oled.println("Off");
     }
+
+    getStatus();
+    oled.println(status);
 }
 #endif
+
+#ifdef ENABLE_MOTION
+void getMotion() {
+
+    if (controllerType == 3) {
+        currentMotionX = (int16_t)PS3Wired.getAngle(Roll);
+        currentMotionY = (int16_t)PS3Wired.getAngle(Pitch);
+    } else if (controllerType == 4) {
+        currentMotionX = (int16_t)PS4Wired.getAngle(Roll);
+        currentMotionY = (int16_t)PS4Wired.getAngle(Pitch);
+    }
+}
+
+void startMotion() {
+    getMotion();
+    lastMotionX = currentMotionX;
+    lastMotionY = currentMotionY;
+    motionStartMillis = millis();
+}
+
+
+#endif
+
+void getStatus() {
+    if (controllerType == 3) {
+        if (PS3Wired.getStatus(Full)) {
+            status = 15;
+        } else if (PS3Wired.getStatus(High)) {
+            status = 10;
+        } else if (PS3Wired.getStatus(Low)) {
+            status = 5;
+        } else if (PS3Wired.getStatus(Dying)) {
+            status = 1;
+        }
+        
+    } else if (controllerType == 4) {
+        status = PS4Wired.getBatteryLevel();
+    }
+}
