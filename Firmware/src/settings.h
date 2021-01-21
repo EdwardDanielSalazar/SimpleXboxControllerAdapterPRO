@@ -14,6 +14,9 @@
 #define I2C_ADDRESS 0x3C
 #define VCC_READ_PIN A0
 
+// Motion Options
+#define MAX_INPUT_ANGLE 45
+
 // Build Options
 #define ENABLE_OLED
 #define ENABLE_RUMBLE

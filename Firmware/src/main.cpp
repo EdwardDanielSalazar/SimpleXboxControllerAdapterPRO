@@ -71,25 +71,40 @@ bool rumbleOn = false;
 #ifdef ENABLE_MOTION
 bool motionOn = false;
 void getMotion();
-void startMotion();
+void limitInputAngles();
 // void startMotion();
-// int16_t initMotionX = 180;
-// int16_t initMotionY = 180;
-int16_t currentMotionX = 0;
-int16_t currentMotionY = 0;
+// void startMotion();
+
+uint16_t rollAngle = 0; // PS controllers provide 0 - 360
+uint16_t pitchAngle = 0;
+int16_t relativeRollAngle = 0; // Will be between [-45 and 45]
+int16_t relativePitchAngle = 0;
 // int16_t newMotionX = 180;
 // int16_t newMotionY = 180;
-int16_t lastMotionX = 0;
-int16_t lastMotionY = 0;
+// int16_t lastMotionX = 0;
+// int16_t lastMotionY = 0;
 // int16_t motionXMod = 180;
 // int16_t motionYMod = 180;
-// float motionAdjustXf = 0;
-// float motionAdjustYf = 0;
-int16_t motionAdjustX = 0;
-int16_t motionAdjustY = 0;
-unsigned long motionStartMillis = 0;
-unsigned long motionCurrentMillis = 0;
-const uint8_t motionPeriod = 1;
+float lookXAdjust_f = 0;
+float lookYAdjust_f = 0;
+// int16_t motionAdjustX = 0;
+// int16_t motionAdjustY = 0;
+// unsigned long motionStartMillis = 0;
+// unsigned long motionCurrentMillis = 0;
+// const uint8_t motionPeriod = 1;
+
+// Use variables for the inital controller angle so these can be 
+// calibrated by the user in future iterations
+uint16_t initRollAngle = 180;
+uint16_t initPitchAngle = 180;
+
+// Set the max controller angles to be accepted as input
+// Set separately as we may want different values for pitch and roll
+uint16_t maxRollInputAngle = initRollAngle + MAX_INPUT_ANGLE; // 180 + 45 = 225
+uint16_t minRollInputAngle = initRollAngle - MAX_INPUT_ANGLE; // 180 - 45 = 135
+uint16_t maxPitchInputAngle = initPitchAngle + MAX_INPUT_ANGLE; // 180 + 45 = 225
+uint16_t minPitchInputAngle = initPitchAngle - MAX_INPUT_ANGLE; // 180 - 45 = 135
+
 #endif
 
 #ifdef ENABLE_OLED
@@ -182,24 +197,48 @@ int main(void)
             XboxOGDuke.leftStickY = getAnalogHat(LeftHatY);
             XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
             XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
+            
 
-            if (motionOn == true) {
-				if (controllerType == 3 || controllerType == 4) {
-                    motionCurrentMillis = millis();
-                    if (motionCurrentMillis - motionStartMillis >= motionPeriod) {
-                        getMotion();
-                        if (currentMotionX != lastMotionX) {
-                            motionAdjustX = currentMotionX - lastMotionX;
-                            lastMotionX = currentMotionX;
-                            Serial1.println(motionAdjustX);
-                        }
-                        if (currentMotionY != lastMotionY) {
-                            motionAdjustY = currentMotionY - lastMotionY;
-                            lastMotionY = currentMotionY;
+            if (motionOn) {
+                if (controllerType == 3 || controllerType == 4) {
+                getMotion();
+                limitInputAngles();
+                // TO DO - change to accomodate a max angle set in settings.h (or by user?)
+                relativeRollAngle = rollAngle - 180; // Shifts value between 135 & 225 to between -45 & 45
+                relativePitchAngle = pitchAngle - 180;
+                lookXAdjust_f = (float)relativeRollAngle / 45; // A proportion of the maximum
+			    lookYAdjust_f = (float)relativePitchAngle / 45;
+                XboxOGDuke.rightStickX = lookXAdjust_f * 32767; // Multiply by max possible value of normal analog stick output 
+				XboxOGDuke.rightStickY = lookYAdjust_f * 32767;
+                }
+            }
+
+            // if (motionOn == true) {
+			// 	if (controllerType == 3 || controllerType == 4) {
+            //         // motionCurrentMillis = millis();
+            //         // if (motionCurrentMillis - motionStartMillis >= motionPeriod) {
+            //             getMotion();
+                        // if (currentMotionX != lastMotionX) {
+                            // motionAdjustX = currentMotionX - lastMotionX;
+                            // lastMotionX = currentMotionX;
+                            // Serial1.print("X: ");
+                            // Serial1.println(motionAdjustX);
+                            // Serial1.print("X: Stick: ");
+                            // Serial1.println(XboxOGDuke.rightStickX);
+                        // }
+                        // if (currentMotionY != lastMotionY) {
+                            // motionAdjustY = currentMotionY - lastMotionY;
+                            // lastMotionY = currentMotionY;
+                            // Serial1.print("Y: ");
                             // Serial1.println(motionAdjustY);
-                        }
-                        motionStartMillis = motionCurrentMillis;
-                    }
+                            // Serial1.print("Y Stick: ");
+                            // Serial1.println(XboxOGDuke.rightStickY);
+                            // Serial1.println("\n\n");
+                        // }
+                        // motionStartMillis = motionCurrentMillis;
+                        // XboxOGDuke.rightStickX += motionAdjustX * 1000;
+                        // XboxOGDuke.rightStickY += motionAdjustY * 1000;
+                    
 					// newMotionX = (int16_t)PS3Wired.getAngle(Roll);
 					// newMotionY = (int16_t)PS3Wired.getAngle(Pitch);
 					// currentMotionX = (currentMotionX > 225) ? 225 : currentMotionX;
@@ -218,10 +257,11 @@ int main(void)
 					// motionAdjustY = (int16_t)motionAdjustYf * 32767;
 					// XboxOGDuke.rightStickX = motionAdjustX;
 					// XboxOGDuke.rightStickY = motionAdjustY;
+                    // }
 
-				}
+				// }
 
-			}
+			// }
 
 
             //Anything that sends a command to the Xbox 360 controllers happens here.
@@ -244,7 +284,7 @@ int main(void)
                         motionOn = !motionOn;
                         #ifdef ENABLE_MOTION
                         if (motionOn) {
-                            startMotion();
+                            // startMotion();
                             // getMotion();
                             // oldMotionX = currentMotionX;
                             // oldMotionY = currentMotionY;
@@ -606,21 +646,34 @@ void updateOled() {
 void getMotion() {
 
     if (controllerType == 3) {
-        currentMotionX = (int16_t)PS3Wired.getAngle(Roll);
-        currentMotionY = (int16_t)PS3Wired.getAngle(Pitch);
+        rollAngle = (int16_t)PS3Wired.getAngle(Roll);
+        pitchAngle = (int16_t)PS3Wired.getAngle(Pitch);
     } else if (controllerType == 4) {
-        currentMotionX = (int16_t)PS4Wired.getAngle(Roll);
-        currentMotionY = (int16_t)PS4Wired.getAngle(Pitch);
+        rollAngle = (int16_t)PS4Wired.getAngle(Roll);
+        pitchAngle = (int16_t)PS4Wired.getAngle(Pitch);
     }
 }
 
-void startMotion() {
-    getMotion();
-    lastMotionX = currentMotionX;
-    lastMotionY = currentMotionY;
-    motionStartMillis = millis();
-}
+// void startMotion() {
+//     getMotion();
+//     lastMotionX = motionX;
+//     lastMotionY = motionY;
+//     motionStartMillis = millis();
+// }
 
+// void startMotion() {
+//     getMotion();
+//     initMotionX = motionX;
+//     initMotionY = motionY;
+//     motionStartMillis = millis();
+// }
+
+void limitInputAngles() {
+    rollAngle = (rollAngle > maxRollInputAngle) ? maxRollInputAngle : rollAngle;
+    rollAngle = (rollAngle < minRollInputAngle) ? minRollInputAngle : rollAngle;
+    pitchAngle = (pitchAngle > maxPitchInputAngle) ? maxPitchInputAngle : pitchAngle;
+    pitchAngle = (pitchAngle < minPitchInputAngle) ? minPitchInputAngle : pitchAngle;
+}
 
 #endif
 
