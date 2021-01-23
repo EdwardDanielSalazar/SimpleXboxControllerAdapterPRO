@@ -72,29 +72,15 @@ bool rumbleOn = false;
 bool motionOn = false;
 void getMotion();
 void limitInputAngles();
-// void invertAngles();
-// void startMotion();
-// void startMotion();
 
 uint16_t rollAngle = 0; // PS controllers provide 0 - 360
 uint16_t pitchAngle = 0;
 int16_t relativeRollAngle = 0; // Will be between [-45 and 45]
 int16_t relativePitchAngle = 0;
-// int16_t newMotionX = 180;
-// int16_t newMotionY = 180;
-// int16_t lastMotionX = 0;
-// int16_t lastMotionY = 0;
-// int16_t motionXMod = 180;
-// int16_t motionYMod = 180;
 float lookXAdjust_f = 0;
 float lookYAdjust_f = 0;
 float invertedXStickVal = 0;
 float invertedYStickVal = 0;
-// int16_t motionAdjustX = 0;
-// int16_t motionAdjustY = 0;
-// unsigned long motionStartMillis = 0;
-// unsigned long motionCurrentMillis = 0;
-// const uint8_t motionPeriod = 1;
 
 // Use variables for the inital controller angle so these can be 
 // calibrated by the user in future iterations
@@ -209,18 +195,9 @@ int main(void)
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
                 relativeRollAngle = rollAngle - 180; // Shifts value between 135 & 225 to between -45 & 45
                 relativePitchAngle = pitchAngle - 180;
-                // invertAngles();
-                // relativePitchAngle = relativePitchAngle * -1;
-                // if (controllerType == 4) {
-                //     relativeRollAngle = relativeRollAngle * -1;
-                // }
                 lookXAdjust_f = (float)relativeRollAngle / 45; // A proportion of the maximum
 			    lookYAdjust_f = (float)relativePitchAngle / 45;
-                // invertedXStickVal = lookXAdjust_f * -1;
-                // invertedYStickVal = lookYAdjust_f * -1;
-                // lookYAdjust_f = lookYAdjust_f * -1;
                 if (controllerType == 3) {
-                    // lookXAdjust_f = lookXAdjust_f * -1;
                     lookYAdjust_f = lookYAdjust_f * -1;
                 } else if (controllerType == 4) {
                     lookXAdjust_f = lookXAdjust_f * -1;
@@ -232,57 +209,7 @@ int main(void)
                 }
             }
 
-            // if (motionOn == true) {
-			// 	if (controllerType == 3 || controllerType == 4) {
-            //         // motionCurrentMillis = millis();
-            //         // if (motionCurrentMillis - motionStartMillis >= motionPeriod) {
-            //             getMotion();
-                        // if (currentMotionX != lastMotionX) {
-                            // motionAdjustX = currentMotionX - lastMotionX;
-                            // lastMotionX = currentMotionX;
-                            // Serial1.print("X: ");
-                            // Serial1.println(motionAdjustX);
-                            // Serial1.print("X: Stick: ");
-                            // Serial1.println(XboxOGDuke.rightStickX);
-                        // }
-                        // if (currentMotionY != lastMotionY) {
-                            // motionAdjustY = currentMotionY - lastMotionY;
-                            // lastMotionY = currentMotionY;
-                            // Serial1.print("Y: ");
-                            // Serial1.println(motionAdjustY);
-                            // Serial1.print("Y Stick: ");
-                            // Serial1.println(XboxOGDuke.rightStickY);
-                            // Serial1.println("\n\n");
-                        // }
-                        // motionStartMillis = motionCurrentMillis;
-                        // XboxOGDuke.rightStickX += motionAdjustX * 1000;
-                        // XboxOGDuke.rightStickY += motionAdjustY * 1000;
-                    
-					// newMotionX = (int16_t)PS3Wired.getAngle(Roll);
-					// newMotionY = (int16_t)PS3Wired.getAngle(Pitch);
-					// currentMotionX = (currentMotionX > 225) ? 225 : currentMotionX;
-					// currentMotionX = (currentMotionX < 135) ? 135 : currentMotionX;
-					// currentMotionY = (currentMotionY > 225) ? 225 : currentMotionY;
-					// currentMotionY = (currentMotionY < 135) ? 135 : currentMotionY;
-					// currentMotionX = (currentMotionX > initMotionX + 45) ? initMotionX + 45 : currentMotionX + motionXMod;
-					// currentMotionX = (currentMotionX < initMotionX - 45) ? initMotionX - 45 : currentMotionX + motionXMod;
-					// currentMotionY = (currentMotionY > initMotionY + 45) ? initMotionY + 45 : currentMotionY + motionYMod;
-					// currentMotionY = (currentMotionY < initMotionY - 45) ? initMotionY - 45 : currentMotionY + motionYMod;
-					// currentMotionX = currentMotionX - 180; // Value between -45 and 45
-					// currentMotionY = currentMotionY - 180;
-					// motionAdjustXf = (float)currentMotionX / 45;
-					// motionAdjustYf = (float)currentMotionY / 45;
-					// motionAdjustX = (int16_t)motionAdjustXf * 32767;
-					// motionAdjustY = (int16_t)motionAdjustYf * 32767;
-					// XboxOGDuke.rightStickX = motionAdjustX;
-					// XboxOGDuke.rightStickY = motionAdjustY;
-                    // }
-
-				// }
-
-			// }
-
-
+           
             //Anything that sends a command to the Xbox 360 controllers happens here.
             //(i.e rumble, LED changes, controller off command)
             static uint32_t commandTimer = 0;
@@ -303,10 +230,7 @@ int main(void)
                         motionOn = !motionOn;
                         #ifdef ENABLE_MOTION
                         if (motionOn) {
-                            // startMotion();
-                            // getMotion();
-                            // oldMotionX = currentMotionX;
-                            // oldMotionY = currentMotionY;
+                            // TO DO - Maybe remove this.
                         }
                         #endif
                         #ifdef ENABLE_OLED
@@ -673,33 +597,12 @@ void getMotion() {
     }
 }
 
-// void startMotion() {
-//     getMotion();
-//     lastMotionX = motionX;
-//     lastMotionY = motionY;
-//     motionStartMillis = millis();
-// }
-
-// void startMotion() {
-//     getMotion();
-//     initMotionX = motionX;
-//     initMotionY = motionY;
-//     motionStartMillis = millis();
-// }
-
 void limitInputAngles() {
     rollAngle = (rollAngle > maxRollInputAngle) ? maxRollInputAngle : rollAngle;
     rollAngle = (rollAngle < minRollInputAngle) ? minRollInputAngle : rollAngle;
     pitchAngle = (pitchAngle > maxPitchInputAngle) ? maxPitchInputAngle : pitchAngle;
     pitchAngle = (pitchAngle < minPitchInputAngle) ? minPitchInputAngle : pitchAngle;
 }
-
-// void invertAngles() {
-//     pitchAngle = pitchAngle * -1;
-//     if (controllerType == 4) {
-//         rollAngle = rollAngle * -1;
-//     }
-// }
 
 #endif
 
