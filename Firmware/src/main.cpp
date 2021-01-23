@@ -72,6 +72,7 @@ bool rumbleOn = false;
 bool motionOn = false;
 void getMotion();
 void limitInputAngles();
+// void invertAngles();
 // void startMotion();
 // void startMotion();
 
@@ -87,6 +88,8 @@ int16_t relativePitchAngle = 0;
 // int16_t motionYMod = 180;
 float lookXAdjust_f = 0;
 float lookYAdjust_f = 0;
+float invertedXStickVal = 0;
+float invertedYStickVal = 0;
 // int16_t motionAdjustX = 0;
 // int16_t motionAdjustY = 0;
 // unsigned long motionStartMillis = 0;
@@ -206,8 +209,16 @@ int main(void)
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
                 relativeRollAngle = rollAngle - 180; // Shifts value between 135 & 225 to between -45 & 45
                 relativePitchAngle = pitchAngle - 180;
+                // invertAngles();
+                // relativePitchAngle = relativePitchAngle * -1;
+                // if (controllerType == 4) {
+                //     relativeRollAngle = relativeRollAngle * -1;
+                // }
                 lookXAdjust_f = (float)relativeRollAngle / 45; // A proportion of the maximum
 			    lookYAdjust_f = (float)relativePitchAngle / 45;
+                // invertedXStickVal = lookXAdjust_f * -1;
+                // invertedYStickVal = lookYAdjust_f * -1;
+                lookYAdjust_f = lookYAdjust_f * -1;
                 XboxOGDuke.rightStickX = lookXAdjust_f * 32767; // Multiply by max possible value of normal analog stick output 
 				XboxOGDuke.rightStickY = lookYAdjust_f * 32767;
                 }
@@ -674,6 +685,13 @@ void limitInputAngles() {
     pitchAngle = (pitchAngle > maxPitchInputAngle) ? maxPitchInputAngle : pitchAngle;
     pitchAngle = (pitchAngle < minPitchInputAngle) ? minPitchInputAngle : pitchAngle;
 }
+
+// void invertAngles() {
+//     pitchAngle = pitchAngle * -1;
+//     if (controllerType == 4) {
+//         rollAngle = rollAngle * -1;
+//     }
+// }
 
 #endif
 
