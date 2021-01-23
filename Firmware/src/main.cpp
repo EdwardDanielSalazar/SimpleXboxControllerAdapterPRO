@@ -218,7 +218,15 @@ int main(void)
 			    lookYAdjust_f = (float)relativePitchAngle / 45;
                 // invertedXStickVal = lookXAdjust_f * -1;
                 // invertedYStickVal = lookYAdjust_f * -1;
-                lookYAdjust_f = lookYAdjust_f * -1;
+                // lookYAdjust_f = lookYAdjust_f * -1;
+                if (controllerType == 3) {
+                    // lookXAdjust_f = lookXAdjust_f * -1;
+                    lookYAdjust_f = lookYAdjust_f * -1;
+                } else if (controllerType == 4) {
+                    lookXAdjust_f = lookXAdjust_f * -1;
+                    lookYAdjust_f = lookYAdjust_f * -1;
+                }
+
                 XboxOGDuke.rightStickX = lookXAdjust_f * 32767; // Multiply by max possible value of normal analog stick output 
 				XboxOGDuke.rightStickY = lookYAdjust_f * 32767;
                 }
