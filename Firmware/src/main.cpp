@@ -70,8 +70,8 @@ bool rumbleOn = false;
 
 #ifdef ENABLE_MOTION
 bool motionOn = false;
-void getMotion();
-int16_t retMotion(AngleEnum a);
+// void getMotion();
+int16_t getMotion(AngleEnum a);
 // void limitInputAngles();
 int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal);
 
@@ -92,7 +92,6 @@ int32_t totalY = 0;
 // uint16_t initPitchAngle = 180;
 
 // Set the max controller angles to be accepted as input
-// Set separately as we may want different values for pitch and roll
 uint16_t maxInputAngle = 180 + MAX_INPUT_ANGLE; // 180 + 45 = 225
 uint16_t minInputAngle = 180 - MAX_INPUT_ANGLE; // 180 - 45 = 135
 // uint16_t maxPitchInputAngle = 180 + MAX_INPUT_ANGLE; // 180 + 45 = 225
@@ -193,13 +192,14 @@ int main(void)
                 if (controllerType == 3 || controllerType == 4) {
                 // Assigns values to rollAngle and pitchAngle
                 // getMotion();
-                rollAngle = retMotion(Roll);
-                pitchAngle = retMotion(Pitch);
+                rollAngle = getMotion(Roll);
+                pitchAngle = getMotion(Pitch);
                 // Constrains values of rollAngle and pitchAngle
                 // limitInputAngles();
                 rollAngle = limitValue(rollAngle, maxInputAngle, minInputAngle);
                 pitchAngle = limitValue(pitchAngle, maxInputAngle, minInputAngle);
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
+                // TO DO - get rid of these vars
                 relativeRollAngle = rollAngle - 180; // Shifts value between 135 & 225 to between -45 & 45
                 relativePitchAngle = pitchAngle - 180;
 
@@ -611,24 +611,41 @@ void updateOled() {
     getStatus();
     oled.println(status);
 }
+
+void getStatus() {
+    if (controllerType == 3) {
+        if (PS3Wired.getStatus(Full)) {
+            status = 15;
+        } else if (PS3Wired.getStatus(High)) {
+            status = 10;
+        } else if (PS3Wired.getStatus(Low)) {
+            status = 5;
+        } else if (PS3Wired.getStatus(Dying)) {
+            status = 1;
+        }
+        
+    } else if (controllerType == 4) {
+        status = PS4Wired.getBatteryLevel();
+    }
+}
 #endif
 
 #ifdef ENABLE_MOTION
 
 // TO DO - could these casts to ints conceivably return a value > 360? Is that a problem?
 
-void getMotion() {
+// void getMotion() {
 
-    if (controllerType == 3) {
-        rollAngle = (int16_t)PS3Wired.getAngle(Roll);
-        pitchAngle = (int16_t)PS3Wired.getAngle(Pitch);
-    } else if (controllerType == 4) {
-        rollAngle = (int16_t)PS4Wired.getAngle(Roll);
-        pitchAngle = (int16_t)PS4Wired.getAngle(Pitch);
-    }
-}
+//     if (controllerType == 3) {
+//         rollAngle = (int16_t)PS3Wired.getAngle(Roll);
+//         pitchAngle = (int16_t)PS3Wired.getAngle(Pitch);
+//     } else if (controllerType == 4) {
+//         rollAngle = (int16_t)PS4Wired.getAngle(Roll);
+//         pitchAngle = (int16_t)PS4Wired.getAngle(Pitch);
+//     }
+// }
 
-int16_t retMotion(AngleEnum a) {
+int16_t getMotion(AngleEnum a) {
     if (controllerType == 3) {
         return (int16_t)PS3Wired.getAngle(a);     
     } else if (controllerType == 4) {
@@ -658,19 +675,3 @@ int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal) {
 
 #endif
 
-void getStatus() {
-    if (controllerType == 3) {
-        if (PS3Wired.getStatus(Full)) {
-            status = 15;
-        } else if (PS3Wired.getStatus(High)) {
-            status = 10;
-        } else if (PS3Wired.getStatus(Low)) {
-            status = 5;
-        } else if (PS3Wired.getStatus(Dying)) {
-            status = 1;
-        }
-        
-    } else if (controllerType == 4) {
-        status = PS4Wired.getBatteryLevel();
-    }
-}
