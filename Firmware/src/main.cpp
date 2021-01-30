@@ -72,7 +72,8 @@ bool rumbleOn = false;
 bool motionOn = false;
 void getMotion();
 int16_t retMotion(AngleEnum a);
-void limitInputAngles();
+// void limitInputAngles();
+int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal);
 
 uint16_t rollAngle = 0; // PS controllers provide 0 - 360
 uint16_t pitchAngle = 0;
@@ -195,7 +196,9 @@ int main(void)
                 rollAngle = retMotion(Roll);
                 pitchAngle = retMotion(Pitch);
                 // Constrains values of rollAngle and pitchAngle
-                limitInputAngles();
+                // limitInputAngles();
+                rollAngle = limitValue(rollAngle, maxInputAngle, minInputAngle);
+                pitchAngle = limitValue(pitchAngle, maxInputAngle, minInputAngle);
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
                 relativeRollAngle = rollAngle - 180; // Shifts value between 135 & 225 to between -45 & 45
                 relativePitchAngle = pitchAngle - 180;
@@ -215,10 +218,12 @@ int main(void)
                 totalY = XboxOGDuke.rightStickY + (lookYAdjust_f * 32767);
                 
 
-                if (totalX > 32767) { totalX = 32767; }
-                else if (totalX < -32767) {totalX = -32767; }
-                if (totalY > 32767) { totalY = 32767; }
-                else if (totalY < -32767) {totalY = -32767; }
+                // if (totalX > 32767) { totalX = 32767; }
+                // else if (totalX < -32767) {totalX = -32767; }
+                // if (totalY > 32767) { totalY = 32767; }
+                // else if (totalY < -32767) {totalY = -32767; }
+                totalX = limitValue(totalX, 32767, -32767);
+                totalY = limitValue(totalY, 32767, -32767);
 
                 XboxOGDuke.rightStickX = totalX;
                 XboxOGDuke.rightStickY = totalY;
@@ -634,15 +639,21 @@ int16_t retMotion(AngleEnum a) {
 
 // TO DO - change to if/else
 // TO DO - consider generalised limitValue function
-void limitInputAngles() {
-    if (rollAngle > maxInputAngle) { rollAngle = maxInputAngle; }
-    else if (rollAngle < minInputAngle) {rollAngle = minInputAngle; }
-    if (pitchAngle > maxInputAngle) { rollAngle = maxInputAngle; }
-    else if (pitchAngle < minInputAngle) {rollAngle = minInputAngle; }
+// void limitInputAngles() {
+//     if (rollAngle > maxInputAngle) { rollAngle = maxInputAngle; }
+//     else if (rollAngle < minInputAngle) {rollAngle = minInputAngle; }
+//     if (pitchAngle > maxInputAngle) { rollAngle = maxInputAngle; }
+//     else if (pitchAngle < minInputAngle) {rollAngle = minInputAngle; }
     // rollAngle = (rollAngle > maxInputAngle) ? maxInputAngle : rollAngle;
     // rollAngle = (rollAngle < minInputAngle) ? minInputAngle : rollAngle;
     // pitchAngle = (pitchAngle > maxInputAngle) ? maxInputAngle : pitchAngle;
     // pitchAngle = (pitchAngle < minInputAngle) ? minInputAngle : pitchAngle;
+// }
+
+int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal) {
+    if (value > maxVal) { return maxVal; }
+    else if (value < minVal) { return minVal; }
+    return value;
 }
 
 #endif
