@@ -71,6 +71,7 @@ bool rumbleOn = false;
 #ifdef ENABLE_MOTION
 bool motionOn = false;
 void getMotion();
+int16_t retMotion(AngleEnum a);
 void limitInputAngles();
 
 uint16_t rollAngle = 0; // PS controllers provide 0 - 360
@@ -86,15 +87,15 @@ int32_t totalY = 0;
 
 // Use variables for the inital controller angle so these can be 
 // calibrated by the user in future iterations
-uint16_t initRollAngle = 180;
-uint16_t initPitchAngle = 180;
+// uint16_t initRollAngle = 180;
+// uint16_t initPitchAngle = 180;
 
 // Set the max controller angles to be accepted as input
 // Set separately as we may want different values for pitch and roll
-uint16_t maxRollInputAngle = initRollAngle + MAX_INPUT_ANGLE; // 180 + 45 = 225
-uint16_t minRollInputAngle = initRollAngle - MAX_INPUT_ANGLE; // 180 - 45 = 135
-uint16_t maxPitchInputAngle = initPitchAngle + MAX_INPUT_ANGLE; // 180 + 45 = 225
-uint16_t minPitchInputAngle = initPitchAngle - MAX_INPUT_ANGLE; // 180 - 45 = 135
+uint16_t maxInputAngle = 180 + MAX_INPUT_ANGLE; // 180 + 45 = 225
+uint16_t minInputAngle = 180 - MAX_INPUT_ANGLE; // 180 - 45 = 135
+// uint16_t maxPitchInputAngle = 180 + MAX_INPUT_ANGLE; // 180 + 45 = 225
+// uint16_t minPitchInputAngle = 180 - MAX_INPUT_ANGLE; // 180 - 45 = 135
 
 #endif
 
@@ -190,7 +191,9 @@ int main(void)
             if (motionOn) {
                 if (controllerType == 3 || controllerType == 4) {
                 // Assigns values to rollAngle and pitchAngle
-                getMotion();
+                // getMotion();
+                rollAngle = retMotion(Roll);
+                pitchAngle = retMotion(Pitch);
                 // Constrains values of rollAngle and pitchAngle
                 limitInputAngles();
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
@@ -200,6 +203,7 @@ int main(void)
                 lookXAdjust_f = (float)relativeRollAngle / 45; // A proportion of the maximum
 			    lookYAdjust_f = (float)relativePitchAngle / 45;
 
+                // TO DO - allow user to invert motion y axis
                 if (controllerType == 3) {
                     lookYAdjust_f = lookYAdjust_f * -1;
                 } else if (controllerType == 4) {
@@ -232,7 +236,8 @@ int main(void)
             static uint32_t xboxHoldTimer = 0;
             if (millis() - commandTimer > 16)
             {
-                //If you hold the XBOX button for more than ~1second, turn off controller
+                // Enable motion controls
+                // TO DO - only turn on motion when compatible controller connected
                 if (getButtonPress(XBOX) && getButtonPress(R2) > 0x00)
                 {
                     if (xboxHoldTimer == 0)
@@ -254,6 +259,7 @@ int main(void)
                         #endif
                     }
                 }
+                // Enable rumble
                 else if (getButtonPress(XBOX) && getButtonPress(L2) > 0x00)
                 {
                     if (xboxHoldTimer == 0)
@@ -356,6 +362,7 @@ void sendControllerHIDReport()
     USB_USBTask();
 }
 
+// TO DO - remove the separate controller connected checks in these functions
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b)
 {
@@ -536,6 +543,8 @@ void setLedOn(LEDEnum led)
 
 }
 
+
+// TO DO - merge these two functions
 uint8_t controllerConnected()
 {
     uint8_t controllerType = 0;
@@ -600,6 +609,9 @@ void updateOled() {
 #endif
 
 #ifdef ENABLE_MOTION
+
+// TO DO - could these casts to ints conceivably return a value > 360? Is that a problem?
+
 void getMotion() {
 
     if (controllerType == 3) {
@@ -611,11 +623,26 @@ void getMotion() {
     }
 }
 
+int16_t retMotion(AngleEnum a) {
+    if (controllerType == 3) {
+        return (int16_t)PS3Wired.getAngle(a);     
+    } else if (controllerType == 4) {
+        return (int16_t)PS4Wired.getAngle(a);      
+    }
+    return 0;
+}
+
+// TO DO - change to if/else
+// TO DO - consider generalised limitValue function
 void limitInputAngles() {
-    rollAngle = (rollAngle > maxRollInputAngle) ? maxRollInputAngle : rollAngle;
-    rollAngle = (rollAngle < minRollInputAngle) ? minRollInputAngle : rollAngle;
-    pitchAngle = (pitchAngle > maxPitchInputAngle) ? maxPitchInputAngle : pitchAngle;
-    pitchAngle = (pitchAngle < minPitchInputAngle) ? minPitchInputAngle : pitchAngle;
+    if (rollAngle > maxInputAngle) { rollAngle = maxInputAngle; }
+    else if (rollAngle < minInputAngle) {rollAngle = minInputAngle; }
+    if (pitchAngle > maxInputAngle) { rollAngle = maxInputAngle; }
+    else if (pitchAngle < minInputAngle) {rollAngle = minInputAngle; }
+    // rollAngle = (rollAngle > maxInputAngle) ? maxInputAngle : rollAngle;
+    // rollAngle = (rollAngle < minInputAngle) ? minInputAngle : rollAngle;
+    // pitchAngle = (pitchAngle > maxInputAngle) ? maxInputAngle : pitchAngle;
+    // pitchAngle = (pitchAngle < minInputAngle) ? minInputAngle : pitchAngle;
 }
 
 #endif
