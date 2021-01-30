@@ -79,8 +79,10 @@ int16_t relativeRollAngle = 0; // Will be between [-45 and 45]
 int16_t relativePitchAngle = 0;
 float lookXAdjust_f = 0;
 float lookYAdjust_f = 0;
-float invertedXStickVal = 0;
-float invertedYStickVal = 0;
+// float invertedXStickVal = 0;
+// float invertedYStickVal = 0;
+int32_t totalX = 0;
+int32_t totalY = 0;
 
 // Use variables for the inital controller angle so these can be 
 // calibrated by the user in future iterations
@@ -117,7 +119,7 @@ int main(void)
     GlobalInterruptEnable();
 
     // Initialise the Serial Port
-    Serial1.begin(500000);
+    // Serial1.begin(500000);
 
     //Init the XboxOG data arrays to zero.
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t));
@@ -131,9 +133,6 @@ int main(void)
         digitalWrite(ARDUINO_LED_PIN, !digitalRead(ARDUINO_LED_PIN));
         delay(500);
     }
-
-    // Record init supply voltage
-    // recordVoltage();
 
     // Setup OLED
     #ifdef ENABLE_OLED
@@ -150,7 +149,7 @@ int main(void)
 
     while (1)
     {
-        // checkVoltage();
+
         UsbHost.busprobe();
         UsbHost.Task();
 
@@ -190,13 +189,17 @@ int main(void)
 
             if (motionOn) {
                 if (controllerType == 3 || controllerType == 4) {
+                // Assigns values to rollAngle and pitchAngle
                 getMotion();
+                // Constrains values of rollAngle and pitchAngle
                 limitInputAngles();
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
                 relativeRollAngle = rollAngle - 180; // Shifts value between 135 & 225 to between -45 & 45
                 relativePitchAngle = pitchAngle - 180;
+
                 lookXAdjust_f = (float)relativeRollAngle / 45; // A proportion of the maximum
 			    lookYAdjust_f = (float)relativePitchAngle / 45;
+
                 if (controllerType == 3) {
                     lookYAdjust_f = lookYAdjust_f * -1;
                 } else if (controllerType == 4) {
@@ -204,8 +207,21 @@ int main(void)
                     lookYAdjust_f = lookYAdjust_f * -1;
                 }
 
-                XboxOGDuke.rightStickX = lookXAdjust_f * 32767; // Multiply by max possible value of normal analog stick output 
-				XboxOGDuke.rightStickY = lookYAdjust_f * 32767;
+                totalX = XboxOGDuke.rightStickX + (lookXAdjust_f * 32767);
+                totalY = XboxOGDuke.rightStickY + (lookYAdjust_f * 32767);
+                
+
+                if (totalX > 32767) { totalX = 32767; }
+                else if (totalX < -32767) {totalX = -32767; }
+                if (totalY > 32767) { totalY = 32767; }
+                else if (totalY < -32767) {totalY = -32767; }
+
+                XboxOGDuke.rightStickX = totalX;
+                XboxOGDuke.rightStickY = totalY;
+
+                // XboxOGDuke.rightStickX = lookXAdjust_f * 32767; // Multiply by max possible value of normal analog stick output 
+				// XboxOGDuke.rightStickY = lookYAdjust_f * 32767;
+
                 }
             }
 
@@ -326,8 +342,6 @@ int main(void)
         //     report[1] = 0x00;
         // }
         // Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
-
-        // checkVoltage();
 
     }
 }
