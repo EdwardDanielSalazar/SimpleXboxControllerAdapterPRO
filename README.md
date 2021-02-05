@@ -6,7 +6,7 @@ Following the instructions below and using the [latest release](https://github.c
 
 ## Background
 
-This is an adaptation of Ryzee119's excellent [four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers (wired and wireless) on an original Xbox console. 
+This is an adaptation/fork of Ryzee119's excellent [four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers (wired and wireless) on an original Xbox console. 
 
 The objectives of this project are:
 * The simplest possible hardware build, using only off-the-shelf parts (at present, an Arduino Leonardo paired with a generic USB Host Shield). 

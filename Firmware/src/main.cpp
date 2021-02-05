@@ -176,7 +176,7 @@ int main(void)
             XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
             XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
             
-
+            #ifdef ENABLE_MOTION
             if (motionOn) {
                 if (controllerType == 3 || controllerType == 4) {
                 // Assigns values to rollAngle and pitchAngle
@@ -209,7 +209,7 @@ int main(void)
 
                 }
             }
-
+            #endif
            
             //Anything that sends a command to the Xbox 360 controllers happens here.
             //(i.e rumble, LED changes, controller off command)
@@ -229,8 +229,9 @@ int main(void)
                     {
 
                         xboxHoldTimer = 0;
+                        #ifdef ENABLE_MOTION
                         motionOn = !motionOn;
-
+                        #endif
                         #ifdef ENABLE_OLED
                         updateOled();
                         #endif
@@ -246,7 +247,9 @@ int main(void)
                     {
 
                         xboxHoldTimer = 0;
+                        #ifdef ENABLE_MOTION
                         changeMotionSensitivity();
+                        #endif
                         #ifdef ENABLE_OLED
                         updateOled();
                         #endif
@@ -263,7 +266,9 @@ int main(void)
                     {
 
                         xboxHoldTimer = 0;
+                        #ifdef ENABLE_RUMBLE
                         rumbleOn = !rumbleOn;
+                        #endif
                         #ifdef ENABLE_OLED
                         updateOled();
                         #endif
@@ -570,14 +575,15 @@ void checkControllerChange() {
 #ifdef ENABLE_OLED
 void updateOled() {
     oled.clear();
-
+    #ifdef ENABLE_RUMBLE
     oled.print("Rumble ");
     if (rumbleOn == true) {
         oled.println("On");
     } else {
         oled.println("Off");
     }
-
+    #endif
+    #ifdef ENABLE_MOTION
     oled.print("Motion ");
     if (controllerType == 3 || controllerType == 4) {
         if (motionOn == true) {
@@ -595,6 +601,7 @@ void updateOled() {
     } else {
         oled.println("N/A");
     }
+    #endif
     // getStatus();
     // oled.println(status);
 }
