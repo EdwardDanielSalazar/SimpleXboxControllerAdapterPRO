@@ -184,8 +184,6 @@ int main(void)
                 pitchAngle = getMotion(Pitch);
                 rollAngle = limitValue(rollAngle, maxInputAngle, minInputAngle);
                 pitchAngle = limitValue(pitchAngle, maxInputAngle, minInputAngle);
-                // TO DO - change to accomodate a max angle set in settings.h (or by user?)
-                // TO DO - get rid of these vars
                 relativeRollAngle = rollAngle - 180; // Makes angle zero-relative
                 relativePitchAngle = pitchAngle - 180;
 
@@ -232,11 +230,7 @@ int main(void)
 
                         xboxHoldTimer = 0;
                         motionOn = !motionOn;
-                        #ifdef ENABLE_MOTION
-                        if (motionOn) {
-                            // TO DO - Maybe remove this.
-                        }
-                        #endif
+
                         #ifdef ENABLE_OLED
                         updateOled();
                         #endif
@@ -576,17 +570,6 @@ void checkControllerChange() {
 #ifdef ENABLE_OLED
 void updateOled() {
     oled.clear();
-    // if (controllerType == 1) {
-    //     oled.println("Xbox 360");
-    // } else if (controllerType == 2) {
-    //     oled.println("Xbox One");
-    // } else if (controllerType == 3) {
-    //     oled.println("PS3");
-    // } else if (controllerType == 4) {
-    //     oled.println("PS4");
-    // } else {
-    //     oled.println("N/C");
-    // }
 
     oled.print("Rumble ");
     if (rumbleOn == true) {
@@ -595,12 +578,6 @@ void updateOled() {
         oled.println("Off");
     }
 
-    // oled.print("Motion ");
-    // if (motionOn == true) {
-    //     oled.println("On");
-    // } else {
-    //     oled.println("Off");
-    // }
     oled.print("Motion ");
     if (motionOn == true) {
         oled.print("On, ");
@@ -615,26 +592,26 @@ void updateOled() {
         oled.println("Off");
     }
 
-    getStatus();
-    oled.println(status);
+    // getStatus();
+    // oled.println(status);
 }
 
-void getStatus() {
-    if (controllerType == 3) {
-        if (PS3Wired.getStatus(Full)) {
-            status = 15;
-        } else if (PS3Wired.getStatus(High)) {
-            status = 10;
-        } else if (PS3Wired.getStatus(Low)) {
-            status = 5;
-        } else if (PS3Wired.getStatus(Dying)) {
-            status = 1;
-        }
+// void getStatus() {
+//     if (controllerType == 3) {
+//         if (PS3Wired.getStatus(Full)) {
+//             status = 15;
+//         } else if (PS3Wired.getStatus(High)) {
+//             status = 10;
+//         } else if (PS3Wired.getStatus(Low)) {
+//             status = 5;
+//         } else if (PS3Wired.getStatus(Dying)) {
+//             status = 1;
+//         }
         
-    } else if (controllerType == 4) {
-        status = PS4Wired.getBatteryLevel();
-    }
-}
+//     } else if (controllerType == 4) {
+//         status = PS4Wired.getBatteryLevel();
+//     }
+// }
 #endif
 
 #ifdef ENABLE_MOTION
