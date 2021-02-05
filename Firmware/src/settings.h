@@ -15,7 +15,7 @@
 #define VCC_READ_PIN A0
 
 // Motion Options
-#define MAX_INPUT_ANGLE 45
+// #define MAX_INPUT_ANGLE 45
 
 // Build Options
 #define ENABLE_OLED

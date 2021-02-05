@@ -71,8 +71,12 @@ bool rumbleOn = false;
 #ifdef ENABLE_MOTION
 int16_t getMotion(AngleEnum a);
 int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal);
+void changeMotionSensitivity();
+void applyMotionSensitivity();
 
 bool motionOn = false;
+int8_t motionSensitivity = 1;
+int8_t sensitivityAngle = 45;
 uint16_t rollAngle = 0; // PS controllers provide 0 - 360
 uint16_t pitchAngle = 0;
 int16_t relativeRollAngle = 0; // Will be between [-45 and 45]
@@ -81,9 +85,8 @@ float lookXAdjust_f = 0;
 float lookYAdjust_f = 0;
 int32_t totalX = 0;
 int32_t totalY = 0;
-// Set the max controller angles to be accepted as input
-uint16_t maxInputAngle = 180 + MAX_INPUT_ANGLE; // 180 + 45 = 225
-uint16_t minInputAngle = 180 - MAX_INPUT_ANGLE; // 180 - 45 = 135
+uint16_t maxInputAngle;
+uint16_t minInputAngle;
 #endif
 
 #ifdef ENABLE_OLED
@@ -131,7 +134,7 @@ int main(void)
     #endif
 
     #ifdef ENABLE_MOTION
-
+    applyMotionSensitivity();
     #endif
 
     while (1)
@@ -183,11 +186,11 @@ int main(void)
                 pitchAngle = limitValue(pitchAngle, maxInputAngle, minInputAngle);
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
                 // TO DO - get rid of these vars
-                relativeRollAngle = rollAngle - 180; // Shifts value between 135 & 225 to between -45 & 45
+                relativeRollAngle = rollAngle - 180; // Makes angle zero-relative
                 relativePitchAngle = pitchAngle - 180;
 
-                lookXAdjust_f = (float)relativeRollAngle / 45; // A proportion of the maximum
-			    lookYAdjust_f = (float)relativePitchAngle / 45;
+                lookXAdjust_f = (float)relativeRollAngle / sensitivityAngle; // A proportion of the maximum
+			    lookYAdjust_f = (float)relativePitchAngle / sensitivityAngle;
 
                 // TO DO - allow user to invert motion y axis
                 if (controllerType == 3) {
@@ -234,6 +237,22 @@ int main(void)
                             // TO DO - Maybe remove this.
                         }
                         #endif
+                        #ifdef ENABLE_OLED
+                        updateOled();
+                        #endif
+                    }
+                }
+                else if (getButtonPress(XBOX) && getButtonPress(R1) > 0x00)
+                {
+                    if (xboxHoldTimer == 0)
+                    {
+                        xboxHoldTimer = millis();
+                    }
+                    if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
+                    {
+
+                        xboxHoldTimer = 0;
+                        changeMotionSensitivity();
                         #ifdef ENABLE_OLED
                         updateOled();
                         #endif
@@ -557,17 +576,17 @@ void checkControllerChange() {
 #ifdef ENABLE_OLED
 void updateOled() {
     oled.clear();
-    if (controllerType == 1) {
-        oled.println("Xbox 360");
-    } else if (controllerType == 2) {
-        oled.println("Xbox One");
-    } else if (controllerType == 3) {
-        oled.println("PS3");
-    } else if (controllerType == 4) {
-        oled.println("PS4");
-    } else {
-        oled.println("N/C");
-    }
+    // if (controllerType == 1) {
+    //     oled.println("Xbox 360");
+    // } else if (controllerType == 2) {
+    //     oled.println("Xbox One");
+    // } else if (controllerType == 3) {
+    //     oled.println("PS3");
+    // } else if (controllerType == 4) {
+    //     oled.println("PS4");
+    // } else {
+    //     oled.println("N/C");
+    // }
 
     oled.print("Rumble ");
     if (rumbleOn == true) {
@@ -576,9 +595,22 @@ void updateOled() {
         oled.println("Off");
     }
 
+    // oled.print("Motion ");
+    // if (motionOn == true) {
+    //     oled.println("On");
+    // } else {
+    //     oled.println("Off");
+    // }
     oled.print("Motion ");
     if (motionOn == true) {
-        oled.println("On");
+        oled.print("On, ");
+        if (motionSensitivity == 0) {
+            oled.println("Low");
+        } else if (motionSensitivity == 1) {
+            oled.println("Med");
+        } else {
+            oled.println("High");
+        }
     } else {
         oled.println("Off");
     }
@@ -622,6 +654,26 @@ int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal) {
     if (value > maxVal) { return maxVal; }
     else if (value < minVal) { return minVal; }
     return value;
+}
+
+void changeMotionSensitivity() {
+    if (motionSensitivity < 2) {
+        ++motionSensitivity;
+    } else {
+        motionSensitivity = 0;
+    }
+}
+
+void applyMotionSensitivity() {
+    if (motionSensitivity == 0) {
+        sensitivityAngle = 30;
+    } else if (motionSensitivity == 1) {
+        sensitivityAngle = 45;
+    } else {
+        sensitivityAngle = 60;
+    }
+    maxInputAngle = 180 + sensitivityAngle; // e.g. 180 + 45 = 225
+    minInputAngle = 180 - sensitivityAngle; // e.g. 180 - 45 = 135
 }
 
 #endif
