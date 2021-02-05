@@ -69,34 +69,21 @@ bool rumbleOn = false;
 #endif
 
 #ifdef ENABLE_MOTION
-bool motionOn = false;
-// void getMotion();
 int16_t getMotion(AngleEnum a);
-// void limitInputAngles();
 int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal);
 
+bool motionOn = false;
 uint16_t rollAngle = 0; // PS controllers provide 0 - 360
 uint16_t pitchAngle = 0;
 int16_t relativeRollAngle = 0; // Will be between [-45 and 45]
 int16_t relativePitchAngle = 0;
 float lookXAdjust_f = 0;
 float lookYAdjust_f = 0;
-// float invertedXStickVal = 0;
-// float invertedYStickVal = 0;
 int32_t totalX = 0;
 int32_t totalY = 0;
-
-// Use variables for the inital controller angle so these can be 
-// calibrated by the user in future iterations
-// uint16_t initRollAngle = 180;
-// uint16_t initPitchAngle = 180;
-
 // Set the max controller angles to be accepted as input
 uint16_t maxInputAngle = 180 + MAX_INPUT_ANGLE; // 180 + 45 = 225
 uint16_t minInputAngle = 180 - MAX_INPUT_ANGLE; // 180 - 45 = 135
-// uint16_t maxPitchInputAngle = 180 + MAX_INPUT_ANGLE; // 180 + 45 = 225
-// uint16_t minPitchInputAngle = 180 - MAX_INPUT_ANGLE; // 180 - 45 = 135
-
 #endif
 
 #ifdef ENABLE_OLED
@@ -140,7 +127,6 @@ int main(void)
     oled.begin(&Adafruit128x32, I2C_ADDRESS);
     oled.setFont(SystemFont5x7);
     oled.displayRemap(true);
-    // oled.clear();
     updateOled();
     #endif
 
@@ -191,11 +177,8 @@ int main(void)
             if (motionOn) {
                 if (controllerType == 3 || controllerType == 4) {
                 // Assigns values to rollAngle and pitchAngle
-                // getMotion();
                 rollAngle = getMotion(Roll);
                 pitchAngle = getMotion(Pitch);
-                // Constrains values of rollAngle and pitchAngle
-                // limitInputAngles();
                 rollAngle = limitValue(rollAngle, maxInputAngle, minInputAngle);
                 pitchAngle = limitValue(pitchAngle, maxInputAngle, minInputAngle);
                 // TO DO - change to accomodate a max angle set in settings.h (or by user?)
@@ -216,20 +199,12 @@ int main(void)
 
                 totalX = XboxOGDuke.rightStickX + (lookXAdjust_f * 32767);
                 totalY = XboxOGDuke.rightStickY + (lookYAdjust_f * 32767);
-                
 
-                // if (totalX > 32767) { totalX = 32767; }
-                // else if (totalX < -32767) {totalX = -32767; }
-                // if (totalY > 32767) { totalY = 32767; }
-                // else if (totalY < -32767) {totalY = -32767; }
                 totalX = limitValue(totalX, 32767, -32767);
                 totalY = limitValue(totalY, 32767, -32767);
 
                 XboxOGDuke.rightStickX = totalX;
                 XboxOGDuke.rightStickY = totalY;
-
-                // XboxOGDuke.rightStickX = lookXAdjust_f * 32767; // Multiply by max possible value of normal analog stick output 
-				// XboxOGDuke.rightStickY = lookYAdjust_f * 32767;
 
                 }
             }
@@ -634,17 +609,6 @@ void getStatus() {
 
 // TO DO - could these casts to ints conceivably return a value > 360? Is that a problem?
 
-// void getMotion() {
-
-//     if (controllerType == 3) {
-//         rollAngle = (int16_t)PS3Wired.getAngle(Roll);
-//         pitchAngle = (int16_t)PS3Wired.getAngle(Pitch);
-//     } else if (controllerType == 4) {
-//         rollAngle = (int16_t)PS4Wired.getAngle(Roll);
-//         pitchAngle = (int16_t)PS4Wired.getAngle(Pitch);
-//     }
-// }
-
 int16_t getMotion(AngleEnum a) {
     if (controllerType == 3) {
         return (int16_t)PS3Wired.getAngle(a);     
@@ -653,19 +617,6 @@ int16_t getMotion(AngleEnum a) {
     }
     return 0;
 }
-
-// TO DO - change to if/else
-// TO DO - consider generalised limitValue function
-// void limitInputAngles() {
-//     if (rollAngle > maxInputAngle) { rollAngle = maxInputAngle; }
-//     else if (rollAngle < minInputAngle) {rollAngle = minInputAngle; }
-//     if (pitchAngle > maxInputAngle) { rollAngle = maxInputAngle; }
-//     else if (pitchAngle < minInputAngle) {rollAngle = minInputAngle; }
-    // rollAngle = (rollAngle > maxInputAngle) ? maxInputAngle : rollAngle;
-    // rollAngle = (rollAngle < minInputAngle) ? minInputAngle : rollAngle;
-    // pitchAngle = (pitchAngle > maxInputAngle) ? maxInputAngle : pitchAngle;
-    // pitchAngle = (pitchAngle < minInputAngle) ? minInputAngle : pitchAngle;
-// }
 
 int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal) {
     if (value > maxVal) { return maxVal; }
