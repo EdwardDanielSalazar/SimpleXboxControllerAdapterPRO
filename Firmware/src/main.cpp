@@ -646,11 +646,11 @@ void changeMotionSensitivity() {
 
 void applyMotionSensitivity() {
     if (motionSensitivity == 0) {
-        sensitivityAngle = 30;
+        sensitivityAngle = 60;
     } else if (motionSensitivity == 1) {
         sensitivityAngle = 45;
     } else {
-        sensitivityAngle = 60;
+        sensitivityAngle = 30;
     }
     maxInputAngle = 180 + sensitivityAngle; // e.g. 180 + 45 = 225
     minInputAngle = 180 - sensitivityAngle; // e.g. 180 - 45 = 135
