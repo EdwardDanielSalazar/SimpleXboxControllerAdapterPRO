@@ -579,19 +579,22 @@ void updateOled() {
     }
 
     oled.print("Motion ");
-    if (motionOn == true) {
-        oled.print("On, ");
-        if (motionSensitivity == 0) {
-            oled.println("Low");
-        } else if (motionSensitivity == 1) {
-            oled.println("Med");
+    if (controllerType == 3 || controllerType == 4) {
+        if (motionOn == true) {
+            oled.print("On, ");
+            if (motionSensitivity == 0) {
+                oled.println("Low");
+            } else if (motionSensitivity == 1) {
+                oled.println("Med");
+            } else {
+                oled.println("High");
+            }
         } else {
-            oled.println("High");
+            oled.println("Off");
         }
     } else {
-        oled.println("Off");
+        oled.println("N/A");
     }
-
     // getStatus();
     // oled.println(status);
 }
