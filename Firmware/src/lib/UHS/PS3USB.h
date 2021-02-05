@@ -109,31 +109,31 @@ public:
          * Set using LSB first.
          * @param bdaddr Your dongles Bluetooth address.
          */
-        void setBdaddr(uint8_t *bdaddr);
+        // void setBdaddr(uint8_t *bdaddr);
         /**
          * Used to get the Bluetooth address inside the Dualshock 3 and Navigation controller.
          * Will return LSB first.
          * @param bdaddr Your dongles Bluetooth address.
          */
-        void getBdaddr(uint8_t *bdaddr);
+        // void getBdaddr(uint8_t *bdaddr);
 
         /**
          * Used to set the Bluetooth address inside the Move controller.
          * Set using LSB first.
          * @param bdaddr Your dongles Bluetooth address.
          */
-        void setMoveBdaddr(uint8_t *bdaddr);
+        // void setMoveBdaddr(uint8_t *bdaddr);
         /**
          * Used to get the Bluetooth address inside the Move controller.
          * Will return LSB first.
          * @param bdaddr Your dongles Bluetooth address.
          */
-        void getMoveBdaddr(uint8_t *bdaddr);
+        // void getMoveBdaddr(uint8_t *bdaddr);
         /**
          * Used to get the calibration data inside the Move controller.
          * @param data Buffer to store data in. Must be at least 147 bytes
          */
-        void getMoveCalibration(uint8_t *data);
+        // void getMoveCalibration(uint8_t *data);
 
         /** @name PS3 Controller functions */
         /**
@@ -185,7 +185,7 @@ public:
          */
         bool getStatus(StatusEnum c);
         /** Read all the available statuses from the controller and prints it as a nice formated string. */
-        void printStatusString();
+        // void printStatusString();
 
         /** Used to set all LEDs and rumble off. */
         void setAllOff();
