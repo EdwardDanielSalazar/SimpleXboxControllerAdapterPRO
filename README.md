@@ -37,6 +37,7 @@ Release 1.3 differs from ogx360 as follows:
 * Motion control sensitivity can be set (PS + R1) - crude, and definitely beta.
 * The code supports an OLED screen displaying rumble/motion status.
 * Replacement STL files for 3D printing a case have been added. For now, these assume use of an OLED screen. A non-OLED case to follow.
+* The non-OLED release isn't properly tested. Consider beta for now.
 
 ### Future Work
 
