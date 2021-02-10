@@ -8,9 +8,9 @@ Following the instructions below and using the [latest release](https://github.c
 
 This is an adaptation/fork of Ryzee119's excellent [four-way wired/wireless controller adapter](https://github.com/Ryzee119/ogx360/) to allow the use of Xbox One and Xbox 360 controllers (wired and wireless) on an original Xbox console. 
 
-The objectives of this project are:
-* The simplest possible hardware build, using only off-the-shelf parts (at present, an Arduino Leonardo paired with a generic USB Host Shield). 
-* Simple soldering (through-hole/jumper pad only). *A no solder version is possible if using the right choice of USB Host Shield*. 
+The objectives of this project were:
+* A simple hardware build, using only off-the-shelf parts (at present, an Arduino Leonardo paired with a generic USB Host Shield). 
+* Simple soldering. *A no solder version is possible if using the right choice of USB Host Shield*. 
 * Reduced, simpler code to make playing around with it as straightforward as possible.
 * Reduced functionality, reflecting the simpler code. Only wired controllers are supported and Steel Battalion emulation is not. 
 * Support for additional controllers (so far, PS3 & PS4 controller support has been added).
@@ -18,30 +18,34 @@ The objectives of this project are:
 
 This started when I dusted off my old Xbox and wanted to make something to use newer controllers with it. There's plenty of previous work on this and as I develop this document I'll link to more and more of it, but even with some experience of AVR and PIC programming it was a bit of a slog working out how to do it. The two biggest barriers were the complexity of some of the projects out there and/or getting them to build using reliable, free/open-source tools.
 
-A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible to clone, edit, and build without too much fighting with tools/IDE(s). The ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but it kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running) in much the same way as [Les fears chives](https://www.youtube.com/watch?v=PjxPaCnIVdM&t=2m15s). This project uses VS Code.
+A significant factor in basing this project on ogx360 rather than XBOXPadMicro/XInput (see below) was that it was possible to clone, edit, and build without too much fighting with tools/IDE(s). The ogx360 project was originally built in Atmel/Microchip Studio which is Windows only (I could have lived with this) but it kept causing my mouse pointer to stall every 60 seconds (I really couldn't) because it apparently [fears some USB mice](https://www.avrfreaks.net/forum/mouse-pointer-stutters-when-connecting-usb-devices-while-running). This project started out with VSCode.
+
+Even better, ogx360 has been transitioned to Platform IO and this project has followed suit. The old VSCode/CMake tools branch can be found at cmake_master and was used up to release 1.2.
 
 Another important factor was starting with something which included the Xbox console's vendor-specific challenge/response values (see 'Alternatives & other projects to look at' below for more on this).
 
 ### Status
 
-Release 1.2 differs from ogx360 as follows:
+Release 1.3 differs from ogx360 as follows:
 * Support for Xbox One and Xbox 360 *wireless* controllers has been removed.
 * Support for multiple controllers has been removed. It supports a single controller connected via USB.
 * Steel Battalion support has been removed, resulting in a smaller binary (and space for more controllers to be supported).
-* Rumble has been disabled via settings.h. Significant rumble caused the device to hang. Future versions will address this though it can probably handle rumble if an => 6v power supply is connected to the Leonardo's power connector.
-* PS3 controller support (via USB) has been added. Rumble isn't implemented at all for the time being, as opposed to being disabled in the case of the Xbox One/360 controllers.
-* PS4 controller support (via USB) has been added. As with the PS3 controller, rumble isn't implemented (for now) and nor is support for doing anything with the LED.
+* PS3 controller support (via USB) has been added. 
+* PS4 controller support (via USB) has been added. 
+* Basic motion controls, using PS3/4 controllers is implemented.
+* Motion controls can be enabled/disabled (PS + R2)
+* Motion control sensitivity can be set (PS + R1) - crude, and definitely beta.
+* The code supports an OLED screen displaying rumble/motion status.
+* Replacement STL files for 3D printing a case have been added. For now, these assume use of an OLED screen. A non-OLED case to follow.
 
 ### Future Work
 
 These are broadly the priorities for now, not necessarily in order:
-* Add instructions for building with an Arduino Pro Micro and mini USB Host Shield. This won't be a no-solder option but will be more compact. I have some mini shields on the way.
-* Add STL files for 3D printable cases for both hardware builds
-* Investigate power/rumble issue
-* Improving this document and not by adding more Vic Reeves references. The current build instructions rely on using VS Code (a command line only option will follow) and don't fully cover MacOS or cover Windows at all.
+* Add instructions for building with an Arduino Pro Micro and mini USB Host Shield. This won't be a no-solder option but will be more compact. Thanks to Phantom8 for some really useful help with this already.
+* Improving this document. The current build instructions rely on using VS Code (a command line only option will follow) and don't fully cover MacOS or cover Windows at all.
 * Adding some scripts to make flashing the binary easier.
-* Possibly add some user input/output on the device itself via an I2C OLED screen. Not really in the spirit of keeping things simple, but fun.
-* Possibly adding more controllers. The binary is now up to more than 26K and adding in anything involving bluetooth support puts it way over 32K. So I need to do a bit of digging to see what's possible here.
+
+The OLED version currently uses 98% of the Leonardo's flash so it won't be possible to add further controllers without removing something else. Since removing the OLED only frees up about 9% of the flash, changes to the code will probably be limited to bug fixes and minor improvements, e.g. to the motion sensitivity options. I'm beginning to look at other microcontrollers to provide for significant additional functionality.
 
 ## Making One
 
@@ -75,11 +79,9 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 Notes:
 * This section covers the process for Ubuntu/Debian and will be expanded with more detail and MacOS instructions soon. I'll get round to Windows eventually but for now the process is well explained in [one of the ogx360 readmes](https://github.com/Ryzee119/ogx360/tree/master/Firmware).
-* The flash script under /Firmware was written for my own convenience and may need adapting to your own setup - don't run it without checking. Use the method below.
+* The flash script under /Firmware was written for my own convenience and may need adapting to your own setup - don't run it without checking! Use the method below.
 
-We need to use Avrdude for this and we need to make sure that the bootloader/firmware section of the Arduino's program memory is flashed rather than the normal 'sketch' space addressed by the Arduino IDE. This is essential to enabling the device to appear as a HID(-like) device rather than a serial device. 
-
-Generally when you flash code onto an Arduino with the IDE it appears to a connected host (e.g. a PC) as a serial device, as this is a feature of the pre-flashed bootloader. Some Leonardos come with a version of the bootloader which makes it appear as a keyboard/mouse device and there are plenty of Leonardo-based projects which make use of this. In any case, neither of these is what we need and the Arduino IDE can't help us.
+We need to use Avrdude for this, rather than the Arduino IDE. Generally when you flash code onto an Arduino with the IDE it appears to a connected host (e.g. a PC) as a serial device, as this is a feature of the pre-flashed bootloader. Some Leonardos come with a version of the bootloader which makes it appear as a keyboard/mouse device and there are plenty of Leonardo-based projects which make use of this. In any case, neither of these is what we need and the Arduino IDE can't help us.
 
 No special hardware (e.g. a programmer) is needed.
 
@@ -94,12 +96,23 @@ No special hardware (e.g. a programmer) is needed.
 avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:sxbca.bin -C /etc/avrdude.conf'
 ```
 * Press the reset button on the Leonardo and *when you see the dmesg output register a new USB device* hit 'Enter'. Avrdude will then flash the firmware. You should have eight seconds from pressing the reset button before the Arduino reverts to its normal state. When this happens, you'll see it again in dmesg. You can just press the reset button again if this happens.
-* All done. Plug an Xbox One/360 controller into the USB Host Shield and the Leonardo into the Xbox console and everything should work.
+* All done. Plug an Xbox One/360/PS3/PS4 controller into the USB Host Shield and the Leonardo into the Xbox console and everything should work.
 
 Note - the correct command for MacOS is probably the following but this will be tested/confirmed soon.
 ```
 avrdude -p atmega32u4 -P /dev/ttyACM0 -c avr109 -U flash:w:sxbca.bin -C /usr/local/Cellar/avrdude/6.3_1/etc/avrdude.conf'
 ```
+
+### Using One
+
+* For the most part, just plug the device into the Xbox via the micro-USB port and the controller into the device via the USB-A port.
+* Holding XBOX/PS+L2 enables rumble, unless you've compiled a version which doesn't support it by amending the relevant line in settings.h. You know if you've done this.
+* If you're using rumble, plug the device into a wall PSU which supplies 7V-12V using the Leonardo's power socket. If you don't, then it will likely freeze when rumble takes place as the power draw is too high.
+* If you remove external power while using the device with a PS controller, press the reset button. During my testing so far the PS controllers are clever enough not to start charging themselves if there is no external power (the voltage on USB VCC can drop below 4V with a PS controller connected). However, they don't always stop charging if external power is removed and this will stress the device.
+* Holding PS+R2 enables/disables motion controls. Tip the controller forward to mimic right stick up, back to mimic right stick down. Roll the controller to mimic right stick right, roll left for right stick left. There are improvements to be made here but it works reasonably well.
+* Holding PS+R1 sets the sensivity of the motion controls but the effect is, for the time being, subtle. What's happening is the device changes the angle of the controller (in any direction) which it considers to be equivalent to pressing the stick fully in the respective direction. High sensivity = 30deg, medium=45deg, low=60deg. It's not great and what I really need to do here is apply a curve to the input.
+* Motion controls and the right stick can be used at the same time.
+* With no feedback from the software this is never going to be like playing Splatoon, but I do intend to get it to the point where it's a sneaky way of lining up headshots in Halo.
 
 ### Reflashing the standard Arduino bootloader
 
@@ -117,8 +130,8 @@ This time, when you first plug the Arduino in it will appear in the dmesg output
 
 Something 'going wrong' could mean:
 
-* You didn't press the reset button before flashing the firmware with Avrdude, or did and then ran the Avrdude command after the device had reverted (after more than eight seconds).
-* You made a typo in the Avrdude command. E.g. Avrdude erases the flash before looking for the hex/bin file you point it towards. So if you make a typo in 'sxbca.bin' it will cheerfully erase your Arduino and leave it at that. It's hard to imagine anyone being daft enough to do this and then getting into a mild panic when they connect the device to the Xbox, it doesn't work, and they assume it's a consequence of refactoring C++ at 3am but it could happen...
+* You time the flashing incorrectly, when the Leonardo is not in the right mode (achieved by pressing reset). However, I have done this accidentally and it's been fine. Several tutorials elsewhere warn about this however.
+* You made a typo in the Avrdude command. E.g. Avrdude erases the flash before looking for the hex/bin file you point it towards. So if you make a typo in 'sxbca.bin' it will cheerfully erase your Arduino and leave it at that. It's hard to imagine anyone being daft enough to do this and then getting into a mild panic when they connect the device to the Xbox, it doesn't work, and they assume it's a consequence of refactoring code at 3am but it could happen...
 
 In these and other cases you won't be able to flash the firmware properly with Avrdude (it either doesn't run, or does run but the device doesn't work). You also won't be able to load sketches with the Arduino IDE. You'll therefore need either another Arduino to use as an ISP (In System Programmer) or a hardware programmer. If you own a hardware programmer you probably don't need any help with this.
 
@@ -147,52 +160,36 @@ The main takeaway from this tutorial is that when using a Pro Micro rather than 
 
 # Development/Building the Binary
 
-This section of the document is still at an early stage...more/better to follow.
+This covers MacOS/Linux (Ubuntu). Some of it holds for Windows (VSCode, Platform IO) but the instructions for installing and using Avrdude differ. More to follow.
 
 ## Install Command Line Tools
 
-### Ubuntu etc.
+### Linux (Ubuntu, Debian etc)
 
 * From a command prompt run: 
 ```
-sudo apt-get install avrdude gcc-avr gdb-avr binutils-avr avr-libc git build-essential cmake
+sudo apt-get install avrdude git
 ```
 
 ### MacOS
 * From a command prompt run:
 ```
-xcode-select —-install
+xcode-select --install
 brew tap osx-cross/avr
-brew install avr-gcc avrdude cmake
+brew install avrdude
 ```
-## Install VS Code
-
-The project uses CMake to build itself from the three libraries (Arduino, LUFA, USB Host Shield) and project code. VS Code's CMake extension can run the right CMake tasks automatically every time the project is opened.
+## Install VS Code (Mac OS & Linux)
 
 * Download and install Visual Studio Code here: https://code.visualstudio.com/download
-* Open VS Code, click on the 'extensions' icon on the left hand side and install the 'C/C++' and 'CMake Tools' extensions.
-* Close VS Code.
+* Open VS Code, click on the 'extensions' icon on the left hand side and install 'Platform IO. Open and close VS Code to finalise install.
 * Clone this project to an appropriate location with 'git clone https://github.com/jimnarey/SimpleXboxControllerAdapter'
-* Open VS Code again and select 'File -> Open Folder'. Point it to the cloned repo.
-* If asked about which compiler to use, via a drop-down box, select gcc-avr
-* The CMake Tools extension should now create a 'build' directory within the 'Firmware' directory. Click 'yes' if it asks for permission to do this and click 'yes' if it asks about running Cmake each time a project/folder is opened.
-* Open main.cpp. If there are red squiggles under any of the header file/other names (meaning VS Code doesn't know where the files are located):
-    * Open the VS Code command palette with Ctrl-Shift-P and type 'edit'. 
-    * An option entitled 'C/C++ Edit Configurations UI' should appear. Select it. 
-    * Scroll down to the 'Include Path' section and in the box below add the path to the AVR libraries. 
-        * On Ubuntu 20 this is '/usr/lib/avr/include' but running ```dpkg -L avr-libc | grep include``` will give you the right path on any Debian-based system.
-        * On MacOS, this will depend on the version of the AVR compiler installed by brew. On Catalina and avr-gcc 9.3.0, the correct path is '/usr/local/Cellar/avr-gcc/9.3.0/avr/include/'.
-* You should now have everything up and running to play around with the code and build it.
+* Access the Platform IO home tab by clicking the (very small) Platform IO icon on the bottom bar of the VS Code window.
+* Select 'Open Project' and point the folder selection window at the cloned repo.
 
 ## Build
 
-* Enter the 'build' directory created by VS Code/CMake Tools.
-* Type `make` to build the project. It will create .elf file, containing the firmware to be burned onto an Arduino Leonardo or Pro Micro but not yet in the correct format.
-* MacOS/Brew, which uses a newer version of gcc-avr than Ubuntu, will likely throw some warnings when compiling the LUFA library. These can be ignored.
-* Enter: 
-```
-avr-objcopy -O binary sxbca.elf ./sxbca.bin
-```
+* Click the tick icon in the bottom bar of the VS Code window.
+* Clicking the arrow button, to upload the code, doesn't work without a bit of further config. I need to do a bit of digging into this but for now use Avrdude, which is how the original CMake version of this project was flashed and is more robust.
 
 ## Develop/Extend
 
@@ -204,7 +201,7 @@ The lines for initialising Serial1 are in main.cpp and commented out in most com
 screen /dev/ttyUSB0 9600
 ```
 
-As noted above, there isn't a huge amount of space left on the ATmega32u4's flash with the current build so it may be necessary to remove support for one or more controllers in order to add in support for others.
+There is almost no space left on the ATmega32u4's flash with the current build so it may be necessary to remove support for one or more controllers in order to add in support for others.
 
 ### Steps for adding additional controllers
 
