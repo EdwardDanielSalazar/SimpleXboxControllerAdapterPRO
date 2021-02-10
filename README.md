@@ -68,6 +68,13 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 
 * A USB-A female to Xbox Controller male/plug adapter. These are a few £/$ on eBay and [a better choice than hacking apart an Xbox peripheral](https://xboxdevwiki.net/Xbox_Input_Devices#USB_Adapters)
 * A total of two micro USB cables. Most Leonardos come with one.
+
+## For the OLED Version
+
+* One SSD1306-based 128x32 OLED screen. These are available cheaply on Amazon or eBay.
+* Four wires (<10cm 4 way ribbon cable is ideal).
+* (Optional) A four way (or equivalent, e.g. 4 x 1 way) dupont connector. Alternatively the wires can be soldered onto the OLED direct.
+* (Optional) heatshrink.
 * (Optional) Another Arduino (Uno/Leonardo/Micro/Pro Micro) and some male to female jumper wires to re-flash the bootloader onto the Leonardo if something goes wrong when using Avrdude. If you follow the instructions and - in particular - are very careful to (re-)produce the Avrdude command correctly, it won't. You could of course use a dedicated AVR hardware programmer for this if you have one.
 
 ### Hardware build
@@ -75,6 +82,11 @@ For now, these instructions cover using a 'full size' Arduino Leonardo and USB H
 * Check whether the pads need soldering on your USB Host Shield using the image above.
 * If they're not, [this](https://learn.sparkfun.com/tutorials/how-to-work-with-jumper-pads-and-pcb-traces/all) is a decent tutorial on soldering jumper pads though there are several on YouTube which may be better if you're not confident with a soldering iron.
 * Plug the USB Host Shield into the Leonardo.
+* If you're not adding an OLED, you're done.
+
+## Adding an OLED
+
+* Proper instructions to follow. In short, the wires need to be soldered to the underside of the Leonardo and then soldered/connected using a dupont connector to the OLED.
 
 ### Flashing the firmware
 
