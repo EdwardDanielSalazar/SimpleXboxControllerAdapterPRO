@@ -15,7 +15,7 @@
 #define VCC_READ_PIN A0
 
 // Build Options
-// #define ENABLE_OLED
+#define ENABLE_OLED
 #define ENABLE_RUMBLE
 #define ENABLE_MOTION
 
