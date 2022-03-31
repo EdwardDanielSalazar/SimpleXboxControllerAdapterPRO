@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2017.
+     Copyright (C) Dean Camera, 2021.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2017  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2021  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -99,7 +99,7 @@
 	/* Public Interface - May be used in end-application: */
 		/* Macros: */
 			/** \name Pipe Error Flag Masks */
-			//@{
+			/**@{*/
 			/** Mask for \ref Pipe_GetErrorFlags(), indicating that an overflow error occurred in the pipe on the received data. */
 			#define PIPE_ERRORFLAG_OVERFLOW         (1 << 6)
 
@@ -120,10 +120,10 @@
 
 			/** Mask for \ref Pipe_GetErrorFlags(), indicating that a hardware data toggle error occurred in the pipe. */
 			#define PIPE_ERRORFLAG_DATATGL          (1 << 0)
-			//@}
+			/**@}*/
 
 			/** \name Pipe Token Masks */
-			//@{
+			/**@{*/
 			/** Token mask for \ref Pipe_SetPipeToken() and \ref Pipe_GetPipeToken(). This sets the pipe as a SETUP token (for CONTROL type pipes),
 			 *  which will trigger a control request on the attached device when data is written to the pipe.
 			 */
@@ -138,7 +138,7 @@
 			 *  indicating that the pipe data will flow from host to device.
 			 */
 			#define PIPE_TOKEN_OUT                  (2 << PTOKEN0)
-			//@}
+			/**@}*/
 
 			/** Default size of the default control pipe's bank, until altered by the Endpoint0Size value
 			 *  in the device descriptor of the attached device.

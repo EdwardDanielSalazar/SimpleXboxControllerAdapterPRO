@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2017.
+     Copyright (C) Dean Camera, 2021.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2017  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2021  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -80,7 +80,7 @@
 	/* Public Interface - May be used in end-application: */
 		/* Macros: */
 			/** \name USB Device Mode Option Masks */
-			//@{
+			/**@{*/
 			#if defined(USB_SERIES_4_AVR) || defined(USB_SERIES_6_AVR) || defined(USB_SERIES_7_AVR) || defined(__DOXYGEN__)
 				/** Mask for the Options parameter of the \ref USB_Init() function. This indicates that the
 				 *  USB interface should be initialized in low speed (1.5Mb/s) mode.
@@ -98,7 +98,7 @@
 			 *  USB interface should be initialized in full speed (12Mb/s) mode.
 			 */
 			#define USB_DEVICE_OPT_FULLSPEED               (0 << 0)
-			//@}
+			/**@}*/
 
 			#if (!defined(NO_INTERNAL_SERIAL) && \
 			     (defined(USB_SERIES_7_AVR) || defined(USB_SERIES_6_AVR) || \
@@ -113,22 +113,25 @@
 				 *  On unsupported devices, this will evaluate to \ref NO_DESCRIPTOR and so will force the host to create a pseudo-serial
 				 *  number for the device.
 				 */
-				#define USE_INTERNAL_SERIAL            0xDC
+				#ifndef USE_INTERNAL_SERIAL
+					#define USE_INTERNAL_SERIAL         0xDC
+				#endif
 
 				/** Length of the device's unique internal serial number, in bits, if present on the selected microcontroller
 				 *  model.
 				 */
-				#define INTERNAL_SERIAL_LENGTH_BITS    80
+				#define INTERNAL_SERIAL_LENGTH_BITS     80
 
 				/** Start address of the internal serial number, in the appropriate address space, if present on the selected microcontroller
 				 *  model.
 				 */
-				#define INTERNAL_SERIAL_START_ADDRESS  0x0E
+				#define INTERNAL_SERIAL_START_ADDRESS   0x0E
 			#else
-				#define USE_INTERNAL_SERIAL            NO_DESCRIPTOR
+				#undef	USE_INTERNAL_SERIAL
+				#define USE_INTERNAL_SERIAL             NO_DESCRIPTOR
 
-				#define INTERNAL_SERIAL_LENGTH_BITS    0
-				#define INTERNAL_SERIAL_START_ADDRESS  0
+				#define INTERNAL_SERIAL_LENGTH_BITS     0
+				#define INTERNAL_SERIAL_START_ADDRESS   0
 			#endif
 
 		/* Function Prototypes: */

@@ -7,17 +7,22 @@
 
 #ifndef MAIN_H_
 #define MAIN_H_
-#include <inttypes.h>
+//#include <inttypes.h>
 
-#define USB_HOST_RESET_PIN 9
+#define USB_HOST_RESET_PIN 10
 #define ARDUINO_LED_PIN 17
 #define I2C_ADDRESS 0x3C
 #define VCC_READ_PIN A0
 
 // Build Options
-#define ENABLE_OLED
+//#define ENABLE_OLED
 #define ENABLE_RUMBLE
-#define ENABLE_MOTION
+#define ENABLE_XBOX360
+//#define ENABLE_XBOXBT
+//#define ENABLE_PS4BT
+//#define ENABLE_MOTION
+#define ENABLE_SWITCHBT
+//#define ENABLE_XBOXONEUSB
 
 /* prototypes */
 void sendControllerHIDReport();

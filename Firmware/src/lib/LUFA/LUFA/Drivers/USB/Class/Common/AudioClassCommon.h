@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2017.
+     Copyright (C) Dean Camera, 2021.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2017  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2021  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -65,7 +65,7 @@
 
 	/* Macros: */
 		/** \name Audio Channel Masks */
-		//@{
+		/**@{*/
 		/** Supported channel mask for an Audio class terminal descriptor. See the Audio class specification for more details. */
 		#define AUDIO_CHANNEL_LEFT_FRONT           (1 << 0)
 
@@ -101,10 +101,10 @@
 
 		/** Supported channel mask for an Audio class terminal descriptor. See the Audio class specification for more details. */
 		#define AUDIO_CHANNEL_TOP                  (1 << 11)
-		//@}
+		/**@}*/
 
 		/** \name Audio Feature Masks */
-		//@{
+		/**@{*/
 		/** Supported feature mask for an Audio class feature unit descriptor. See the Audio class specification for more details. */
 		#define AUDIO_FEATURE_MUTE                 (1 << 0)
 
@@ -134,10 +134,10 @@
 
 		/** Supported feature mask for an Audio class feature unit descriptor. See the Audio class specification for more details. */
 		#define AUDIO_FEATURE_BASS_LOUDNESS        (1 << 9)
-		//@}
+		/**@}*/
 
 		/** \name Audio Terminal Types */
-		//@{
+		/**@{*/
 		/** Terminal type constant for an Audio class terminal descriptor. See the Audio class specification for more details. */
 		#define AUDIO_TERMINAL_UNDEFINED           0x0100
 
@@ -191,7 +191,7 @@
 
 		/** Terminal type constant for an Audio class terminal descriptor. See the Audio class specification for more details. */
 		#define AUDIO_TERMINAL_OUT_LOWFREQ         0x0307
-		//@}
+		/**@}*/
 
 		/** Convenience macro to fill a 24-bit \ref USB_Audio_SampleFreq_t structure with the given sample rate as a 24-bit number.
 		 *
@@ -243,6 +243,13 @@
 			AUDIO_CSCP_StreamingProtocol              = 0x00, /**< Descriptor Protocol value indicating that the device or
 			                                                   *   interface belongs to the Streaming Audio protocol.
 			                                                   */
+		};
+
+		/** Enum for the Audio class specific descriptor types. */
+		enum AUDIO_DescriptorTypes_t
+		{
+			AUDIO_DTYPE_CSInterface                     = 0x24, /**< Audio class specific Interface functional descriptor. */
+			AUDIO_DTYPE_CSEndpoint                      = 0x25, /**< Audio class specific Endpoint functional descriptor. */
 		};
 
 		/** Audio class specific interface description subtypes, for the Audio Control interface. */

@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2017.
+     Copyright (C) Dean Camera, 2021.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2017  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2021  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -71,7 +71,7 @@
 		/** \name MIDI Command Values
 		 *  See http://www.midi.org/techspecs/midimessages.php for more information.
 		 */
-		//@{
+		/**@{*/
 		/** MIDI command for System Exclusive (SysEx) single event that has one byte of data total. */
 		#define MIDI_COMMAND_SYSEX_1BYTE           MIDI_COMMAND_SYSEX_END_1BYTE
 
@@ -113,7 +113,7 @@
 
 		/** MIDI command for a pitch change event. */
 		#define MIDI_COMMAND_PITCH_WHEEL_CHANGE    0xE0
-		//@}
+		/**@}*/
 
 		/** Standard key press velocity value used for all note events. */
 		#define MIDI_STANDARD_VELOCITY             64

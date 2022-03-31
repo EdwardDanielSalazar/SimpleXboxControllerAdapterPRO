@@ -104,6 +104,7 @@
 #define EV_LOOPBACK_COMMAND                             0x19
 #define EV_PAGE_SCAN_REP_MODE                           0x20
 #define EV_READ_REMOTE_EXTENDED_FEATURES_COMPLETE       0x23
+#define EV_EXTENDED_INQUIRY_RESULT                      0x2F
 #define EV_IO_CAPABILITY_REQUEST                        0x31
 #define EV_IO_CAPABILITY_RESPONSE                       0x32
 #define EV_USER_CONFIRMATION_REQUEST                    0x33
@@ -575,7 +576,7 @@ private:
 
         bool pairWiiUsingSync; // True if pairing was done using the Wii SYNC button.
         bool checkRemoteName; // Used to check remote device's name before connecting.
-        bool incomingPS4; // True if a PS4 controller is connecting
+        bool incomingPSController; // True if a PS4/PS5 controller is connecting
         uint8_t classOfDevice[3]; // Class of device of last device
 
         /* Variables used by high level HCI task */

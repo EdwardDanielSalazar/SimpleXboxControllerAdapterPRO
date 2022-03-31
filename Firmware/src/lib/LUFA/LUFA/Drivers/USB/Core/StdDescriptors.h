@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2017.
+     Copyright (C) Dean Camera, 2021.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2017  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2021  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -76,9 +76,7 @@
 			 *
 			 *  \param[in] mA  Maximum number of milliamps the device consumes when the given configuration is selected.
 			 */
-			#ifndef USB_CONFIG_POWER_MA
 			#define USB_CONFIG_POWER_MA(mA)           ((mA) >> 1)
-			#endif
 
 			/** Macro to calculate the Unicode length of a string with a given number of Unicode characters.
 			 *  Should be used in string descriptor's headers for giving the string descriptor's byte length.
@@ -99,7 +97,7 @@
 			 *
 			 *  \param[in] ...  Characters to initialize a USB String Descriptor structure with.
 			 */
-			#define USB_STRING_DESCRIPTOR_ARRAY(...)  { .Header = {.Size = sizeof(USB_Descriptor_Header_t) + sizeof((uint16_t){__VA_ARGS__}), .Type = DTYPE_String}, .UnicodeString = {__VA_ARGS__} }
+			#define USB_STRING_DESCRIPTOR_ARRAY(...)  { .Header = {.Size = sizeof(USB_Descriptor_Header_t) + sizeof((uint16_t[]){__VA_ARGS__}), .Type = DTYPE_String}, .UnicodeString = {__VA_ARGS__} }
 
 			/** Macro to encode a given major/minor/revision version number into Binary Coded Decimal format for descriptor
 			 *  fields requiring BCD encoding, such as the USB version number in the standard device descriptor.
@@ -122,15 +120,18 @@
 			#define LANGUAGE_ID_ENG                   0x0409
 
 			/** \name USB Configuration Descriptor Attribute Masks */
-			//@{
-			/** Mask for the reserved bit in the Configuration Descriptor's \c ConfigAttributes field, which must be set on all
-			 *  devices for historical purposes.
+			/**@{*/
+			/** Mask for the reserved bit in the Configuration Descriptor's \c ConfigAttributes field, which must be always
+			 *  set on all USB devices for historical purposes.
 			 */
 			#define USB_CONFIG_ATTR_RESERVED          0x80
 
 			/** Can be masked with other configuration descriptor attributes for a \ref USB_Descriptor_Configuration_Header_t
 			 *  descriptor's \c ConfigAttributes value to indicate that the specified configuration can draw its power
-			 *  from the device's own power source.
+			 *  from the device's own power source, instead of drawing it from the USB host.
+			 *
+			 *  Note that the host will probe this dynamically - the device should report its current power state via the
+			 *  \ref USB_Device_CurrentlySelfPowered global variable.
 			 */
 			#define USB_CONFIG_ATTR_SELFPOWERED       0x40
 
@@ -138,12 +139,16 @@
 			 *  descriptor's \c ConfigAttributes value to indicate that the specified configuration supports the
 			 *  remote wakeup feature of the USB standard, allowing a suspended USB device to wake up the host upon
 			 *  request.
+			 *
+			 *  If set, the host will dynamically enable and disable remote wakeup support, indicated via the
+			 *  \ref USB_Device_RemoteWakeupEnabled global variable. To initiate a remote wakeup of the host (when allowed)
+			 *  see \ref USB_Device_RemoteWakeupEnabled().
 			 */
 			#define USB_CONFIG_ATTR_REMOTEWAKEUP      0x20
-			//@}
+			/**@}*/
 
 			/** \name Endpoint Descriptor Attribute Masks */
-			//@{
+			/**@{*/
 			/** Can be masked with other endpoint descriptor attributes for a \ref USB_Descriptor_Endpoint_t descriptor's
 			 *  \c Attributes value to indicate that the specified endpoint is not synchronized.
 			 *
@@ -171,10 +176,10 @@
 			 *  \see The USB specification for more details on the possible Endpoint attributes.
 			 */
 			#define ENDPOINT_ATTR_SYNC                (3 << 2)
-			//@}
+			/**@}*/
 
 			/** \name Endpoint Descriptor Usage Masks */
-			//@{
+			/**@{*/
 			/** Can be masked with other endpoint descriptor attributes for a \ref USB_Descriptor_Endpoint_t descriptor's
 			 *  \c Attributes value to indicate that the specified endpoint is used for data transfers.
 			 *
@@ -195,7 +200,7 @@
 			 *  \see The USB specification for more details on the possible Endpoint usage attributes.
 			 */
 			#define ENDPOINT_USAGE_IMPLICIT_FEEDBACK  (2 << 4)
-			//@}
+			/**@}*/
 
 		/* Enums: */
 			/** Enum for the possible standard descriptor types, as given in each descriptor's header. */
@@ -210,8 +215,6 @@
 				DTYPE_Other                     = 0x07, /**< Indicates that the descriptor is of other type. */
 				DTYPE_InterfacePower            = 0x08, /**< Indicates that the descriptor is an interface power descriptor. */
 				DTYPE_InterfaceAssociation      = 0x0B, /**< Indicates that the descriptor is an interface association descriptor. */
-				DTYPE_CSInterface               = 0x24, /**< Indicates that the descriptor is a class specific interface descriptor. */
-				DTYPE_CSEndpoint                = 0x25, /**< Indicates that the descriptor is a class specific endpoint descriptor. */
 			};
 
 			/** Enum for possible Class, Subclass and Protocol values of device and interface descriptors. */

@@ -1,40 +1,26 @@
-/*
-This sketch is used for the ogx360 PCB (See https://github.com/Ryzee119/ogx360).
-This program incorporates the USB Host Shield Library for the MAX3421 IC See https://github.com/felis/USB_Host_Shield_2.0.
-The USB Host Shield Library is an Arduino library, consequently I have imported to necessary Arduino libs into this project.
-This program also incorporates the AVR LUFA USB Library, See http://www.fourwalledcubicle.com/LUFA.php for the USB HID support.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-In settings.h you can configure the following options:
-1. Compile for MASTER of SLAVE (comment out #define MASTER) (Host is default)
-2. Enable or disable Steel Battalion Controller Support via Wireless Xbox 360 Chatpad (Enabled by Default)
-3. Enable or disable Xbox 360 Wired Support (Enabled by default)
-4. Enable or disable Xbox One Wired Support (Disabled by default)
-*/
-
 #include "settings.h"
 #include "xiddevice.h"
 // #include "EEPROM.h" // ?? Remove this ??
 #include <SPI.h>
-#include <XBOXONE.h>
-#include <XBOXUSB.h>
-#include <PS3USB.h>
-#include <PS4USB.h>
 
-#ifdef ENABLE_OLED
-#include <SSD1306Ascii.h>
-#include <SSD1306AsciiAvrI2c.h>
+#ifdef ENABLE_XBOX360
+#include <XBOXRECV.h>
 #endif
+#ifdef ENABLE_XBOXBT
+#include <XBOXONESBT.h>
+#endif
+
+//#include <PS3USB.h>
+#ifdef ENABLE_PS4BT
+#include <PS4BT.h>
+#endif
+#ifdef ENABLE_XBOXONEUSB
+#include <XBOXONE.h>
+#endif
+#ifdef ENABLE_SWITCHBT
+#include <SwitchProBT.h>
+#endif
+
 
 //playerID is set in the main program based on the slot the Arduino is installed.
 // uint8_t playerID;
@@ -47,7 +33,20 @@ bool enumerationComplete = false;
 //Timer used to time disconnection between SB and Duke controller swapover
 uint32_t disconnectTimer = 0;
 
-USB UsbHost;
+USB Usb;
+
+
+#ifdef ENABLE_PS4BT
+BTD Btd(&Usb);
+PS4BT PS4Wired(&Btd, PAIR);
+#endif
+#ifdef ENABLE_SWITCHBT
+BTD Btd(&Usb);
+SwitchProBT SwitchPro(&Btd, PAIR);
+#endif
+#ifdef ENABLE_XBOXONEUSB
+XBOXONE XBOXONE(&Usb);
+#endif
 uint8_t getButtonPress(ButtonEnum b);
 int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
@@ -57,10 +56,17 @@ void checkControllerChange();
 
 void getStatus();
 
-XBOXONE XboxOneWired(&UsbHost);
-XBOXUSB Xbox360Wired(&UsbHost);
-PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
-PS4USB PS4Wired(&UsbHost);
+//XBOXONE XboxOneWired(&UsbHost);
+
+#ifdef ENABLE_XBOX360
+XBOXRECV Xbox360Wired(&Usb);
+#endif
+#ifdef ENABLE_XBOXBT
+BTD Btd(&Usb);
+XBOXONESBT Xbox(&Btd, PAIR);
+#endif
+//PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
+
 uint8_t controllerType = 0;
 uint8_t status = 0;
 
@@ -68,37 +74,10 @@ uint8_t status = 0;
 bool rumbleOn = false;
 #endif
 
-#ifdef ENABLE_MOTION
-int16_t getMotion(AngleEnum a);
-int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal);
-void changeMotionSensitivity();
-void applyMotionSensitivity();
-
-bool motionOn = false;
-int8_t motionSensitivity = 1;
-int8_t sensitivityAngle = 45;
-uint16_t rollAngle = 0; // PS controllers provide 0 - 360
-uint16_t pitchAngle = 0;
-int16_t relativeRollAngle = 0; // Will be between [-45 and 45]
-int16_t relativePitchAngle = 0;
-float lookXAdjust_f = 0;
-float lookYAdjust_f = 0;
-int32_t totalX = 0;
-int32_t totalY = 0;
-uint16_t maxInputAngle;
-uint16_t minInputAngle;
-#endif
-
-#ifdef ENABLE_OLED
-void updateOled();
-SSD1306AsciiAvrI2c oled;
-#endif
-
 int main(void)
 {
     //Init the Arduino Library
     init();
-
     //Init IO
     pinMode(USB_HOST_RESET_PIN, OUTPUT);
     pinMode(ARDUINO_LED_PIN, OUTPUT);
@@ -110,7 +89,7 @@ int main(void)
     GlobalInterruptEnable();
 
     // Initialise the Serial Port
-    // Serial1.begin(500000);
+     //Serial1.begin(115200);
 
     //Init the XboxOG data arrays to zero.
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t));
@@ -119,34 +98,23 @@ int main(void)
     delay(20); //wait 20ms to reset the IC. Reseting at startup improves reliability in my experience.
     digitalWrite(USB_HOST_RESET_PIN, HIGH);
     delay(20); //Settle
-    while (UsbHost.Init() == -1)
+    while (Usb.Init() == -1)
     {
+        //while (1); // Halt
         digitalWrite(ARDUINO_LED_PIN, !digitalRead(ARDUINO_LED_PIN));
-        delay(500);
+       // delay(500);
+     
     }
-
-    // Setup OLED
-    #ifdef ENABLE_OLED
-    oled.begin(&Adafruit128x32, I2C_ADDRESS);
-    oled.setFont(SystemFont5x7);
-    oled.displayRemap(true);
-    updateOled();
-    #endif
-
-    #ifdef ENABLE_MOTION
-    applyMotionSensitivity();
-    #endif
-
+     
     while (1)
     {
-
-        UsbHost.busprobe();
-        UsbHost.Task();
+        Usb.busprobe();
+        Usb.Task();
 
         checkControllerChange();
+       
         if (controllerType)
         {
-        
             //Read Digital Buttons
             XboxOGDuke.dButtons=0x0000;
             if (getButtonPress(UP))      XboxOGDuke.dButtons |= DUP;
@@ -165,52 +133,25 @@ int main(void)
             getButtonPress(Y)    ? XboxOGDuke.Y = 0xFF      : XboxOGDuke.Y = 0x00;
             getButtonPress(L1)   ? XboxOGDuke.WHITE = 0xFF  : XboxOGDuke.WHITE = 0x00;
             getButtonPress(R1)   ? XboxOGDuke.BLACK = 0xFF  : XboxOGDuke.BLACK = 0x00;
-
+            
             //Read Analog triggers
+            if ((controllerType) == 1||(controllerType) == 2||(controllerType) == 4||(controllerType) == 5){
             XboxOGDuke.L = getButtonPress(L2); //0x00 to 0xFF
-            XboxOGDuke.R = getButtonPress(R2); //0x00 to 0xFF
-
+            XboxOGDuke.R = getButtonPress(R2);
+            }
+            
+            if ((controllerType) == 3){
+            XboxOGDuke.L = getButtonPress(ZLl); //0x00 to 0xFF
+            XboxOGDuke.R = getButtonPress(ZR);
+            }
+            
+             //0x00 to 0xFF
             //Read Control Sticks (16bit signed short)
             XboxOGDuke.leftStickX = getAnalogHat(LeftHatX);
             XboxOGDuke.leftStickY = getAnalogHat(LeftHatY);
             XboxOGDuke.rightStickX = getAnalogHat(RightHatX);
             XboxOGDuke.rightStickY = getAnalogHat(RightHatY);
-            
-            #ifdef ENABLE_MOTION
-            if (motionOn) {
-                if (controllerType == 3 || controllerType == 4) {
-                // Assigns values to rollAngle and pitchAngle
-                rollAngle = getMotion(Roll);
-                pitchAngle = getMotion(Pitch);
-                rollAngle = limitValue(rollAngle, maxInputAngle, minInputAngle);
-                pitchAngle = limitValue(pitchAngle, maxInputAngle, minInputAngle);
-                relativeRollAngle = rollAngle - 180; // Makes angle zero-relative
-                relativePitchAngle = pitchAngle - 180;
-
-                lookXAdjust_f = (float)relativeRollAngle / sensitivityAngle; // A proportion of the maximum
-			    lookYAdjust_f = (float)relativePitchAngle / sensitivityAngle;
-
-                // TO DO - allow user to invert motion y axis
-                if (controllerType == 3) {
-                    lookYAdjust_f = lookYAdjust_f * -1;
-                } else if (controllerType == 4) {
-                    lookXAdjust_f = lookXAdjust_f * -1;
-                    lookYAdjust_f = lookYAdjust_f * -1;
-                }
-
-                totalX = XboxOGDuke.rightStickX + (lookXAdjust_f * 32767);
-                totalY = XboxOGDuke.rightStickY + (lookYAdjust_f * 32767);
-
-                totalX = limitValue(totalX, 32767, -32767);
-                totalY = limitValue(totalY, 32767, -32767);
-
-                XboxOGDuke.rightStickX = totalX;
-                XboxOGDuke.rightStickY = totalY;
-
-                }
-            }
-            #endif
-           
+                      
             //Anything that sends a command to the Xbox 360 controllers happens here.
             //(i.e rumble, LED changes, controller off command)
             static uint32_t commandTimer = 0;
@@ -219,44 +160,9 @@ int main(void)
             {
                 // Enable motion controls
                 // TO DO - only turn on motion when compatible controller connected
-                if (getButtonPress(XBOX) && getButtonPress(R2) > 0x00)
-                {
-                    if (xboxHoldTimer == 0)
-                    {
-                        xboxHoldTimer = millis();
-                    }
-                    if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
-                    {
-
-                        xboxHoldTimer = 0;
-                        #ifdef ENABLE_MOTION
-                        motionOn = !motionOn;
-                        #endif
-                        #ifdef ENABLE_OLED
-                        updateOled();
-                        #endif
-                    }
-                }
-                else if (getButtonPress(XBOX) && getButtonPress(R1) > 0x00)
-                {
-                    if (xboxHoldTimer == 0)
-                    {
-                        xboxHoldTimer = millis();
-                    }
-                    if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
-                    {
-
-                        xboxHoldTimer = 0;
-                        #ifdef ENABLE_MOTION
-                        changeMotionSensitivity();
-                        #endif
-                        #ifdef ENABLE_OLED
-                        updateOled();
-                        #endif
-                    }
-                }
+                                
                 // Enable rumble
-                else if (getButtonPress(XBOX) && getButtonPress(L2) > 0x00)
+                if (getButtonPress(XBOX) && getButtonPress(L2) > 0x00)
                 {
                     if (xboxHoldTimer == 0)
                     {
@@ -264,16 +170,27 @@ int main(void)
                     }
                     if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
                     {
-
                         xboxHoldTimer = 0;
                         #ifdef ENABLE_RUMBLE
                         rumbleOn = !rumbleOn;
                         #endif
-                        #ifdef ENABLE_OLED
-                        updateOled();
+                    }
+                }
+                if (getButtonPress(HOME) && getButtonPress(ZLl) > 0x00)
+                {
+                    if (xboxHoldTimer == 0)
+                    {
+                        xboxHoldTimer = millis();
+                    }
+                    if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
+                    {
+                        xboxHoldTimer = 0;
+                        #ifdef ENABLE_RUMBLE
+                        rumbleOn = !rumbleOn;
                         #endif
                     }
                 }
+                
                 #ifdef ENABLE_RUMBLE
                 //START+BACK TRIGGERS is a standard soft reset command.
                 //We turn off the rumble motors here to prevent them getting locked on
@@ -304,8 +221,6 @@ int main(void)
 
             sendControllerHIDReport();
         }
-
-
         //Handle Player 1 controller connect/disconnect events.
         if (controllerConnected() && disconnectTimer == 0)
         {
@@ -364,57 +279,118 @@ void sendControllerHIDReport()
 //Parse button presses for each type of controller
 uint8_t getButtonPress(ButtonEnum b)
 {
-
+    
     uint8_t psVal = 0;
-
-
-    if (Xbox360Wired.Xbox360Connected)
+    
+    #ifdef ENABLE_XBOX360
+    if (Xbox360Wired.XboxReceiverConnected){
         return Xbox360Wired.getButtonPress(b);
-
-    if (XboxOneWired.XboxOneConnected)
+    }
+    #endif
+    #ifdef ENABLE_XBOXBT
+    if (Xbox.connected())
     {
         if (b == L2 || b == R2)
         {
             //Xbone one triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
-            return (uint8_t)(XboxOneWired.getButtonPress(b) >> 2); 
+            return (uint8_t)(Xbox.getButtonPress(b) >> 2); 
         }
         else
         {
-            return (uint8_t)XboxOneWired.getButtonPress(b);
+            return (uint8_t)Xbox.getButtonPress(b);
         }
     }
+    #endif
+    #ifdef ENABLE_XBOXONEUSB
+    if (XBOXONE.XboxOneConnected)
+    {
+        if (b == L2 || b == R2)
+        {
+            //Xbone one triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
+            return (uint8_t)(XBOXONE.getButtonPress(b) >> 2); 
+        }
+        else
+        {
+            return (uint8_t)XBOXONE.getButtonPress(b);
+        }
+    }
+    #endif
+    
 
-    if (PS3Wired.PS3Connected) {
-		switch (b) {
-			// Remap the PS3 controller face buttons to their Xbox counterparts
+    #ifdef ENABLE_SWITCHBT
+    if (SwitchPro.connected())
+    {            
+           switch (b) {
+			// Remap the PS4 controller face buttons to their Xbox counterparts
 			case A:
-				psVal = (uint8_t)PS3Wired.getButtonPress(CROSS); // TO DO - are these casts needed now? And in PS4 code.
+				psVal = (uint8_t)SwitchPro.getButtonPress(B);
 				break;
 			case B:
-				psVal = (uint8_t)PS3Wired.getButtonPress(CIRCLE);
+				psVal = (uint8_t)SwitchPro.getButtonPress(A);
 				break;
 			case X:
-				psVal = (uint8_t)PS3Wired.getButtonPress(SQUARE);
+				psVal = (uint8_t)SwitchPro.getButtonPress(Y);
 				break;
 			case Y:
-				psVal = (uint8_t)PS3Wired.getButtonPress(TRIANGLE);
+				psVal = (uint8_t)SwitchPro.getButtonPress(X);
 				break;
-			// Call a different function from the PS3USB library to get the level of
+            case BACK:
+				psVal = (uint8_t)SwitchPro.getButtonPress(MINUS);
+				break;
+            case R3:
+				psVal = (uint8_t)SwitchPro.getButtonPress(R3);
+				break;  
+            case L3:
+				psVal = (uint8_t)SwitchPro.getButtonPress(L3);
+				break; 
+            case START:
+				psVal = (uint8_t)SwitchPro.getButtonPress(PLUS);
+				break;  
+            case UP:
+				psVal = (uint8_t)SwitchPro.getButtonPress(UP);
+				break; 
+            case DOWN:
+				psVal = (uint8_t)SwitchPro.getButtonPress(DOWN);
+				break; 
+            case LEFT:
+				psVal = (uint8_t)SwitchPro.getButtonPress(LEFT);
+				break; 
+            case RIGHT:
+				psVal = (uint8_t)SwitchPro.getButtonPress(RIGHT);
+				break; 
+            case R1:
+				psVal = (uint8_t)SwitchPro.getButtonPress(R);
+				break; 
+            case L1:
+				psVal = (uint8_t)SwitchPro.getButtonPress(L);
+				break;
+                  
+            case ZLl:
+				if(SwitchPro.getButtonPress(ZLl)){
+                psVal = 0xff;
+                }else{
+                psVal = 0x00;
+                }
+              	break; 
+            case ZR:
+				if(SwitchPro.getButtonPress(ZR)){
+                psVal = 0xff;
+                }else{
+                psVal = 0x00;
+                }
+				break;          
+                        
+			// Call a different function from the PS4USB library to get the level of
 			// pressure applied to the L2 and R2 triggers, not just 'on' or 'off
-			case L2:
-				psVal = (uint8_t)PS3Wired.getAnalogButton(L2);
-				break;
-			case R2:
-				psVal = (uint8_t)PS3Wired.getAnalogButton(R2);
-				break;
-			// Requests for the start, select, R1, L1 and the D-pad buttons can be called normally
 			default:
-				psVal = (uint8_t)PS3Wired.getButtonPress(b);
+				psVal = (uint8_t)SwitchPro.getButtonPress(b);
 		}
 		return psVal;
-	}
-
-	if (PS4Wired.connected()) {
+    }
+    #endif
+    
+	#ifdef ENABLE_PS4BT
+    if (PS4Wired.connected()) {
 		switch (b) {
 			// Remap the PS4 controller face buttons to their Xbox counterparts
 			case A:
@@ -442,6 +418,7 @@ uint8_t getButtonPress(ButtonEnum b)
 		}
 		return psVal;
 	}
+    #endif
 
     return 0;
 }
@@ -449,8 +426,8 @@ uint8_t getButtonPress(ButtonEnum b)
 //Parse analog stick requests for each type of controller.
 int16_t getAnalogHat(AnalogHatEnum a)
 {
-
-    if (Xbox360Wired.Xbox360Connected)
+#ifdef ENABLE_XBOX360
+    if (Xbox360Wired.XboxReceiverConnected)
     {
         int16_t val;
         val = Xbox360Wired.getAnalogHat(a);
@@ -458,28 +435,35 @@ int16_t getAnalogHat(AnalogHatEnum a)
             val = -32768;
         return val;
     }
-
-    if (XboxOneWired.XboxOneConnected)
-        return XboxOneWired.getAnalogHat(a);
-
-    if (PS3Wired.PS3Connected) {
-		// Scale up the unsigned 8bit values produced by the PS3 analog sticks to the
-		// signed 16bit values expected by the Xbox. In the case of the Y axes, invert the result
+    #endif
+    #ifdef ENABLE_XBOXBT
+    if (Xbox.connected())
+        return Xbox.getAnalogHat(a);
+    #endif
+    #ifdef ENABLE_XBOXONEUSB
+    if (XBOXONE.XboxOneConnected)
+    return XBOXONE.getAnalogHat(a);
+    #endif
+    #ifdef ENABLE_SWITCHBT
+   if (SwitchPro.connected()) {
+        
 		if (a == RightHatY || a == LeftHatY) {
-			return (PS3Wired.getAnalogHat(a) - 127) * -255;
+			return (SwitchPro.getAnalogHat(a) - 127) * -19;
 		} else {
-			return (PS3Wired.getAnalogHat(a) - 127) * 255;
+			return (SwitchPro.getAnalogHat(a) - 129) * 20;
 		}
-	}
-
-	if (PS4Wired.connected()) {
+    }
+    #endif
+    
+	#ifdef ENABLE_PS4BT
+    if (PS4Wired.connected()) {
 		if (a == RightHatY || a == LeftHatY) {
 			return (PS4Wired.getAnalogHat(a) - 127) * -255;
 		} else {
 			return (PS4Wired.getAnalogHat(a) - 127) * 255;
 		}
 	}
-
+    #endif
     return 0;
 }
 
@@ -488,27 +472,37 @@ int16_t getAnalogHat(AnalogHatEnum a)
 void setRumbleOn(uint8_t lValue, uint8_t rValue)
 {
     if (rumbleOn) {
-        if (Xbox360Wired.Xbox360Connected)
+        #ifdef ENABLE_XBOX360
+        if (Xbox360Wired.XboxReceiverConnected)
         {
             Xbox360Wired.setRumbleOn(lValue, rValue); 
         }
-
-        if (XboxOneWired.XboxOneConnected)
+        #endif
+        #ifdef ENABLE_XBOXBT
+        if (Xbox.connected())
         {
-            XboxOneWired.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+            //Xbox.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
         }
-
-        // TO DO - add left and right values
-        // TO DO - consider separate rumbleOff function
-        if (PS3Wired.PS3Connected)
-        {   
+        #endif
+        #ifdef ENABLE_XBOXONEUSB
+        if (XBOXONE.XboxOneConnected)
+        XBOXONE.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+        #endif
+        #ifdef SWITCH
+        if (SwitchPro.connected())
+        {
             if (lValue == 0 && rValue == 0) {
-                PS3Wired.setRumbleOff();
+            SwitchPro.setRumbleRight(false);
+            SwitchPro.setRumbleLeft(false);
             } else {
-                PS3Wired.setRumbleOn(RumbleLow);
+            SwitchPro.setRumbleRight(true);
+            SwitchPro.setRumbleLeft(true);
             }
+        
         }
-
+         #endif
+         
+        #ifdef ENABLE_PS4BT
         if (PS4Wired.connected())
         {   
             if (lValue == 0 && rValue == 0) {
@@ -517,6 +511,7 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
                 PS4Wired.setRumbleOn(RumbleLow);
             }
         }
+        #endif
     }
 }
 #endif
@@ -524,21 +519,11 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
 //Parse LED activation requests for each type of controller.
 void setLedOn(LEDEnum led)
 {
-
-    if (Xbox360Wired.Xbox360Connected)
-        Xbox360Wired.setLedOn(led);
-
-    if (XboxOneWired.XboxOneConnected)
-    {
-        //no LEDs on Xbox One Controller. I think it is possible to adjust brightness but this is not implemented.
-    }
-
-    if (PS3Wired.PS3Connected)
-	PS3Wired.setLedOn(led);
-
-    // if (PS3Wired.PS3Connected)
-	// PS3Wired.setLedOn(led);
-
+    #ifdef ENABLE_XBOX360
+    if (Xbox360Wired.XboxReceiverConnected)
+        Xbox360Wired.setLedOn(led);  
+    #endif
+    
 }
 
 
@@ -546,122 +531,38 @@ void setLedOn(LEDEnum led)
 uint8_t controllerConnected()
 {
     uint8_t controllerType = 0;
-
-    if (Xbox360Wired.Xbox360Connected)
+    #ifdef ENABLE_XBOX360
+    if (Xbox360Wired.XboxReceiverConnected)
+       {
         controllerType =  1;
-
-    if (XboxOneWired.XboxOneConnected)
+       }
+    #endif
+    #ifdef ENABLE_XBOXBT
+    if (Xbox.connected())
+       {
         controllerType =  2;
-
-    if (PS3Wired.PS3Connected)
-		controllerType =  3;
-
-	if (PS4Wired.connected())
+       }
+    #endif
+	#ifdef ENABLE_SWITCHBT
+    if (SwitchPro.connected())
+        controllerType =  3;
+    #endif   
+	#ifdef ENABLE_PS4BT
+    if (PS4Wired.connected())
 		controllerType =  4;
+    #endif
+    #ifdef ENABLE_XBOXONEUSB
+    if (XBOXONE.XboxOneConnected)
+		controllerType =  5;
+    #endif
 
     return controllerType;
 }
 
 void checkControllerChange() {
+    Usb.Task();
     uint8_t currentController = controllerConnected();
     if (currentController != controllerType) {
         controllerType = currentController;
-        #ifdef ENABLE_OLED
-        updateOled();
-        #endif
     }
 }
-
-#ifdef ENABLE_OLED
-void updateOled() {
-    oled.clear();
-    #ifdef ENABLE_RUMBLE
-    oled.print("Rumble ");
-    if (rumbleOn == true) {
-        oled.println("On");
-    } else {
-        oled.println("Off");
-    }
-    #endif
-    #ifdef ENABLE_MOTION
-    oled.print("Motion ");
-    if (controllerType == 3 || controllerType == 4) {
-        if (motionOn == true) {
-            oled.print("On, ");
-            if (motionSensitivity == 0) {
-                oled.println("Low");
-            } else if (motionSensitivity == 1) {
-                oled.println("Med");
-            } else {
-                oled.println("High");
-            }
-        } else {
-            oled.println("Off");
-        }
-    } else {
-        oled.println("N/A");
-    }
-    #endif
-    // getStatus();
-    // oled.println(status);
-}
-
-// void getStatus() {
-//     if (controllerType == 3) {
-//         if (PS3Wired.getStatus(Full)) {
-//             status = 15;
-//         } else if (PS3Wired.getStatus(High)) {
-//             status = 10;
-//         } else if (PS3Wired.getStatus(Low)) {
-//             status = 5;
-//         } else if (PS3Wired.getStatus(Dying)) {
-//             status = 1;
-//         }
-        
-//     } else if (controllerType == 4) {
-//         status = PS4Wired.getBatteryLevel();
-//     }
-// }
-#endif
-
-#ifdef ENABLE_MOTION
-
-// TO DO - could these casts to ints conceivably return a value > 360? Is that a problem?
-
-int16_t getMotion(AngleEnum a) {
-    if (controllerType == 3) {
-        return (int16_t)PS3Wired.getAngle(a);     
-    } else if (controllerType == 4) {
-        return (int16_t)PS4Wired.getAngle(a);      
-    }
-    return 0;
-}
-
-int16_t limitValue(int32_t value, int32_t maxVal, int32_t minVal) {
-    if (value > maxVal) { return maxVal; }
-    else if (value < minVal) { return minVal; }
-    return value;
-}
-
-void changeMotionSensitivity() {
-    if (motionSensitivity < 2) {
-        ++motionSensitivity;
-    } else {
-        motionSensitivity = 0;
-    }
-}
-
-void applyMotionSensitivity() {
-    if (motionSensitivity == 0) {
-        sensitivityAngle = 60;
-    } else if (motionSensitivity == 1) {
-        sensitivityAngle = 45;
-    } else {
-        sensitivityAngle = 30;
-    }
-    maxInputAngle = 180 + sensitivityAngle; // e.g. 180 + 45 = 225
-    minInputAngle = 180 - sensitivityAngle; // e.g. 180 - 45 = 135
-}
-
-#endif
-

@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2017.
+     Copyright (C) Dean Camera, 2021.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2017  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2021  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -143,7 +143,7 @@ bool HID_Device_ConfigureEndpoints(USB_ClassInfo_HID_Device_t* const HIDInterfac
 {
 	memset(&HIDInterfaceInfo->State, 0x00, sizeof(HIDInterfaceInfo->State));
 	HIDInterfaceInfo->State.UsingReportProtocol = true;
-	HIDInterfaceInfo->State.IdleCount           = 5000;
+	HIDInterfaceInfo->State.IdleCount           = 500;
 
 	HIDInterfaceInfo->Config.ReportINEndpoint.Type = EP_TYPE_INTERRUPT;
 
