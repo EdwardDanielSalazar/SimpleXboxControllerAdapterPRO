@@ -162,7 +162,7 @@ int main(void)
                 // TO DO - only turn on motion when compatible controller connected
                                 
                 // Enable rumble
-                if (getButtonPress(XBOX) && getButtonPress(L2) > 0x00)
+                 if ((getButtonPress(XBOX) && getButtonPress(L2)) > 0x00 || (getButtonPress(HOME) && getButtonPress(ZLl)) > 0x00)
                 {
                     if (xboxHoldTimer == 0)
                     {
@@ -173,23 +173,11 @@ int main(void)
                         xboxHoldTimer = 0;
                         #ifdef ENABLE_RUMBLE
                         rumbleOn = !rumbleOn;
+                        
                         #endif
                     }
                 }
-                if (getButtonPress(HOME) && getButtonPress(ZLl) > 0x00)
-                {
-                    if (xboxHoldTimer == 0)
-                    {
-                        xboxHoldTimer = millis();
-                    }
-                    if ((millis() - xboxHoldTimer) > 1000 && (millis() - xboxHoldTimer) < 1100)
-                    {
-                        xboxHoldTimer = 0;
-                        #ifdef ENABLE_RUMBLE
-                        rumbleOn = !rumbleOn;
-                        #endif
-                    }
-                }
+                
                 
                 #ifdef ENABLE_RUMBLE
                 //START+BACK TRIGGERS is a standard soft reset command.
@@ -488,7 +476,8 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
         if (XBOXONE.XboxOneConnected)
         XBOXONE.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
         #endif
-        #ifdef SWITCH
+
+        #ifdef ENABLE_SWITCHBT
         if (SwitchPro.connected())
         {
             if (lValue == 0 && rValue == 0) {
