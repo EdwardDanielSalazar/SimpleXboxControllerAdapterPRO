@@ -100,12 +100,11 @@ int main(void)
     delay(20); //Settle
     while (Usb.Init() == -1)
     {
-        //while (1); // Halt
+        while (1); // Halt
         digitalWrite(ARDUINO_LED_PIN, !digitalRead(ARDUINO_LED_PIN));
-       // delay(500);
+        delay(500);
      
     }
-     
     while (1)
     {
         Usb.busprobe();
@@ -113,6 +112,8 @@ int main(void)
 
         checkControllerChange();
        
+        
+
         if (controllerType)
         {
             //Read Digital Buttons
@@ -172,8 +173,7 @@ int main(void)
                     {
                         xboxHoldTimer = 0;
                         #ifdef ENABLE_RUMBLE
-                        rumbleOn = !rumbleOn;
-                        
+                        rumbleOn = !rumbleOn;                        
                         #endif
                     }
                 }
@@ -435,9 +435,15 @@ int16_t getAnalogHat(AnalogHatEnum a)
     #ifdef ENABLE_SWITCHBT
    if (SwitchPro.connected()) {
         
-		if (a == RightHatY || a == LeftHatY) {
+		if (a == RightHatY ) {
 			return (SwitchPro.getAnalogHat(a) - 127) * -20;
-		} else {
+        }
+		else if(a == LeftHatY){
+            return (SwitchPro.getAnalogHat(a)) * -19;
+        } else if (a == RightHatX ) {
+			return (SwitchPro.getAnalogHat(a) - 127) * 21;
+        } 
+        else{
 			return (SwitchPro.getAnalogHat(a) - 127) * 20;
 		}
     }
@@ -481,11 +487,9 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
         if (SwitchPro.connected())
         {
             if (lValue == 0 && rValue == 0) {
-            SwitchPro.setRumbleRight(false);
-            SwitchPro.setRumbleLeft(false);
+            SwitchPro.setRumble(false, false );
             } else {
-            SwitchPro.setRumbleRight(true);
-            SwitchPro.setRumbleLeft(true);
+            SwitchPro.setRumble(true, true);
             }
         
         }

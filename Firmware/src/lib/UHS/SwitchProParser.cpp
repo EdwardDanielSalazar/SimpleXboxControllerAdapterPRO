@@ -44,7 +44,7 @@ int16_t SwitchProParser::getAnalogHat(AnalogHatEnum a) {
                 case 0:
                         return switchProData.leftHatX - 1910; // Subtract the center value
                 case 1:
-                        return 2151 - switchProData.leftHatY; // Invert, so it follows the same coordinate as the simple report
+                        return 2048 - switchProData.leftHatY; // Invert, so it follows the same coordinate as the simple report
                 case 2:
                         return switchProData.rightHatX - 1770; // Subtract the center value
                 default:
