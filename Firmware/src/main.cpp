@@ -436,9 +436,9 @@ int16_t getAnalogHat(AnalogHatEnum a)
    if (SwitchPro.connected()) {
         
 		if (a == RightHatY || a == LeftHatY) {
-			return (SwitchPro.getAnalogHat(a) - 127) * -19;
+			return (SwitchPro.getAnalogHat(a) - 127) * -20;
 		} else {
-			return (SwitchPro.getAnalogHat(a) - 129) * 20;
+			return (SwitchPro.getAnalogHat(a) - 127) * 20;
 		}
     }
     #endif
