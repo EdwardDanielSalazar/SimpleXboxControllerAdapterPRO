@@ -2,7 +2,7 @@
 #include "xiddevice.h"
 // #include "EEPROM.h" // ?? Remove this ??
 #include <SPI.h>
-
+#include <usbhub.h>
 #ifdef ENABLE_XBOX360
 #include <XBOXRECV.h>
 #endif
@@ -16,6 +16,9 @@
 #endif
 #ifdef ENABLE_XBOXONEUSB
 #include <XBOXONE.h>
+#endif
+#ifdef ENABLE_XBOXUSB
+#include <XBOXUSB.h>
 #endif
 #ifdef ENABLE_SWITCHBT
 #include <SwitchProBT.h>
@@ -45,8 +48,19 @@ BTD Btd(&Usb);
 SwitchProBT SwitchPro(&Btd, PAIR);
 #endif
 #ifdef ENABLE_XBOXONEUSB
-XBOXONE XBOXONE(&Usb);
+XBOXONE XBOXone(&Usb);
 #endif
+#ifdef ENABLE_XBOXUSB
+XBOXUSB xbox(&Usb);
+#endif
+#ifdef ENABLE_XBOX360
+XBOXRECV Xbox360Wired(&Usb);
+#endif
+#ifdef ENABLE_XBOXBT
+BTD Btd(&Usb);
+XBOXONESBT Xbox(&Btd, PAIR);
+#endif
+
 uint8_t getButtonPress(ButtonEnum b);
 int16_t getAnalogHat(AnalogHatEnum a);
 void setRumbleOn(uint8_t lValue, uint8_t rValue);
@@ -56,16 +70,6 @@ void checkControllerChange();
 
 void getStatus();
 
-//XBOXONE XboxOneWired(&UsbHost);
-
-#ifdef ENABLE_XBOX360
-XBOXRECV Xbox360Wired(&Usb);
-#endif
-#ifdef ENABLE_XBOXBT
-BTD Btd(&Usb);
-XBOXONESBT Xbox(&Btd, PAIR);
-#endif
-//PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 
 uint8_t controllerType = 0;
 uint8_t status = 0;
@@ -73,6 +77,7 @@ uint8_t status = 0;
 #ifdef ENABLE_RUMBLE
 bool rumbleOn = false;
 #endif
+bool control = false;
 
 int main(void)
 {
@@ -83,17 +88,17 @@ int main(void)
     pinMode(ARDUINO_LED_PIN, OUTPUT);
     digitalWrite(USB_HOST_RESET_PIN, LOW);
     digitalWrite(ARDUINO_LED_PIN, HIGH);
-
+    
     //Init the LUFA USB Device Library
     SetupHardware();
     GlobalInterruptEnable();
-
+    
     // Initialise the Serial Port
      //Serial1.begin(115200);
-
+    
     //Init the XboxOG data arrays to zero.
     memset(&XboxOGDuke, 0x00, sizeof(USB_XboxGamepad_Data_t));
-
+    
     digitalWrite(USB_HOST_RESET_PIN, LOW);
     delay(20); //wait 20ms to reset the IC. Reseting at startup improves reliability in my experience.
     digitalWrite(USB_HOST_RESET_PIN, HIGH);
@@ -102,19 +107,21 @@ int main(void)
     {
         while (1); // Halt
         digitalWrite(ARDUINO_LED_PIN, !digitalRead(ARDUINO_LED_PIN));
-        delay(500);
-     
+        //delay(500);
+        
+       
     }
+    
+    
+    
     while (1)
-    {
+    {           
         Usb.busprobe();
         Usb.Task();
-
-        checkControllerChange();
-       
         
-
-        if (controllerType)
+        checkControllerChange();
+        
+       if (controllerType)
         {
             //Read Digital Buttons
             XboxOGDuke.dButtons=0x0000;
@@ -209,6 +216,7 @@ int main(void)
 
             sendControllerHIDReport();
         }
+         
         //Handle Player 1 controller connect/disconnect events.
         if (controllerConnected() && disconnectTimer == 0)
         {
@@ -218,17 +226,20 @@ int main(void)
                 digitalWrite(ARDUINO_LED_PIN, LOW);
             }
         }
-        else if (millis() > 7000)
+        else if (millis() > 7000 )
         {
             digitalWrite(ARDUINO_LED_PIN, HIGH);
-            USB_Detach(); //Disconnect from the OG Xbox port.
+            USB_Detach();
+                  
         }
         else
         {
             USB_Attach();
+               
             sendControllerHIDReport();
+            
         }
-
+     
 
         //THPS 2X is the only game I know that sends rumble commands to the USB OUT pipe
         //instead of the control pipe. So unfortunately need to manually read the out pipe
@@ -275,6 +286,11 @@ uint8_t getButtonPress(ButtonEnum b)
         return Xbox360Wired.getButtonPress(b);
     }
     #endif
+    #ifdef ENABLE_XBOXUSB
+    if (xbox.Xbox360Connected){
+        return xbox.getButtonPress(b);
+    }
+    #endif
     #ifdef ENABLE_XBOXBT
     if (Xbox.connected())
     {
@@ -290,16 +306,16 @@ uint8_t getButtonPress(ButtonEnum b)
     }
     #endif
     #ifdef ENABLE_XBOXONEUSB
-    if (XBOXONE.XboxOneConnected)
+    if (XBOXone.XboxOneConnected)
     {
         if (b == L2 || b == R2)
         {
             //Xbone one triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
-            return (uint8_t)(XBOXONE.getButtonPress(b) >> 2); 
+            return (uint8_t)(XBOXone.getButtonPress(b) >> 2); 
         }
         else
         {
-            return (uint8_t)XBOXONE.getButtonPress(b);
+            return (uint8_t)XBOXone.getButtonPress(b);
         }
     }
     #endif
@@ -429,8 +445,8 @@ int16_t getAnalogHat(AnalogHatEnum a)
         return Xbox.getAnalogHat(a);
     #endif
     #ifdef ENABLE_XBOXONEUSB
-    if (XBOXONE.XboxOneConnected)
-    return XBOXONE.getAnalogHat(a);
+    if (XBOXone.XboxOneConnected)
+    return XBOXone.getAnalogHat(a);
     #endif
     #ifdef ENABLE_SWITCHBT
    if (SwitchPro.connected()) {
@@ -479,8 +495,8 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
         }
         #endif
         #ifdef ENABLE_XBOXONEUSB
-        if (XBOXONE.XboxOneConnected)
-        XBOXONE.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+        if (XBOXone.XboxOneConnected)
+        XBOXone.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
         #endif
 
         #ifdef ENABLE_SWITCHBT
@@ -539,21 +555,33 @@ uint8_t controllerConnected()
 	#ifdef ENABLE_SWITCHBT
     if (SwitchPro.connected())
         controllerType =  3;
-    #endif   
+        control=true;
+    #endif
+   
 	#ifdef ENABLE_PS4BT
     if (PS4Wired.connected())
 		controllerType =  4;
     #endif
     #ifdef ENABLE_XBOXONEUSB
-    if (XBOXONE.XboxOneConnected)
+    if (XBOXone.XboxOneConnected)
 		controllerType =  5;
+    #endif
+    #ifdef ENABLE_XBOXUSB
+    if (xbox.Xbox360Connected)
+		controllerType =  6;
     #endif
 
     return controllerType;
 }
 
 void checkControllerChange() {
+   
     Usb.Task();
+    
+     SwitchProBT SwitchPro(&Btd);
+    
+        
+    // SwitchProBT SwitchPro(&Btd);
     uint8_t currentController = controllerConnected();
     if (currentController != controllerType) {
         controllerType = currentController;
