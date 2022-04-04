@@ -77,7 +77,6 @@ uint8_t status = 0;
 #ifdef ENABLE_RUMBLE
 bool rumbleOn = false;
 #endif
-bool control = false;
 
 int main(void)
 {
@@ -108,8 +107,7 @@ int main(void)
         while (1); // Halt
         digitalWrite(ARDUINO_LED_PIN, !digitalRead(ARDUINO_LED_PIN));
         //delay(500);
-        
-       
+           
     }
     
     
@@ -230,14 +228,11 @@ int main(void)
         {
             digitalWrite(ARDUINO_LED_PIN, HIGH);
             USB_Detach();
-                  
         }
         else
         {
             USB_Attach();
-               
             sendControllerHIDReport();
-            
         }
      
 
@@ -555,7 +550,6 @@ uint8_t controllerConnected()
 	#ifdef ENABLE_SWITCHBT
     if (SwitchPro.connected())
         controllerType =  3;
-        control=true;
     #endif
    
 	#ifdef ENABLE_PS4BT
@@ -577,11 +571,12 @@ uint8_t controllerConnected()
 void checkControllerChange() {
    
     Usb.Task();
-    
+    #ifdef ENABLE_SWITCHBT
      SwitchProBT SwitchPro(&Btd);
-    
-        
-    // SwitchProBT SwitchPro(&Btd);
+    #endif
+    #ifdef ENABLE_PS4BT
+    PS4BT PS4Wired(&Btd);
+    #endif    
     uint8_t currentController = controllerConnected();
     if (currentController != controllerType) {
         controllerType = currentController;
