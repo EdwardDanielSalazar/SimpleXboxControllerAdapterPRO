@@ -291,7 +291,8 @@ uint8_t getButtonPress(ButtonEnum b)
     if (Xbox.connected())
     {
         switch (b) {
-			// Remap the PS4 controller face buttons to their Xbox counterparts
+			// Remap the Xbox controller face buttons to their Xbox counterparts
+            //Xbone one S triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
 			case L2:
 				psVal = (uint16_t)Xbox.getAnalogButton(L2)>> 2;
 				break;
