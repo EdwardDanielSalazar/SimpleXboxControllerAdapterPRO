@@ -76,18 +76,23 @@ bool XBOXONESParser::checkDpad(ButtonEnum b) {
         }
 }
 
-uint16_t XBOXONESParser::getButtonPress(ButtonEnum b) {
+bool XBOXONESParser::getButtonPress(ButtonEnum b) {
         const int8_t index = getButtonIndexXboxOneS(b); if (index < 0) return 0;
-        if (index == ButtonIndex(L2))
-                return xboxOneSData.trigger[0];
-        else if (index == ButtonIndex(R2))
-                return xboxOneSData.trigger[1];
-        else if (index <= LEFT) // Dpad
+        if (index <= LEFT) // Dpad
                 return checkDpad(b);
         else if (index == ButtonIndex(XBOX))
                 return xboxButtonState;
         return xboxOneSData.btn.val & (1UL << pgm_read_byte(&XBOX_ONE_S_BUTTONS[index]));
 }
+uint16_t XBOXONESParser::getAnalogButton(ButtonEnum b) {
+        const int8_t index = getButtonIndexXboxOneS(b); if (index < 0) return 0;
+        if (index == ButtonIndex(L2))
+                return xboxOneSData.trigger[0];
+        else if (index == ButtonIndex(R2))
+                return xboxOneSData.trigger[1];
+        return 0;
+}
+
 
 bool XBOXONESParser::getButtonClick(ButtonEnum b) {
         const int8_t index = getButtonIndexXboxOneS(b); if (index < 0) return 0;

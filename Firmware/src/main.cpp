@@ -76,7 +76,7 @@ uint8_t status = 0;
 
 #ifdef ENABLE_RUMBLE
 bool rumbleOn = false;
-#endif
+#endif 
 
 int main(void)
 {
@@ -131,7 +131,7 @@ int main(void)
             if (getButtonPress(BACK))    XboxOGDuke.dButtons |= BACK_BTN;
             if (getButtonPress(L3))      XboxOGDuke.dButtons |= LS_BTN;
             if (getButtonPress(R3))      XboxOGDuke.dButtons |= RS_BTN;
-
+            
             //Read Analog Buttons - have to be converted to digital because x360 controllers don't have analog buttons
             getButtonPress(A)    ? XboxOGDuke.A = 0xFF      : XboxOGDuke.A = 0x00;
             getButtonPress(B)    ? XboxOGDuke.B = 0xFF      : XboxOGDuke.B = 0x00;
@@ -271,6 +271,7 @@ void sendControllerHIDReport()
 
 // TO DO - remove the separate controller connected checks in these functions
 //Parse button presses for each type of controller
+
 uint8_t getButtonPress(ButtonEnum b)
 {
     
@@ -289,15 +290,19 @@ uint8_t getButtonPress(ButtonEnum b)
     #ifdef ENABLE_XBOXBT
     if (Xbox.connected())
     {
-        if (b == L2 || b == R2)
-        {
-            //Xbone one triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
-            return (uint8_t)(Xbox.getButtonPress(b) >> 2); 
-        }
-        else
-        {
-            return (uint8_t)Xbox.getButtonPress(b);
-        }
+        switch (b) {
+			// Remap the PS4 controller face buttons to their Xbox counterparts
+			case L2:
+				psVal = (uint16_t)Xbox.getAnalogButton(L2)>> 2;
+				break;
+			case R2:
+				psVal = (uint16_t)Xbox.getAnalogButton(R2)>> 2;
+				break;
+			default:
+				psVal = (uint8_t)Xbox.getButtonPress(b);
+		}
+		return psVal;
+        //return Xbox.getButtonPress(b);     
     }
     #endif
     #ifdef ENABLE_XBOXONEUSB
@@ -437,7 +442,12 @@ int16_t getAnalogHat(AnalogHatEnum a)
     #endif
     #ifdef ENABLE_XBOXBT
     if (Xbox.connected())
-        return Xbox.getAnalogHat(a);
+        if (a == LeftHatY ||  a == RightHatY) {
+			return (-Xbox.getAnalogHat(a)-1);
+        }else{
+            return Xbox.getAnalogHat(a);
+        }
+        //return Xbox.getAnalogHat(a);
     #endif
     #ifdef ENABLE_XBOXONEUSB
     if (XBOXone.XboxOneConnected)
@@ -486,7 +496,7 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
         #ifdef ENABLE_XBOXBT
         if (Xbox.connected())
         {
-            //Xbox.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+            Xbox.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
         }
         #endif
         #ifdef ENABLE_XBOXONEUSB
@@ -576,7 +586,11 @@ void checkControllerChange() {
     #endif
     #ifdef ENABLE_PS4BT
     PS4BT PS4Wired(&Btd);
-    #endif    
+    #endif  
+    #ifdef ENABLE_XBOXBT
+    //XBOXONESBT Xbox(&Btd,PAIR);
+    XBOXONESBT Xbox(&Btd);
+    #endif   
     uint8_t currentController = controllerConnected();
     if (currentController != controllerType) {
         controllerType = currentController;

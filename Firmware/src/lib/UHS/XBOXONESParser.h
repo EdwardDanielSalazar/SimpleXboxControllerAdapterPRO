@@ -69,7 +69,7 @@ public:
          * @param  b          ::ButtonEnum to read.
          * @return            getButtonPress(ButtonEnum b) will return a true as long as a button is held down, while getButtonClick(ButtonEnum b) will return true once for each button press.
          */
-        uint16_t getButtonPress(ButtonEnum b);
+        bool getButtonPress(ButtonEnum b);
         bool getButtonClick(ButtonEnum b);
         /**@}*/
 
@@ -79,7 +79,7 @@ public:
          * @return   Return the analog value as a 16-bit signed integer.
          */
         int16_t getAnalogHat(AnalogHatEnum a);
-
+        uint16_t getAnalogButton(ButtonEnum b);
         /** Used to set the rumble off. */
         void setRumbleOff();
 

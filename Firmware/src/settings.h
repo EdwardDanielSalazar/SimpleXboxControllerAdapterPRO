@@ -17,13 +17,14 @@
 // Build Options
 //#define ENABLE_OLED
 #define ENABLE_RUMBLE
-#define ENABLE_XBOX360
+//#define ENABLE_XBOX360 //para xbox 360 con adaptador inalambrico
 //#define ENABLE_XBOXBT
 //#define ENABLE_PS4BT
 //#define ENABLE_MOTION
-#define ENABLE_SWITCHBT
+//#define ENABLE_SWITCHBT
 //#define ENABLE_XBOXONEUSB
-//#define ENABLE_XBOXUSB
+//#define ENABLE_XBOXUSB //para xbox 360 cableado
+#define ENABLE_XBOXBT
 /* prototypes */
 void sendControllerHIDReport();
 
