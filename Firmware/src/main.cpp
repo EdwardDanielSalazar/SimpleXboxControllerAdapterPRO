@@ -75,7 +75,7 @@ uint8_t controllerType = 0;
 uint8_t status = 0;
 
 #ifdef ENABLE_RUMBLE
-bool rumbleOn = false;
+bool rumbleOn = true;
 #endif 
 
 int main(void)
@@ -496,9 +496,17 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
         #endif
         #ifdef ENABLE_XBOXBT
         if (Xbox.connected())
-        {
-            Xbox.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
-        }
+        /////por bt no es posible enviar aun vibracion se satura y se desconecta
+        /*{
+            uint8_t leftRumble = map(lValue, 0x00,0x10, 0, 127); // Map the trigger values into a byte
+            uint8_t rightRumble = map(rValue, 0x00, 0x10, 0, 127);
+
+            if (lValue > 0 && rValue > 0) {
+                Xbox.setRumbleOn(leftRumble/ 8,rightRumble/ 8,leftRumble/ 2,rightRumble/ 2);
+            } else{
+                Xbox.setRumbleOff();
+            }    
+        }*/
         #endif
         #ifdef ENABLE_XBOXONEUSB
         if (XBOXone.XboxOneConnected)

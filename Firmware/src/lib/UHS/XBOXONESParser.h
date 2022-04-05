@@ -91,7 +91,7 @@ public:
          * @param rightMotor   Right motor force.
          */
         void setRumbleOn(uint8_t leftTrigger, uint8_t rightTrigger, uint8_t leftMotor, uint8_t rightMotor);
-
+        uint8_t XboxCommand(uint8_t* data, uint16_t nbytes);
 protected:
         /**
          * Used to parse data sent from the Xbox One S controller.
