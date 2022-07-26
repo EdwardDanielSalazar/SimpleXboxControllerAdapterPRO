@@ -70,7 +70,7 @@ void checkControllerChange();
 
 void getStatus();
 
-
+bool control=true;
 uint8_t controllerType = 0;
 uint8_t status = 0;
 
@@ -442,11 +442,12 @@ int16_t getAnalogHat(AnalogHatEnum a)
     }
     #endif
     #ifdef ENABLE_XBOXBT
-    if (Xbox.connected())
+    if (Xbox.connected()){
         if (a == LeftHatY ||  a == RightHatY) {
 			return (-Xbox.getAnalogHat(a)-1);
         }else{
             return Xbox.getAnalogHat(a);
+        }
         }
         //return Xbox.getAnalogHat(a);
     #endif
@@ -485,6 +486,8 @@ int16_t getAnalogHat(AnalogHatEnum a)
 
 #ifdef ENABLE_RUMBLE
 //Parse rumble activation requests for each type of controller.
+
+
 void setRumbleOn(uint8_t lValue, uint8_t rValue)
 {
     if (rumbleOn) {
@@ -497,16 +500,18 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
         #ifdef ENABLE_XBOXBT
         if (Xbox.connected())
         /////por bt no es posible enviar aun vibracion se satura y se desconecta
-        /*{
-            uint8_t leftRumble = map(lValue, 0x00,0x10, 0, 127); // Map the trigger values into a byte
-            uint8_t rightRumble = map(rValue, 0x00, 0x10, 0, 127);
-
+        {/*
+        
+            uint8_t leftRumble = map(lValue, 0,100,0x00,0x20); // Map the trigger values into a byte
+            uint8_t rightRumble = map(rValue, 0,100,0x00,0x20);
+        
             if (lValue > 0 && rValue > 0) {
-                Xbox.setRumbleOn(leftRumble/ 8,rightRumble/ 8,leftRumble/ 2,rightRumble/ 2);
-            } else{
+               Xbox.setRumbleOn(leftRumble,rightRumble,leftRumble,rightRumble);
+                
+            }else{
                 Xbox.setRumbleOff();
-            }    
-        }*/
+          }  */              
+        }
         #endif
         #ifdef ENABLE_XBOXONEUSB
         if (XBOXone.XboxOneConnected)
