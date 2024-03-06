@@ -7,7 +7,7 @@
 
 #ifndef MAIN_H_
 #define MAIN_H_
-#include <inttypes.h>
+//#include <inttypes.h>
 
 #define USB_HOST_RESET_PIN 10
 #define ARDUINO_LED_PIN 17
@@ -17,14 +17,13 @@
 // Build Options
 //#define ENABLE_OLED
 #define ENABLE_RUMBLE
-//#define ENABLE_XBOX360 //para xbox 360 con adaptador inalambrico
-//#define ENABLE_XBOXBT
+#define ENABLE_XBOX360
+#define ENABLE_XBOXBT
 //#define ENABLE_PS4BT
 //#define ENABLE_MOTION
 //#define ENABLE_SWITCHBT
 //#define ENABLE_XBOXONEUSB
-//#define ENABLE_XBOXUSB //para xbox 360 cableado
-#define ENABLE_XBOXBT
+
 /* prototypes */
 void sendControllerHIDReport();
 

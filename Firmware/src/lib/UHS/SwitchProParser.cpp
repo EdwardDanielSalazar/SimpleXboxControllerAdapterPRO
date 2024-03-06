@@ -42,13 +42,13 @@ bool SwitchProParser::getButtonClick(ButtonEnum b) {
 int16_t SwitchProParser::getAnalogHat(AnalogHatEnum a) {
         switch((uint8_t)a) {
                 case 0:
-                        return switchProData.leftHatX - 1910; // Subtract the center value
+                        return switchProData.leftHatX - 1890; // Subtract the center value
                 case 1:
-                        return 2048 - switchProData.leftHatY; // Invert, so it follows the same coordinate as the simple report
+                        return 2170 - switchProData.leftHatY; // Invert, so it follows the same coordinate as the simple report
                 case 2:
                         return switchProData.rightHatX - 1770; // Subtract the center value
                 default:
-                        return 2100 - switchProData.rightHatY; // Invert, so it follows the same coordinate as the simple report
+                        return 2170 - switchProData.rightHatY; // Invert, so it follows the same coordinate as the simple report
         }
 }
 
