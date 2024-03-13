@@ -69,7 +69,7 @@ public:
          * @param  b          ::ButtonEnum to read.
          * @return            getButtonPress(ButtonEnum b) will return a true as long as a button is held down, while getButtonClick(ButtonEnum b) will return true once for each button press.
          */
-        uint16_t getButtonPress(ButtonEnum b);
+        bool getButtonPress(ButtonEnum b);
         bool getButtonClick(ButtonEnum b);
         /**@}*/
 
@@ -79,7 +79,7 @@ public:
          * @return   Return the analog value as a 16-bit signed integer.
          */
         int16_t getAnalogHat(AnalogHatEnum a);
-
+        uint16_t getAnalogButton(ButtonEnum b);
         /** Used to set the rumble off. */
         void setRumbleOff();
 
@@ -91,7 +91,7 @@ public:
          * @param rightMotor   Right motor force.
          */
         void setRumbleOn(uint8_t leftTrigger, uint8_t rightTrigger, uint8_t leftMotor, uint8_t rightMotor);
-
+        uint8_t XboxCommand(uint8_t* data, uint16_t nbytes);
 protected:
         /**
          * Used to parse data sent from the Xbox One S controller.

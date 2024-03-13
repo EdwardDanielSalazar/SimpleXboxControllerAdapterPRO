@@ -62,8 +62,8 @@ void getStatus();
 XBOXRECV Xbox360Wired(&Usb);
 #endif
 #ifdef ENABLE_XBOXBT
-BTD Btd(&Usb);
-XBOXONESBT Xbox(&Btd, PAIR);
+BTD Btd1(&Usb);
+XBOXONESBT Xbox(&Btd1, PAIR);
 #endif
 //PS3USB PS3Wired(&UsbHost); //defines EP_MAXPKTSIZE = 64. The change causes a compiler warning but doesn't seem to affect operation
 
@@ -71,7 +71,7 @@ uint8_t controllerType = 0;
 uint8_t status = 0;
 
 #ifdef ENABLE_RUMBLE
-bool rumbleOn = false;
+bool rumbleOn = true;
 #endif
 
 int main(void)
@@ -262,22 +262,23 @@ int main(void)
         //THPS 2X is the only game I know that sends rumble commands to the USB OUT pipe
         //instead of the control pipe. So unfortunately need to manually read the out pipe
         //and update rumble values as needed!
-        // uint8_t ep = Endpoint_GetCurrentEndpoint();
-        // static uint8_t report[6];
-        // Endpoint_SelectEndpoint(0x02); //0x02 is the out endpoint address for the Duke Controller
-        // if (Endpoint_IsOUTReceived())
-        // {
-        //     Endpoint_Read_Stream_LE(report, 6, NULL);
-        //     Endpoint_ClearOUT();
-        //     if (report[1] == 0x06)
-        //     {
-        //         XboxOGDuke.left_actuator = report[3];
-        //         XboxOGDuke.right_actuator = report[5];
-        //         XboxOGDuke.rumbleUpdate = 1;
-        //     }
-        //     report[1] = 0x00;
-        // }
-        // Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
+         uint8_t ep = Endpoint_GetCurrentEndpoint();
+         static uint8_t report[6];
+         Endpoint_SelectEndpoint(0x02); //0x02 is the out endpoint address for the Duke Controller
+         if (Endpoint_IsOUTReceived())
+         {
+             Endpoint_Read_Stream_LE(report, 6, NULL);
+             Endpoint_ClearOUT();
+             if (report[1] == 0x06)
+        
+                 {
+                XboxOGDuke.left_actuator = report[3];
+                XboxOGDuke.right_actuator = report[5];
+                XboxOGDuke.rumbleUpdate = 1;
+            }
+            report[1] = 0x00;
+        }
+        Endpoint_SelectEndpoint(ep); //set back to the old endpoint.
 
     }
 }
@@ -310,7 +311,7 @@ uint8_t getButtonPress(ButtonEnum b)
         if (b == L2 || b == R2)
         {
             //Xbone one triggers are 10-bit, remove 2LSBs so its 8bit like OG Xbox
-            return (uint8_t)(Xbox.getButtonPress(b) >> 2); 
+            return (uint8_t)(Xbox.getAnalogButton(b) >> 2); 
         }
         else
         {
@@ -446,16 +447,21 @@ int16_t getAnalogHat(AnalogHatEnum a)
 #ifdef ENABLE_XBOX360
     if (Xbox360Wired.XboxReceiverConnected)
     {
-        int16_t val;
-        val = Xbox360Wired.getAnalogHat(a);
-        if (val == -32512) //8bitdo range fix
-            val = -32768;
-        return val;
+        //int16_t val;
+        //val = Xbox360Wired.getAnalogHat(a);
+        //if (val == -32512) //8bitdo range fix
+        //    val = -32768;
+        return Xbox360Wired.getAnalogHat(a);
     }
     #endif
     #ifdef ENABLE_XBOXBT
-    if (Xbox.connected())
-        return Xbox.getAnalogHat(a);
+        if (Xbox.connected())
+        
+         if (a == RightHatY || a == LeftHatY) {
+			return (Xbox.getAnalogHat(a) + 0.5) * -1;
+		    } else {
+			return (Xbox.getAnalogHat(a));
+		    }
     #endif
     #ifdef ENABLE_XBOXONEUSB
     if (XBOXONE.XboxOneConnected)
@@ -492,18 +498,18 @@ void setRumbleOn(uint8_t lValue, uint8_t rValue)
         #ifdef ENABLE_XBOX360
         if (Xbox360Wired.XboxReceiverConnected)
         {
-            Xbox360Wired.setRumbleOn(lValue, rValue); 
+           Xbox360Wired.setRumbleOn(lValue, rValue); 
         }
         #endif
         #ifdef ENABLE_XBOXBT
         if (Xbox.connected())
         {
-            //Xbox.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+            Xbox.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
         }
         #endif
         #ifdef ENABLE_XBOXONEUSB
         if (XBOXONE.XboxOneConnected)
-        XBOXONE.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
+            XBOXONE.setRumbleOn(lValue / 8, rValue / 8, lValue / 2, rValue / 2);
         #endif
         #ifdef ENABLE_SWITCHBT
         if (SwitchPro.connected())

@@ -15,12 +15,10 @@
 #define VCC_READ_PIN A0
 
 // Build Options
-//#define ENABLE_OLED
 #define ENABLE_RUMBLE
 #define ENABLE_XBOX360
 #define ENABLE_XBOXBT
 //#define ENABLE_PS4BT
-//#define ENABLE_MOTION
 //#define ENABLE_SWITCHBT
 //#define ENABLE_XBOXONEUSB
 
